@@ -191,3 +191,14 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .lista-promovari { list-style: none; padding: 0; display: grid; gap: 10px; }
 .lista-promovari li { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
 .lista-promovari .pret-vechi { text-decoration: line-through; color: var(--muted); margin-right: 6px; font-weight: 400; }
+
+/* Pagini legale și subsol */
+.legal { max-width: 760px; }
+.legal h2 { margin-top: 28px; font-size: 1.15rem; }
+.legal li { margin: 6px 0; }
+.subsol { display: grid; gap: 12px; }
+.subsol-linkuri { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.subsol-plati { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: .85rem; }
+.subsol-plati .netopia { font-weight: 800; color: #0b6bcb; }
+.subsol-plati .carduri { font-weight: 700; letter-spacing: .03em; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; }
+.subsol p { margin: 0; }
