@@ -108,16 +108,64 @@ const b64url = (s: string) => Buffer.from(s.replace(/-/g, "+").replace(/_/g, "/"
  */
 export function verificaNotificare(corp: string, token: string | null) {
   const cheie = cheiePublica();
-  if (!cheie || !token) return false;
+  if (!cheie || !token) {
+    console.error("IPN NETOPIA:", !cheie ? "lipsește NETOPIA_PUBLIC_KEY" : "lipsește Verification-token");
+    return false;
+  }
   const [h, p, s] = token.split(".");
-  if (!h || !p || !s) return false;
+  if (!h || !p || !s) {
+    console.error("IPN NETOPIA: Verification-token nu e JWT");
+    return false;
+  }
+  let c: { iss?: string; aud?: string | string[]; sub?: string }, alg: string | undefined;
+  try {
+    c = JSON.parse(b64url(p).toString("utf8"));
+    alg = JSON.parse(b64url(h).toString("utf8")).alg;
+  } catch {
+    console.error("IPN NETOPIA: Verification-token ilizibil");
+    return false;
+  }
   const v = createVerify("RSA-SHA512");
   v.update(`${h}.${p}`);
-  if (!v.verify(cheie, b64url(s))) return false;
-  const c = JSON.parse(b64url(p).toString("utf8")) as { iss?: string; aud?: string | string[]; sub?: string };
+  const semnatura = v.verify(cheie, b64url(s));
   const aud = Array.isArray(c.aud) ? c.aud : [c.aud];
   const hash = createHash("sha512").update(corp, "utf8").digest("base64");
-  return c.iss === "NETOPIA Payments" && aud.includes(process.env.NETOPIA_POS_SIGNATURE) && c.sub === hash;
+  const verificari = {
+    alg,
+    semnatura,
+    iss: c.iss === "NETOPIA Payments",
+    aud: aud.includes(process.env.NETOPIA_POS_SIGNATURE),
+    sub: c.sub === hash,
+  };
+  const ok = semnatura && verificari.iss && verificari.aud && verificari.sub;
+  // Doar rezultate da/nu, fără chei sau date ale clientului, ca să vedem în jurnal ce verificare a picat.
+  if (!ok) console.error("IPN NETOPIA: verificare picată", JSON.stringify(verificari));
+  return ok;
+}
+
+/**
+ * Întreabă direct NETOPIA (server la server, cu cheia API secretă) starea unei plăți.
+ * Sursa de adevăr când notificarea nu poate fi verificată sau întârzie.
+ */
+export async function stareaPlatii(orderID: string, ntpID: string | null) {
+  if (!netopiaConfigurat()) return null;
+  try {
+    const r = await fetch(`${BAZA}/operation/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: process.env.NETOPIA_API_KEY ?? "" },
+      body: JSON.stringify({ posID: process.env.NETOPIA_POS_SIGNATURE, ntpID: ntpID ?? "", orderID }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const j = (await r.json().catch(() => null)) as { payment?: { status?: number; amount?: number; ntpID?: string }; error?: { code?: string } } | null;
+    if (!j?.payment || j.payment.status === undefined) {
+      console.error("NETOPIA operation/status:", r.status, j?.error?.code ?? "fără payment");
+      return null;
+    }
+    return { status: Number(j.payment.status), sumaBani: Math.round(Number(j.payment.amount) * 100), ntpID: j.payment.ntpID ?? ntpID };
+  } catch (e) {
+    console.error("NETOPIA operation/status:", (e as Error).message);
+    return null;
+  }
 }
 
 /** 3 = plătită, 5 = confirmată: ambele înseamnă bani încasați. */

@@ -4,6 +4,7 @@ import { db } from "../db";
 import { abonamentActiv, activeazaAbonament } from "../abonamente";
 import { aplicaPromovare } from "../promovari";
 import { emiteFactura } from "../facturare";
+import { STARI_PLATITE, stareaPlatii } from "./netopia";
 import { getAbonament, getPromovare, pretAnual, pretLunar, pretPromovare, type CodPromovare } from "../tarife";
 
 export type CerereComanda = { tip: "promovare"; produs: string; anuntId: number } | { tip: "abonament"; produs: string; anual: boolean };
@@ -73,4 +74,25 @@ export async function plataReusita(comandaId: string, ntpID: string | null, star
 
 export async function plataRespinsa(comandaId: string, ntpID: string | null, stare: number) {
   await db.comanda.updateMany({ where: { id: comandaId, stare: "noua" }, data: { stare: "respinsa", ntpID, stareNetopia: stare } });
+}
+
+/** Verifică la NETOPIA o comandă încă neconfirmată și aplică rezultatul. Întoarce starea comenzii după verificare. */
+export async function confirmaDinNetopia(c: { id: string; sumaBani: number; ntpID: string | null; stare: string }) {
+  if (c.stare !== "noua") return c.stare;
+  const s = await stareaPlatii(c.id, c.ntpID);
+  if (!s) return c.stare;
+  if (STARI_PLATITE.includes(s.status)) {
+    if (s.sumaBani !== c.sumaBani) {
+      console.error("NETOPIA: suma diferită la comanda", c.id);
+      return c.stare;
+    }
+    await plataReusita(c.id, s.ntpID, s.status);
+    return "platita";
+  }
+  if (s.status === 12) {
+    await plataRespinsa(c.id, s.ntpID, s.status);
+    return "respinsa";
+  }
+  await db.comanda.update({ where: { id: c.id }, data: { stareNetopia: s.status } });
+  return c.stare;
 }
