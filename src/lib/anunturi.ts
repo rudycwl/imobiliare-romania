@@ -89,3 +89,22 @@ export type AnuntNou = Omit<Anunt, "id" | "publicatLa" | "imagine" | "proprietar
 export async function creeazaAnunt(proprietarId: string, a: AnuntNou) {
   return db.anunt.create({ data: { ...a, proprietarId, imagine: "#64748b" } });
 }
+
+/** Statistici pentru paginile de oraș/județ: număr de anunțuri și prețuri medii (apartamente). */
+export async function statisticiZona(judet: string, oras?: string) {
+  const zona = { judet, oras: oras || undefined };
+  const [vanzare, inchiriere, apVanzare, apChirie] = await Promise.all([
+    db.anunt.count({ where: { ...zona, tranzactie: "vanzare" } }),
+    db.anunt.count({ where: { ...zona, tranzactie: "inchiriere" } }),
+    db.anunt.aggregate({ where: { ...zona, tranzactie: "vanzare", tip: "apartament" }, _sum: { pret: true, suprafata: true }, _count: true }),
+    db.anunt.aggregate({ where: { ...zona, tranzactie: "inchiriere", tip: "apartament" }, _avg: { pret: true }, _count: true }),
+  ]);
+  const s = apVanzare._sum;
+  return {
+    vanzare,
+    inchiriere,
+    // Media ponderată: total preț / total suprafață, ca un apartament foarte mare să nu strice media.
+    pretMp: apVanzare._count && s.suprafata ? Math.round((s.pret ?? 0) / s.suprafata) : null,
+    chirieMedie: apChirie._count ? Math.round(apChirie._avg.pret ?? 0) : null,
+  };
+}

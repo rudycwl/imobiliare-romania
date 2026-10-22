@@ -4,23 +4,34 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Filtre } from "@/components/Filtre";
 import { ListaAnunturi } from "@/components/AnuntCard";
-import { cautaAnunturi, numarAnunturi, type Filtre as F } from "@/lib/anunturi";
+import { SeoZona } from "@/components/SeoZona";
+import { cautaAnunturi, numarAnunturi, statisticiZona, type Filtre as F } from "@/lib/anunturi";
 import { getJudet } from "@/lib/geo";
 
 type Props = { params: Promise<{ judet: string }>; searchParams: Promise<F> };
 
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro";
+const numeZona = (j: { slug: string; nume: string }) => (j.slug === "bucuresti" ? "București" : `județul ${j.nume}`);
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const j = getJudet((await params).judet);
-  return { title: j ? `Imobiliare județul ${j.nume}` : "Județ inexistent" };
+  if (!j) return { title: "Județ inexistent" };
+  const s = await statisticiZona(j.slug);
+  const pret = s.pretMp ? ` Preț mediu apartamente: ${new Intl.NumberFormat("ro-RO").format(s.pretMp)} €/m².` : "";
+  const title = `Imobiliare ${numeZona(j)}: anunțuri de vânzare și închiriere`;
+  const description = `${s.vanzare + s.inchiriere} anunțuri imobiliare în ${numeZona(j)}, în ${j.orase.length} localități: ${s.vanzare} de vânzare, ${s.inchiriere} de închiriat.${pret}`;
+  const url = `${SITE}/${j.slug}`;
+  return { title, description, alternates: { canonical: url }, openGraph: { title, description, url } };
 }
 
 export default async function JudetPage({ params, searchParams }: Props) {
   const j = getJudet((await params).judet);
   if (!j) notFound();
   const sp = await searchParams;
-  const [{ anunturi, total }, numar] = await Promise.all([
+  const [{ anunturi, total }, numar, s] = await Promise.all([
     cautaAnunturi({ ...sp, judet: j.slug, oras: undefined }),
     numarAnunturi(j.slug),
+    statisticiZona(j.slug),
   ]);
   return (
     <>
@@ -37,6 +48,7 @@ export default async function JudetPage({ params, searchParams }: Props) {
       </ul>
       <Filtre valori={sp} action={`/${j.slug}`} />
       <ListaAnunturi anunturi={anunturi} total={total} />
+      <SeoZona loc={numeZona(j)} s={s} breadcrumb={[{ name: "Acasă", url: SITE }, { name: j.nume, url: `${SITE}/${j.slug}` }]} />
     </>
   );
 }

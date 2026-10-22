@@ -144,3 +144,11 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .share:hover { transform: translateY(-2px); }
 .share-wa { background: #25d366; }
 .share-fb { background: #1877f2; }
+.seo-zona { margin-top: 40px; }
+.statistici { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.statistici div { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; }
+.statistici strong { font-size: 1.4rem; color: #f97316; }
+.statistici span { color: var(--muted); font-size: .85rem; }
+.faq { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 8px 0; }
+.faq summary { cursor: pointer; font-weight: 600; }
+.faq p { margin: 8px 0 0; color: var(--muted); }

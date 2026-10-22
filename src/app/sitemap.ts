@@ -11,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: BAZA },
     { url: `${BAZA}/agentii` },
+    { url: `${BAZA}/pentru-agentii` },
     ...JUDETE.flatMap((j) => [{ url: `${BAZA}/${j.slug}` }, ...j.orase.map((o) => ({ url: `${BAZA}/${j.slug}/${o.slug}` }))]),
     ...agentii.map((a) => ({ url: `${BAZA}/agentii/${a.slug}` })),
   ];
