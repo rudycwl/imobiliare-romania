@@ -29,7 +29,7 @@ export async function getAgentii(judet?: string) {
   const lista = await db.utilizator.findMany({
     where: { tip: "agentie", judet },
     orderBy: { nume: "asc" },
-    include: { _count: { select: { anunturi: true } } },
+    include: { _count: { select: { anunturi: { where: { expiraLa: { gt: new Date() } } } } } },
   });
   return lista.map((u) => ({ ...laUtilizator(u), numarAnunturi: u._count.anunturi }));
 }
