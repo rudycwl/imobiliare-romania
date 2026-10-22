@@ -11,7 +11,7 @@ export default async function AnuntNouPage() {
   return (
     <div className="ingust">
       <h1>Adaugă anunț</h1>
-      <FormularAnunt judet={u.judet} oras={u.oras} />
+      <FormularAnunt judet={u.judet} oras={u.oras} poateImporta={u.tip !== "agentie"} />
     </div>
   );
 }
