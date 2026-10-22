@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FIRMA } from "@/lib/firma";
 import { Atribuire } from "@/components/Atribuire";
 import "./globals.css";
 
@@ -41,8 +42,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         <main className="container">{children}</main>
         <footer className="footer">
-          <div className="container muted">
-            © 2026 CheiaMea · anunțuri imobiliare din toată țara · <Link href="/pentru-agentii">Pentru agenții</Link> · <Link href="/preturi">Prețuri</Link>
+          <div className="container muted subsol">
+            <nav className="subsol-linkuri">
+              <Link href="/pentru-agentii">Pentru agenții</Link>
+              <Link href="/preturi">Prețuri</Link>
+              <Link href="/termeni">Termeni și condiții</Link>
+              <Link href="/confidentialitate">Confidențialitate și cookie-uri</Link>
+              <Link href="/anulare-rambursare">Anulare și rambursare</Link>
+              <Link href="/contact">Contact</Link>
+            </nav>
+            <div className="subsol-plati">
+              <span>Plăți securizate cu cardul prin</span>
+              <a href="https://netopia-payments.com" target="_blank" rel="noopener noreferrer" className="netopia">NETOPIA Payments</a>
+              <span className="carduri" aria-label="Visa și Mastercard">VISA · Mastercard</span>
+              <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener noreferrer">ANPC – SAL</a>
+            </div>
+            <p className="small">
+              © 2026 CheiaMea · anunțuri imobiliare din toată țara · operat de {FIRMA.nume}, CUI {FIRMA.cui}, {FIRMA.regCom}, {FIRMA.sediu} ·{" "}
+              <a href={`mailto:${FIRMA.email}`}>{FIRMA.email}</a>
+            </p>
           </div>
         </footer>
       </body>
