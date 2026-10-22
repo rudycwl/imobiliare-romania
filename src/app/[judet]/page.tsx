@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Filtre } from "@/components/Filtre";
+import { SalveazaCautarea } from "@/components/SalveazaCautarea";
+import { curataFiltre } from "@/lib/cautari";
 import { ListaAnunturi } from "@/components/AnuntCard";
 import { SeoZona } from "@/components/SeoZona";
 import { cautaAnunturi, numarAnunturi, statisticiZona, type Filtre as F } from "@/lib/anunturi";
@@ -47,6 +49,7 @@ export default async function JudetPage({ params, searchParams }: Props) {
         ))}
       </ul>
       <Filtre valori={sp} action={`/${j.slug}`} />
+      <SalveazaCautarea filtre={curataFiltre({ ...sp, judet: j.slug, oras: undefined })} />
       <ListaAnunturi anunturi={anunturi} total={total} />
       <SeoZona loc={numeZona(j)} s={s} breadcrumb={[{ name: "Acasă", url: SITE }, { name: j.nume, url: `${SITE}/${j.slug}` }]} />
     </>

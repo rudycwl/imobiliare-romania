@@ -55,6 +55,8 @@ model Utilizator {
   invitatie            InvitatieAgentie?
   facturi              Factura[]
   comenzi              Comanda[]
+  favorite             Favorit[]
+  cautari              CautareSalvata[]
   /// Contul a fost șters de utilizator: datele personale sunt golite, comenzile și facturile rămân pentru contabilitate.
   stersLa              DateTime?
 
@@ -98,6 +100,7 @@ model Anunt {
   afisariTelefon      Int        @default(0)
   raportari           Raportare[]
   poze                Poza[]
+  favorite            Favorit[]
   proprietarId        String
   proprietar          Utilizator @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
 
@@ -248,4 +251,31 @@ model CerereRetragere {
   comanda   String
   mesaj     String?
   rezolvat  Boolean  @default(false)
+}
+
+/// Anunțurile salvate cu inima de un utilizator.
+model Favorit {
+  utilizatorId String
+  utilizator   Utilizator @relation(fields: [utilizatorId], references: [id], onDelete: Cascade)
+  anuntId      Int
+  anunt        Anunt      @relation(fields: [anuntId], references: [id], onDelete: Cascade)
+  creatLa      DateTime   @default(now())
+
+  @@id([utilizatorId, anuntId])
+}
+
+/// Filtrele unei căutări, salvate ca utilizatorul să vadă anunțurile noi.
+model CautareSalvata {
+  id           Int        @id @default(autoincrement())
+  utilizatorId String
+  utilizator   Utilizator @relation(fields: [utilizatorId], references: [id], onDelete: Cascade)
+  /// Descrierea afișată, ex. „Apartament · Vânzare · Iași”.
+  nume         String
+  /// Parametrii căutării (judet, oras, tip, tranzactie, pretMin, pretMax, camere, oferit, q).
+  filtre       Json
+  creatLa      DateTime   @default(now())
+  /// Ultima dată când utilizatorul a deschis căutarea; anunțurile publicate după sunt „noi”.
+  vazutLa      DateTime   @default(now())
+
+  @@index([utilizatorId])
 }

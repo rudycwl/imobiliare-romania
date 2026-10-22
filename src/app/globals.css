@@ -271,3 +271,18 @@ button.pericol { background: #b91c1c; color: #fff; border-color: #b91c1c; }
 .tabel-plati th, .tabel-plati td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
 @media (max-width: 560px) { .tabel-plati thead { display: none; } .tabel-plati tr { display: block; padding: 8px 0; border-bottom: 1px solid var(--border); } .tabel-plati td { display: block; border: 0; padding: 2px 0; } }
 .setari-cont { max-width: 640px; }
+
+/* ---------- Favorite și căutări salvate ---------- */
+.card-img { position: relative; }
+.favorit { background: rgba(255,255,255,.92); color: #e11d48; border: 1px solid var(--border); border-radius: 999px; width: 36px; height: 36px; padding: 0; font-size: 1.25rem; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.card-img .favorit { position: absolute; top: 8px; right: 8px; }
+.favorit:hover { transform: scale(1.08); }
+.favorit.pus { background: #ffe4e6; border-color: #fda4af; }
+.favorit.mare { width: auto; height: auto; padding: 10px 16px; font-size: 1rem; background: var(--card); }
+.favorit.mare span:first-child { font-size: 1.2rem; }
+.actiuni-anunt { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+.grid.inactive { opacity: .6; }
+.salveaza-cautarea { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 16px; }
+.succes-mic { color: #166534; }
+.eticheta-noi { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: #f97316; color: #fff; font-size: .8rem; font-weight: 600; }
+.card-img .favorit span { background: none; padding: 0; color: inherit; font-size: inherit; border-radius: 0; }

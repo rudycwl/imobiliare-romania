@@ -3,10 +3,11 @@
 import { useActionState } from "react";
 import { autentificare } from "../actiuni";
 
-export function FormularAutentificare() {
+export function FormularAutentificare({ inapoi }: { inapoi: string }) {
   const [stare, actiune, inLucru] = useActionState(autentificare, undefined);
   return (
     <form className="formular" action={actiune}>
+      <input type="hidden" name="inapoi" value={inapoi} />
       <label>
         Email
         <input name="email" defaultValue={stare?.valori?.email} type="email" required autoComplete="email" />

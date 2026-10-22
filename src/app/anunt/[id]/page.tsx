@@ -12,6 +12,7 @@ import { getJudet, getOras } from "@/lib/geo";
 import { Raporteaza } from "./Raporteaza";
 import { ActiuniProprietar } from "./ActiuniProprietar";
 import { ButonTelefon, Vizualizare } from "./Statistica";
+import { Favorit } from "@/components/Favorit";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -97,7 +98,10 @@ export default async function AnuntPage({ params }: Props) {
           </table>
           <p>{a.descriere}</p>
           <Vanzator u={u} />
-          <ButonTelefon id={a.id} telefon={u.telefon} />
+          <div className="actiuni-anunt">
+            <ButonTelefon id={a.id} telefon={u.telefon} />
+            <Favorit id={a.id} mare />
+          </div>
           <Distribuie url={`${SITE}/anunt/${a.id}`} text={`${a.titlu} – ${formatPret(a)} pe CheiaMea`} />
           <Raporteaza id={a.id} />
         </div>

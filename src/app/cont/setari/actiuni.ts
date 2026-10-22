@@ -66,6 +66,8 @@ export async function stergeCont(_: StareSetari, f: FormData): Promise<StareSeta
   await Promise.all(poze.map((p) => stergeObiect(p.cheie).catch((e) => console.error("R2", e))));
   await db.$transaction([
     db.anunt.deleteMany({ where: { proprietarId: u.id } }),
+    db.favorit.deleteMany({ where: { utilizatorId: u.id } }),
+    db.cautareSalvata.deleteMany({ where: { utilizatorId: u.id } }),
     db.sesiune.deleteMany({ where: { utilizatorId: u.id } }),
     db.utilizator.update({
       where: { id: u.id },
