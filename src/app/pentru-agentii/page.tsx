@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Distribuie } from "@/components/Distribuie";
 import type { Metadata } from "next";
+import { TabelAbonamente } from "@/components/TabelAbonamente";
 import { formatData, getInvitatieValabila, locuriRamase, LOCURI_FONDATOARE, LUNI_GRATUITE } from "@/lib/fondatori";
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 const AVANTAJE = [
   { icon: "🏢", titlu: "Profil public de agenție", text: "Pagina agenției tale, cu logo, date de contact și toate ofertele într-un singur loc." },
-  { icon: "📋", titlu: "Oferte nelimitate", text: "Publici tot portofoliul, în orice județ și oraș din țară." },
+  { icon: "📋", titlu: "Abonamente de la 149 lei", text: "De la 25 la un număr nelimitat de anunțuri active, în orice județ și oraș din țară." },
   { icon: "🏷️", titlu: "Insignă „Agenție”", text: "Anunțurile tale apar marcate clar, iar clienții te găsesc la filtrul „Oferit de”." },
   { icon: "🇷🇴", titlu: "Acoperire națională", text: "Toate cele 41 de județe și Bucureștiul, organizate pe orașe." },
 ];
@@ -65,6 +66,10 @@ export default async function PentruAgentiiPage({ searchParams }: { searchParams
           </div>
         ))}
       </div>
+
+      <h2 id="abonamente">Abonamente</h2>
+      <TabelAbonamente />
+      <p className="muted">Vezi toate <Link href="/preturi">prețurile CheiaMea</Link>, inclusiv promovările.</p>
 
       <Distribuie url="https://cheiamea.ro/pentru-agentii" text="CheiaMea: 6 luni gratuit pentru primele 100 de agenții imobiliare." />
       <p className="muted" style={{ marginTop: 24 }}>
