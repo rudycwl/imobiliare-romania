@@ -1,5 +1,5 @@
 import "server-only";
-import { createHash, createPublicKey, createVerify } from "crypto";
+import { createHash, createPublicKey, createVerify, X509Certificate } from "crypto";
 
 // NETOPIA Payments, API v2 (cheie API). Variabile în Netlify:
 // NETOPIA_API_KEY, NETOPIA_POS_SIGNATURE, NETOPIA_PUBLIC_KEY (cheia publică a punctului de vânzare, PEM sau base64),
@@ -75,11 +75,29 @@ export async function pornestePlata(p: {
   return { url, ntpID: j?.payment?.ntpID ?? null };
 }
 
+/** Reface un PEM lipit pe un singur rând (spațiile în loc de rânduri noi îl fac ilizibil pentru OpenSSL). */
+function refaPem(text: string) {
+  const m = text.replace(/\\n/g, "\n").match(/-----BEGIN ([A-Z ]+)-----([\s\S]*?)-----END \1-----/);
+  if (!m) return null;
+  const corp = m[2].replace(/\s+/g, "").match(/.{1,64}/g)?.join("\n") ?? "";
+  return `-----BEGIN ${m[1]}-----\n${corp}\n-----END ${m[1]}-----\n`;
+}
+
+/**
+ * Cheia publică NETOPIA, oricum a fost lipită în Netlify: PEM (certificat .cer sau cheie publică),
+ * PEM pe un singur rând, PEM codat base64 sau direct conținutul DER în base64.
+ */
 function cheiePublica() {
   const v = process.env.NETOPIA_PUBLIC_KEY?.trim();
   if (!v) return null;
-  const pem = v.startsWith("-----") ? v : Buffer.from(v, "base64").toString("utf8");
-  return createPublicKey(pem.replace(/\\n/g, "\n"));
+  const pem = refaPem(v) ?? refaPem(Buffer.from(v, "base64").toString("utf8"));
+  if (pem) return createPublicKey(pem);
+  const der = Buffer.from(v.replace(/\s+/g, ""), "base64");
+  try {
+    return createPublicKey({ key: der, format: "der", type: "spki" });
+  } catch {
+    return new X509Certificate(der).publicKey;
+  }
 }
 
 const b64url = (s: string) => Buffer.from(s.replace(/-/g, "+").replace(/_/g, "/"), "base64");
