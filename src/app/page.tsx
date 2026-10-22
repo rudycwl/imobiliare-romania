@@ -4,8 +4,11 @@ import { ListaAnunturi } from "@/components/AnuntCard";
 import { cautaAnunturi, numarAnunturi } from "@/lib/anunturi";
 import { JUDETE } from "@/lib/geo";
 
-export default function Home() {
-  const recente = cautaAnunturi({}).slice(0, 8);
+// Regenerată cel mult o dată pe minut: pagina rămâne statică și rapidă.
+export const revalidate = 60;
+
+export default async function Home() {
+  const [{ anunturi }, numar] = await Promise.all([cautaAnunturi({}, 8), numarAnunturi()]);
   return (
     <>
       <section className="hero">
@@ -19,14 +22,14 @@ export default function Home() {
         {JUDETE.map((j) => (
           <li key={j.slug}>
             <Link href={`/${j.slug}`}>
-              <strong>{j.nume}</strong> <span className="muted">({numarAnunturi(j.slug)})</span>
+              <strong>{j.nume}</strong> <span className="muted">({numar[j.slug] ?? 0})</span>
             </Link>
           </li>
         ))}
       </ul>
 
       <h2>Anunțuri recente</h2>
-      <ListaAnunturi anunturi={recente} />
+      <ListaAnunturi anunturi={anunturi} />
     </>
   );
 }

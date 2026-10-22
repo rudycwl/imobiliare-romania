@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import type { TipUtilizator } from "@/modules/types";
+import { utilizatorCurent } from "@/lib/auth";
 import { FormularInregistrare } from "./Formular";
 
 export const metadata: Metadata = { title: "Creează cont" };
@@ -8,6 +10,7 @@ export const metadata: Metadata = { title: "Creează cont" };
 const VALIDE: TipUtilizator[] = ["persoana-fizica", "firma", "agentie"];
 
 export default async function InregistrarePage({ searchParams }: { searchParams: Promise<{ tip?: string }> }) {
+  if (await utilizatorCurent()) redirect("/cont");
   const { tip } = await searchParams;
   const tipInitial = VALIDE.includes(tip as TipUtilizator) ? (tip as TipUtilizator) : "persoana-fizica";
   return (

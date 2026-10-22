@@ -1,18 +1,17 @@
 import Link from "next/link";
-import type { Anunt } from "@/modules/types";
-import { formatPret, TIPURI } from "@/lib/anunturi";
+import type { AnuntCuProprietar } from "@/lib/anunturi";
+import { formatPret, TIPURI, TIPURI_UTILIZATOR } from "@/lib/etichete";
 import { getJudet, getOras } from "@/lib/geo";
-import { getUtilizator, TIPURI_UTILIZATOR } from "@/lib/utilizatori";
 
-export function AnuntCard({ a }: { a: Anunt }) {
+export function AnuntCard({ a }: { a: AnuntCuProprietar }) {
   const oras = getOras(a.judet, a.oras);
   const judet = getJudet(a.judet);
-  const u = getUtilizator(a.proprietarId);
+  const u = a.proprietar;
   return (
     <Link href={`/anunt/${a.id}`} className="card">
       <div className="card-img" style={{ background: a.imagine }}>
         <span>{TIPURI[a.tip]}</span>
-        {u && <span className={`badge badge-${u.tip}`}>{TIPURI_UTILIZATOR[u.tip]}</span>}
+        <span className={`badge badge-${u.tip}`}>{TIPURI_UTILIZATOR[u.tip]}</span>
       </div>
       <div className="card-body">
         <div className="pret">{formatPret(a)}</div>
@@ -25,11 +24,14 @@ export function AnuntCard({ a }: { a: Anunt }) {
   );
 }
 
-export function ListaAnunturi({ anunturi }: { anunturi: Anunt[] }) {
+export function ListaAnunturi({ anunturi, total }: { anunturi: AnuntCuProprietar[]; total?: number }) {
   if (!anunturi.length) return <p className="muted">Niciun anunț nu corespunde filtrelor.</p>;
+  const n = total ?? anunturi.length;
   return (
     <>
-      <p className="muted">{anunturi.length} anunțuri găsite</p>
+      <p className="muted">
+        {n} anunțuri găsite{n > anunturi.length ? `, primele ${anunturi.length} afișate` : ""}
+      </p>
       <div className="grid">
         {anunturi.map((a) => (
           <AnuntCard key={a.id} a={a} />
