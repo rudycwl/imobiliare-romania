@@ -23,7 +23,7 @@ export async function SectiunePoze({ anuntId }: { anuntId: number }) {
               <form className="butoane-poza">
                 <input type="hidden" name="anunt" value={anuntId} />
                 <input type="hidden" name="poza" value={p.id} />
-                {i > 0 && <button type="submit" formAction={facePrimaActiune} title="Pune această poză prima">★ Fă copertă</button>}
+                {i > 0 && <button type="submit" formAction={facePrimaActiune} title="Pune această poză prima" aria-label={`Fă coperta din poza ${i + 1}`}>★ Fă copertă</button>}
                 <button type="submit" formAction={stergePozaActiune} className="sterge" title="Șterge poza" aria-label={`Șterge poza ${i + 1}`}>🗑</button>
               </form>
             </li>
