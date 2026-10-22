@@ -6,6 +6,7 @@ import { Vanzator } from "@/components/Vanzator";
 import { utilizatorCurent } from "@/lib/auth";
 import { cautaAnunturi } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
+import { formatData } from "@/lib/fondatori";
 import { deconectare } from "./actiuni";
 
 export const metadata: Metadata = { title: "Contul meu" };
@@ -22,6 +23,12 @@ export default async function ContPage() {
         {u.email} · {u.telefon} · {getOras(u.judet, u.oras)?.nume}, {getJudet(u.judet)?.nume}
         {u.contact && ` · contact: ${u.contact}`}
       </p>
+      {u.tip === "agentie" && u.gratuitPanaLa && u.gratuitPanaLa > new Date() && (
+        <p className="succes">
+          {u.fondator ? "⭐ Ești Agenție Fondatoare. " : ""}Abonamentul tău e gratuit până la {formatData(u.gratuitPanaLa)}
+          {u.fondator ? ", apoi ai 50% reducere permanent cât rămâi abonat." : "."}
+        </p>
+      )}
       <div className="actiuni">
         <Link href="/cont/anunt-nou" className="buton">+ Adaugă anunț</Link>
         {u.tip === "agentie" && <Link href={`/agentii/${u.slug}`}>Vezi profilul public al agenției</Link>}

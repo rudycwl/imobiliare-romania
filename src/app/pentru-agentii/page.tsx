@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { formatData, getInvitatieValabila, locuriRamase, LOCURI_FONDATOARE, LUNI_GRATUITE } from "@/lib/fondatori";
 
 export const metadata: Metadata = {
   title: "Pentru agenții imobiliare",
@@ -13,18 +14,45 @@ const AVANTAJE = [
   { icon: "🇷🇴", titlu: "Acoperire națională", text: "Toate cele 41 de județe și Bucureștiul, organizate pe orașe." },
 ];
 
-export default function PentruAgentiiPage() {
+
+export default async function PentruAgentiiPage({ searchParams }: { searchParams: Promise<{ cod?: string }> }) {
+  const { cod } = await searchParams;
+  const [ramase, invitatie] = await Promise.all([locuriRamase(), getInvitatieValabila(cod)]);
+  const inscriere = invitatie ? `/pentru-agentii/inregistrare?cod=${invitatie.cod}` : "/pentru-agentii/inregistrare";
   return (
     <>
       <section className="hero hero-anim">
         <div className="forme" aria-hidden="true"><span>🏢</span><span>🤝</span><span>🔑</span></div>
         <h1>CheiaMea pentru agenții imobiliare</h1>
         <p>Un cont dedicat agenției tale, separat de anunțurile persoanelor fizice.</p>
+        {invitatie && (
+          <p className="rezervat">
+            🎟️ Ai un loc de Agenție Fondatoare rezervat până la {formatData(invitatie.expiraLa)}.
+          </p>
+        )}
+        {ramase > 0 && (
+          <p className="contor">
+            Au mai rămas <strong>{ramase}</strong> din {LOCURI_FONDATOARE} de locuri de Agenție Fondatoare
+          </p>
+        )}
         <div className="filtre">
-          <Link href="/pentru-agentii/inregistrare" className="buton buton-alb">Creează cont de agenție</Link>
+          <Link href={inscriere} className="buton buton-alb">{invitatie ? "Activează locul rezervat" : "Creează cont de agenție"}</Link>
           <Link href="/cont/autentificare" className="buton buton-contur">Am deja cont</Link>
         </div>
       </section>
+
+      {(ramase > 0 || invitatie) && (
+        <section className="oferta">
+          <h2>⭐ Oferta Agenție Fondatoare</h2>
+          <ul>
+            <li><strong>{LUNI_GRATUITE} luni gratuit</strong>, cu toate funcțiile pentru agenții.</li>
+            <li>Apoi <strong>50% reducere permanent</strong>, cât timp rămâi abonat.</li>
+            <li>Insigna <strong>„Agenție Fondatoare”</strong> pe profil și pe toate anunțurile.</li>
+            <li>Valabil pentru primele {LOCURI_FONDATOARE} de agenții înscrise, până la 31 decembrie 2026.</li>
+          </ul>
+          <Link href={inscriere} className="buton">Vreau locul meu</Link>
+        </section>
+      )}
 
       <h2>De ce CheiaMea</h2>
       <div className="grid">

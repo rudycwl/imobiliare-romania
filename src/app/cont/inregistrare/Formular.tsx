@@ -11,7 +11,7 @@ const OPTIUNI: { tip: TipUtilizator; titlu: string; text: string }[] = [
   { tip: "agentie", titlu: "Agenție imobiliară", text: "Profil public de agenție, oferte nelimitate." },
 ];
 
-export function FormularInregistrare({ tipInitial, tipuri }: { tipInitial: TipUtilizator; tipuri: TipUtilizator[] }) {
+export function FormularInregistrare({ tipInitial, tipuri, cod }: { tipInitial: TipUtilizator; tipuri: TipUtilizator[]; cod?: string }) {
   const [tip, setTip] = useState<TipUtilizator>(tipInitial);
   const optiuni = OPTIUNI.filter((o) => tipuri.includes(o.tip));
   const [stare, actiune, inLucru] = useActionState(inregistrare, undefined);
@@ -20,6 +20,7 @@ export function FormularInregistrare({ tipInitial, tipuri }: { tipInitial: TipUt
 
   return (
     <form className="formular" action={actiune}>
+      {cod && <input type="hidden" name="cod" value={cod} />}
       {optiuni.length > 1 ? (
       <fieldset className="tipuri-cont" style={{ gridTemplateColumns: `repeat(${optiuni.length}, 1fr)` }}>
         <legend>Tip cont</legend>

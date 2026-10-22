@@ -16,6 +16,7 @@ export function laUtilizator(u: UtilizatorDb): Utilizator {
     contact: u.contact,
     cui: u.cui,
     culoare: u.culoare,
+    fondator: u.fondator,
   };
 }
 

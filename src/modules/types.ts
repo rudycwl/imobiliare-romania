@@ -53,4 +53,6 @@ export type Utilizator = {
   /** Doar pentru firme și agenții. */
   cui?: string | null;
   culoare: string;
+  /** Agenție Fondatoare (oferta de lansare). */
+  fondator?: boolean;
 };
