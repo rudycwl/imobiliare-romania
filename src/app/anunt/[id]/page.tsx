@@ -3,11 +3,14 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Vanzator } from "@/components/Vanzator";
+import { Distribuie } from "@/components/Distribuie";
 import { getAnunt } from "@/lib/anunturi";
 import { formatPret, TIPURI, TRANZACTII } from "@/lib/etichete";
 import { getJudet, getOras } from "@/lib/geo";
 
 type Props = { params: Promise<{ id: string }> };
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro";
 
 // Anunțurile se generează la prima vizită și se reîmprospătează la cel mult 5 minute.
 export const revalidate = 300;
@@ -57,6 +60,7 @@ export default async function AnuntPage({ params }: Props) {
           <p>{a.descriere}</p>
           <Vanzator u={u} />
           <a className="buton" href={`tel:${u.telefon}`}>Sună {u.telefon.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3")}</a>
+          <Distribuie url={`${SITE}/anunt/${a.id}`} text={`${a.titlu} – ${formatPret(a)} pe CheiaMea`} />
         </div>
       </div>
     </>

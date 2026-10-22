@@ -18,6 +18,15 @@ export default async function Home() {
         <Filtre valori={{}} action="/cautare" cuJudet />
       </section>
 
+      <Link href="/cont/anunt-nou" className="banner-import">
+        <span className="banner-icon" aria-hidden="true">🏠</span>
+        <span>
+          <strong>Proprietarii publică gratuit</strong>
+          <span>Importă anunțul tău din OLX în 30 de secunde</span>
+        </span>
+        <span className="banner-cta">Publică acum →</span>
+      </Link>
+
       <h2>Județe</h2>
       <ul className="judete">
         {JUDETE.map((j) => (
