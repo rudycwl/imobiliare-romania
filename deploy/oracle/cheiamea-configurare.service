@@ -1,0 +1,11 @@
+[Unit]
+Description=CheiaMea - pagina de configurare
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/node /opt/cheiamea/bin/configurare.mjs
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -97,7 +97,7 @@ let corsSetat: Promise<void> | null = null;
 export function asiguraCors() {
   corsSetat ??= (async () => {
     const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro").replace(/\/$/, "");
-    const origini = [...new Set([site, "https://cheiamea.ro", "https://www.cheiamea.ro", "https://cheiamea.com", "https://www.cheiamea.com"])];
+    const origini = [...new Set([site, "https://cheiamea.ro", "https://nou.cheiamea.ro", "https://www.cheiamea.ro", "https://cheiamea.com", "https://www.cheiamea.com"])];
     const xml =
       `<CORSConfiguration><CORSRule>${origini.map((o) => `<AllowedOrigin>${o}</AllowedOrigin>`).join("")}` +
       `<AllowedMethod>PUT</AllowedMethod><AllowedMethod>GET</AllowedMethod><AllowedHeader>content-type</AllowedHeader>` +
