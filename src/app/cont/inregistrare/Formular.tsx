@@ -11,17 +11,19 @@ const OPTIUNI: { tip: TipUtilizator; titlu: string; text: string }[] = [
   { tip: "agentie", titlu: "Agenție imobiliară", text: "Profil public de agenție, oferte nelimitate." },
 ];
 
-export function FormularInregistrare({ tipInitial }: { tipInitial: TipUtilizator }) {
+export function FormularInregistrare({ tipInitial, tipuri }: { tipInitial: TipUtilizator; tipuri: TipUtilizator[] }) {
   const [tip, setTip] = useState<TipUtilizator>(tipInitial);
+  const optiuni = OPTIUNI.filter((o) => tipuri.includes(o.tip));
   const [stare, actiune, inLucru] = useActionState(inregistrare, undefined);
   const juridic = tip !== "persoana-fizica";
   const v = stare?.valori;
 
   return (
     <form className="formular" action={actiune}>
-      <fieldset className="tipuri-cont">
+      {optiuni.length > 1 ? (
+      <fieldset className="tipuri-cont" style={{ gridTemplateColumns: `repeat(${optiuni.length}, 1fr)` }}>
         <legend>Tip cont</legend>
-        {OPTIUNI.map((o) => (
+        {optiuni.map((o) => (
           <label key={o.tip} className={tip === o.tip ? "activ" : ""}>
             <input type="radio" name="tip" value={o.tip} checked={tip === o.tip} onChange={() => setTip(o.tip)} />
             <strong>{o.titlu}</strong>
@@ -29,6 +31,9 @@ export function FormularInregistrare({ tipInitial }: { tipInitial: TipUtilizator
           </label>
         ))}
       </fieldset>
+      ) : (
+        <input type="hidden" name="tip" value={tip} />
+      )}
 
       {juridic && (
         <>

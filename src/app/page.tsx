@@ -11,7 +11,8 @@ export default async function Home() {
   const [{ anunturi }, numar] = await Promise.all([cautaAnunturi({}, 8), numarAnunturi()]);
   return (
     <>
-      <section className="hero">
+      <section className="hero hero-anim">
+        <div className="forme" aria-hidden="true"><span>🏠</span><span>🔑</span><span>🏢</span></div>
         <h1>Găsește-ți casa oriunde în România</h1>
         <p className="muted">Anunțuri de vânzare și închiriere în toate cele 41 de județe și municipiul București.</p>
         <Filtre valori={{}} action="/cautare" cuJudet />

@@ -30,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav>
               <Link href="/cautare">Caută</Link>
               <Link href="/agentii">Agenții</Link>
+              <Link href="/pentru-agentii">Pentru agenții</Link>
               <Link href="/cont/autentificare">Contul meu</Link>
               <Link href="/cont/anunt-nou" className="buton">+ Adaugă anunț</Link>
             </nav>
@@ -37,7 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         <main className="container">{children}</main>
         <footer className="footer">
-          <div className="container muted">© 2026 CheiaMea · anunțuri imobiliare din toată țara</div>
+          <div className="container muted">
+            © 2026 CheiaMea · anunțuri imobiliare din toată țara · <Link href="/pentru-agentii">Pentru agenții</Link>
+          </div>
         </footer>
       </body>
     </html>
