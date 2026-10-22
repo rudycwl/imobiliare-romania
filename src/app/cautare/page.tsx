@@ -8,12 +8,13 @@ export const metadata: Metadata = { title: "Căutare anunțuri" };
 
 export default async function CautarePage({ searchParams }: { searchParams: Promise<F> }) {
   const sp = await searchParams;
+  const { anunturi, total } = await cautaAnunturi(sp);
   return (
     <>
       <Breadcrumbs items={[{ label: "Căutare" }]} />
       <h1>Caută anunțuri în toată țara</h1>
       <Filtre valori={sp} action="/cautare" cuJudet />
-      <ListaAnunturi anunturi={cautaAnunturi(sp).slice(0, 60)} />
+      <ListaAnunturi anunturi={anunturi} total={total} />
     </>
   );
 }

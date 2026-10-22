@@ -61,3 +61,10 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .card-img span.badge-agentie { background: #dbeafe; color: #1e40af; }
 .card-img span.badge-firma { background: #fef3c7; color: #92400e; }
 .card-img span.badge-persoana-fizica { background: #dcfce7; color: #166534; }
+.formular select, .formular textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--fg); font: inherit; }
+.rand { display: flex; gap: 12px; flex-wrap: wrap; }
+.rand > label { flex: 1 1 140px; }
+.eroare { background: #fee2e2; color: #991b1b; padding: 10px 12px; border-radius: 8px; margin: 0; }
+.actiuni { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
+button.secundar { background: transparent; color: var(--accent); border: 1px solid var(--border); }
+.logo-accent { color: var(--accent); }

@@ -5,23 +5,26 @@ import { Vanzator } from "@/components/Vanzator";
 import { ListaAnunturi } from "@/components/AnuntCard";
 import { cautaAnunturi } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
-import { getAgentie, getAgentii } from "@/lib/utilizatori";
+import { getAgentie } from "@/lib/utilizatori";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const revalidate = 300;
+
+// Listă goală: paginile se generează static la prima vizită (ISR), nu la build.
 export function generateStaticParams() {
-  return getAgentii().map((a) => ({ slug: a.slug }));
+  return [];
 }
-export const dynamicParams = false;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const a = getAgentie((await params).slug);
+  const a = await getAgentie((await params).slug);
   return { title: a?.nume ?? "Agenție inexistentă" };
 }
 
 export default async function AgentiePage({ params }: Props) {
-  const a = getAgentie((await params).slug);
+  const a = await getAgentie((await params).slug);
   if (!a) notFound();
+  const { anunturi, total } = await cautaAnunturi({ proprietar: a.id });
   return (
     <>
       <Breadcrumbs items={[{ href: "/agentii", label: "Agenții" }, { label: a.nume }]} />
@@ -29,7 +32,7 @@ export default async function AgentiePage({ params }: Props) {
       <p className="muted">
         {getOras(a.judet, a.oras)?.nume}, {getJudet(a.judet)?.nume} · Tel. {a.telefon}
       </p>
-      <ListaAnunturi anunturi={cautaAnunturi({ proprietar: a.id })} />
+      <ListaAnunturi anunturi={anunturi} total={total} />
     </>
   );
 }

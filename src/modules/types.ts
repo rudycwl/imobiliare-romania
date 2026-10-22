@@ -15,7 +15,7 @@ export type TipProprietate = "apartament" | "casa" | "teren" | "spatiu-comercial
 export type Tranzactie = "vanzare" | "inchiriere";
 
 export type Anunt = {
-  id: string;
+  id: number;
   titlu: string;
   descriere: string;
   tip: TipProprietate;
@@ -27,7 +27,7 @@ export type Anunt = {
   judet: string;
   oras: string;
   zona: string;
-  dataPublicarii: string;
+  publicatLa: Date;
   imagine: string;
   proprietarId: string;
 };
@@ -48,7 +48,9 @@ export type Utilizator = {
   telefon: string;
   judet: string;
   oras: string;
+  /** Persoana de contact, doar pentru firme și agenții. */
+  contact?: string | null;
   /** Doar pentru firme și agenții. */
-  cui?: string;
+  cui?: string | null;
   culoare: string;
 };

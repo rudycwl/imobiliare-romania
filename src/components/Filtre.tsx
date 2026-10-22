@@ -1,7 +1,6 @@
 import type { Filtre as F } from "@/lib/anunturi";
-import { TIPURI, TRANZACTII } from "@/lib/anunturi";
+import { TIPURI, TIPURI_UTILIZATOR, TRANZACTII } from "@/lib/etichete";
 import { JUDETE } from "@/lib/geo";
-import { TIPURI_UTILIZATOR } from "@/lib/utilizatori";
 
 /** Formular GET simplu: filtrele ajung în URL, deci rezultatele pot fi partajate. */
 export function Filtre({ valori, action, cuJudet = false }: { valori: F; action: string; cuJudet?: boolean }) {
