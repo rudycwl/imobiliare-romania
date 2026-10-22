@@ -22,7 +22,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const a = await getAnunt((await params).id);
-  return { title: a?.titlu ?? "Anunț inexistent", description: a?.descriere };
+  // Anunțurile expirate rămân accesibile prin link, dar nu mai apar în Google.
+  return { title: a?.titlu ?? "Anunț inexistent", description: a?.descriere, robots: a && a.expiraLa <= new Date() ? { index: false } : undefined };
 }
 
 export default async function AnuntPage({ params }: Props) {
@@ -40,6 +41,11 @@ export default async function AnuntPage({ params }: Props) {
           { label: `Anunț #${a.id}` },
         ]}
       />
+      {a.expiraLa <= new Date() && (
+        <p className="eroare" style={{ marginBottom: 16 }}>
+          Acest anunț nu mai este activ. Vezi <Link href={`/${j.slug}/${o.slug}`}>alte anunțuri din {o.nume}</Link>.
+        </p>
+      )}
       <div className="anunt">
         <div className="anunt-img" style={{ background: a.imagine }}>
           <span>{TIPURI[a.tip]}</span>

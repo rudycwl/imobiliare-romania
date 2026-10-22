@@ -175,3 +175,10 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
   .tabel-preturi .pret { color: #fb923c; }
   .card-body p.pret-mare { color: #4ade80; }
 }
+
+/* Anunțurile mele */
+.anunturile-mele { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
+.anunturile-mele li { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+.anunturile-mele li.expirat { opacity: .7; }
+.butoane-anunt { display: flex; gap: 8px; flex-wrap: wrap; }
+.stare-expirat { color: #b91c1c; font-weight: 600; }
