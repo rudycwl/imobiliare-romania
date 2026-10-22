@@ -67,8 +67,10 @@ export default async function AnuntPage({ params }: Props) {
         {poze.length ? (
           <div className="galerie" aria-label="Pozele anunțului">
             {poze.map((p, i) => (
-              // eslint-disable-next-line @next/next/no-img-element -- pozele vin direct din stocare, nu prin Netlify
-              <img key={p.id} src={urlPublic(p.cheie)} alt={`${a.titlu}, poza ${i + 1} din ${poze.length}`} loading={i ? "lazy" : "eager"} />
+              <a key={p.id} href={urlPublic(p.cheie)} target="_blank" rel="noopener" title="Deschide poza mărită">
+                {/* eslint-disable-next-line @next/next/no-img-element -- pozele vin direct din stocare, nu prin Netlify */}
+                <img src={urlPublic(p.cheie)} alt={`${a.titlu}, poza ${i + 1} din ${poze.length}`} loading={i ? "lazy" : "eager"} />
+              </a>
             ))}
           </div>
         ) : (
