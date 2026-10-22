@@ -1,0 +1,8 @@
+[Unit]
+Description=CheiaMea - publică ultima versiune de pe main
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/cheiamea/bin/actualizeaza.sh
+TimeoutStartSec=40min

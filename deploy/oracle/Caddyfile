@@ -1,0 +1,18 @@
+# CheiaMea pe Oracle Cloud. Caddy ia singur certificatele HTTPS când domeniile arată spre această mașină.
+cheiamea.ro, nou.cheiamea.ro {
+	encode zstd gzip
+	handle /configurare* {
+		reverse_proxy 127.0.0.1:3001
+	}
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+	handle_errors 502 503 {
+		header Content-Type "text/html; charset=utf-8"
+		respond "<h1>CheiaMea</h1><p>Site-ul se pregătește. Revino în câteva minute.</p>" 503
+	}
+}
+
+www.cheiamea.ro, cheiamea.com, www.cheiamea.com {
+	redir https://cheiamea.ro{uri} permanent
+}
