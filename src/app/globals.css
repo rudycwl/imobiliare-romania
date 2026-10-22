@@ -8,7 +8,8 @@ a { color: var(--accent); text-decoration: none; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 .header { background: var(--card); border-bottom: 1px solid var(--border); }
 .header-inner { display: flex; justify-content: space-between; align-items: center; height: 60px; }
-.logo { font-weight: 700; font-size: 1.15rem; color: var(--fg); }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.2rem; letter-spacing: -0.02em; color: var(--fg); }
+.logo-icon { width: 30px; height: 30px; flex: none; }
 .footer { margin-top: 48px; padding: 24px 0; border-top: 1px solid var(--border); }
 .muted { color: var(--muted); }
 .hero { padding: 32px 0 8px; }
@@ -67,4 +68,4 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .eroare { background: #fee2e2; color: #991b1b; padding: 10px 12px; border-radius: 8px; margin: 0; }
 .actiuni { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
 button.secundar { background: transparent; color: var(--accent); border: 1px solid var(--border); }
-.logo-accent { color: var(--accent); }
+.logo-accent { color: #f97316; }
