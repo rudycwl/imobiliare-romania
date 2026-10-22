@@ -63,7 +63,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <img src="https://mny.ro/np-black-0.svg?id=170227" alt="NETOPIA Payments" width={160} height={32} />
                 </picture>
               </a>
-              <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener noreferrer">ANPC – SAL</a>
+              <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="nofollow noopener noreferrer" className="anpc">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/anpc-sal.svg" alt="ANPC - Soluționarea alternativă a litigiilor" width={250} height={50} />
+              </a>
+              <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="nofollow noopener noreferrer" className="anpc">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/anpc-sol.svg" alt="Soluționarea online a litigiilor" width={250} height={50} />
+              </a>
             </div>
             <p className="small">
               © 2026 CheiaMea · anunțuri imobiliare din toată țara · operat de {FIRMA.nume}, CUI {FIRMA.cui}, {FIRMA.regCom}, {FIRMA.sediu} ·{" "}
