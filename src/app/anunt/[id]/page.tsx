@@ -10,6 +10,7 @@ import { urlPublic } from "@/lib/stocare";
 import { formatPret, TIPURI, TRANZACTII } from "@/lib/etichete";
 import { getJudet, getOras } from "@/lib/geo";
 import { Raporteaza } from "./Raporteaza";
+import { ActiuniProprietar } from "./ActiuniProprietar";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -63,6 +64,7 @@ export default async function AnuntPage({ params }: Props) {
           Acest anunț nu mai este activ. Vezi <Link href={`/${j.slug}/${o.slug}`}>alte anunțuri din {o.nume}</Link>.
         </p>
       )}
+      <ActiuniProprietar id={a.id} activ={a.expiraLa > new Date()} />
       <div className="anunt">
         {poze.length ? (
           <div className="galerie" aria-label="Pozele anunțului">
