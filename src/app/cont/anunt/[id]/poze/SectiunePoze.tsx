@@ -19,11 +19,12 @@ export async function SectiunePoze({ anuntId }: { anuntId: number }) {
             <li key={p.id}>
               {/* eslint-disable-next-line @next/next/no-img-element -- pozele vin direct din stocare, nu prin Netlify */}
               <img src={urlPublic(p.cheie)} alt={`Poza ${i + 1}`} loading="lazy" />
-              <form className="butoane-anunt">
+              {i === 0 && <span className="eticheta-coperta">★ Copertă</span>}
+              <form className="butoane-poza">
                 <input type="hidden" name="anunt" value={anuntId} />
                 <input type="hidden" name="poza" value={p.id} />
-                {i === 0 ? <span className="eticheta-promo">Copertă</span> : <button type="submit" formAction={facePrimaActiune} className="secundar">Fă copertă</button>}
-                <button type="submit" formAction={stergePozaActiune} className="secundar">Șterge</button>
+                {i > 0 && <button type="submit" formAction={facePrimaActiune} title="Pune această poză prima">★ Fă copertă</button>}
+                <button type="submit" formAction={stergePozaActiune} className="sterge" title="Șterge poza" aria-label={`Șterge poza ${i + 1}`}>🗑</button>
               </form>
             </li>
           ))}
