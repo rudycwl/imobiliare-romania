@@ -14,6 +14,7 @@ import { getOras } from "@/lib/geo";
 import { aplicaOfertaFondator } from "@/lib/fondatori";
 import { aplicaRecomandare } from "@/lib/atribuire";
 import { aplicaFiltru } from "@/lib/moderare";
+import { stocareConfigurata } from "@/lib/stocare";
 
 export type Stare = { eroare?: string; valori?: Record<string, string> } | undefined;
 
@@ -131,7 +132,8 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   // Paginile cache-uite (ISR) arată anunțul nou imediat, nu după expirare.
   revalidatePath("/");
   if (u.tip === "agentie") revalidatePath(`/agentii/${u.slug}`);
-  redirect(`/anunt/${a.id}`);
+  // Pozele se adaugă imediat după publicare, dacă stocarea (Cloudflare R2) e configurată.
+  redirect(stocareConfigurata() ? `/cont/anunt/${a.id}/poze?nou=1` : `/anunt/${a.id}`);
 }
 
 /** Salvează modificările unui anunț propriu; valabilitatea și promovările rămân neschimbate. */
