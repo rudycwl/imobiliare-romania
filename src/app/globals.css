@@ -67,7 +67,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .rand > label { flex: 1 1 140px; }
 .eroare { background: #fee2e2; color: #991b1b; padding: 10px 12px; border-radius: 8px; margin: 0; }
 .actiuni { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
-button.secundar { background: transparent; color: var(--accent); border: 1px solid var(--border); }
+button.secundar, .buton.secundar { background: transparent; color: var(--accent); border: 1px solid var(--border); }
 .logo-accent { color: #f97316; }
 
 /* ---------- Animații (doar CSS, fără JavaScript: site-ul rămâne rapid) ---------- */

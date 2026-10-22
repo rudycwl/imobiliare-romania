@@ -11,7 +11,7 @@ export type Judet = {
   orase: Oras[];
 };
 
-export type TipProprietate = "apartament" | "casa" | "teren" | "spatiu-comercial";
+export type TipProprietate = "apartament" | "casa" | "teren" | "spatiu-comercial" | "birouri" | "depozit";
 export type Tranzactie = "vanzare" | "inchiriere";
 
 export type Anunt = {

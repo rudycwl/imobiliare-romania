@@ -4,7 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import { Localitate } from "@/components/Localitate";
 import { TIPURI, TRANZACTII } from "@/lib/etichete";
 import type { AnuntImportat } from "@/lib/import-anunt";
-import { publicaAnunt } from "../actiuni";
+import { editeazaAnunt, publicaAnunt } from "../actiuni";
 import { importaAnunt } from "./import";
 
 function ImportAnunt({ laImport }: { laImport: (v: AnuntImportat) => void }) {
@@ -62,12 +62,24 @@ export function FormularAnunt({ judet, oras, poateImporta }: { judet: string; or
   );
 }
 
-function FormularCampuri({ judet, oras, importat }: { judet: string; oras: string; importat?: AnuntImportat }) {
-  const [stare, actiune, inLucru] = useActionState(publicaAnunt, undefined);
-  const [tip, setTip] = useState(importat?.tip ?? "apartament");
-  const v: Record<string, string | undefined> = { ...importat, ...stare?.valori };
+/** Cu `editare`, formularul pornește completat cu anunțul existent și îl salvează în loc să publice unul nou. */
+export function FormularCampuri({
+  judet,
+  oras,
+  importat,
+  editare,
+}: {
+  judet: string;
+  oras: string;
+  importat?: AnuntImportat;
+  editare?: { id: number; valori: Record<string, string> };
+}) {
+  const [stare, actiune, inLucru] = useActionState(editare ? editeazaAnunt : publicaAnunt, undefined);
+  const [tip, setTip] = useState(importat?.tip ?? editare?.valori.tip ?? "apartament");
+  const v: Record<string, string | undefined> = { ...editare?.valori, ...importat, ...stare?.valori };
   return (
     <form className="formular" action={actiune}>
+      {editare && <input type="hidden" name="id" value={editare.id} />}
       {importat && (
         <p className="succes small">Am completat ce am găsit în anunțul tău. Verifică fiecare câmp înainte să publici.</p>
       )}
@@ -125,7 +137,7 @@ function FormularCampuri({ judet, oras, importat }: { judet: string; oras: strin
       )}
       {stare?.eroare && <p className="eroare" role="alert">{stare.eroare}</p>}
       <button type="submit" disabled={inLucru}>
-        {inLucru ? "Se publică…" : "Publică anunțul"}
+        {editare ? (inLucru ? "Se salvează…" : "Salvează modificările") : inLucru ? "Se publică…" : "Publică anunțul"}
       </button>
     </form>
   );
