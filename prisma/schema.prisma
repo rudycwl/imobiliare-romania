@@ -22,6 +22,10 @@ model Utilizator {
   judet                String
   oras                 String
   cui                  String?
+  /// Nr. Registrul Comerțului, pentru facturile firmelor și agențiilor.
+  regCom               String?
+  /// Adresa de facturare (stradă, număr), obligatorie pe e-Factura pentru firme.
+  adresa               String?
   culoare              String            @default("#0b6bcb")
   creatLa              DateTime          @default(now())
   /// Agenție Fondatoare: una din primele 100 de agenții înscrise până la 31.12.2026.
@@ -49,6 +53,7 @@ model Utilizator {
   anunturi             Anunt[]
   sesiuni              Sesiune[]
   invitatie            InvitatieAgentie?
+  facturi              Factura[]
 
   @@index([tip, judet])
 }
@@ -124,4 +129,43 @@ model Vizita {
   pagina   String?
 
   @@index([creatLa, sursa])
+}
+
+/// Factură (sau storno) emisă de Hugetech SRL pentru o plată de pe site.
+/// Seria și numărul le dă programul de facturare (Oblio), care ține numerotarea continuă
+/// și trimite factura în e-Factura (SPV). Aici păstrăm evidența și legătura cu plata.
+model Factura {
+  id           Int         @id @default(autoincrement())
+  creatLa      DateTime    @default(now())
+  /// factura | storno
+  tip          String      @default("factura")
+  /// in-asteptare (neemisă încă) | emisa | eroare | stornata
+  stare        String      @default("in-asteptare")
+  /// Referința plății (comanda Netopia); una singură per plată, ca să nu facturăm de două ori.
+  plataRef     String?     @unique
+  utilizatorId String?
+  utilizator   Utilizator? @relation(fields: [utilizatorId], references: [id], onDelete: SetNull)
+  /// Datele cumpărătorului la momentul facturării (nume, cui, regCom, adresa, judet, oras, email).
+  cumparator   Json
+  /// Liniile facturii: [{ denumire, pretBani, cantitate }], prețuri cu TVA inclus.
+  produse      Json
+  /// Total cu TVA, în bani (1 leu = 100 bani).
+  totalBani    Int
+  cotaTva      Int         @default(0)
+  seria        String?
+  numar        String?
+  emisaLa      DateTime?
+  linkPdf      String?
+  /// netrimisa | in-prelucrare | trimisa | eroare
+  eFactura     String?
+  eroare       String?
+  /// Pentru storno: factura stornată.
+  referintaId  Int?
+  referinta    Factura?    @relation("Stornari", fields: [referintaId], references: [id], onDelete: Restrict)
+  stornari     Factura[]   @relation("Stornari")
+
+  @@unique([seria, numar])
+  @@index([creatLa])
+  @@index([stare])
+  @@index([utilizatorId])
 }
