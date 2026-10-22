@@ -17,7 +17,7 @@ export default async function InvitatiiPage() {
   return (
     <>
       <h1>Invitații pentru agenții</h1>
-      <p className="muted">Locuri de Agenție Fondatoare libere: {ramase}. O invitație rezervă un loc 14 zile.</p>
+      <p className="muted">Locuri de Agenție Fondatoare libere: {ramase}. O invitație rezervă un loc 14 zile. · <a href="/admin/statistici">Statistici pe surse</a></p>
       <form action={genereazaInvitatie} className="filtre">
         <input name="nota" placeholder="Pentru cine (ex. numele agenției)" maxLength={120} style={{ flex: "1 1 260px" }} />
         <button type="submit">Generează invitație</button>

@@ -9,28 +9,38 @@ datasource db {
 
 /// tip: "persoana-fizica" | "firma" | "agentie" (validat în aplicație, vezi TipUtilizator)
 model Utilizator {
-  id            String            @id @default(cuid())
-  slug          String            @unique
-  tip           String
+  id             String            @id @default(cuid())
+  slug           String            @unique
+  tip            String
   /// Persoană fizică: numele complet. Firmă/agenție: denumirea.
-  nume          String
+  nume           String
   /// Persoana de contact, doar pentru firme și agenții.
-  contact       String?
-  email         String?           @unique
-  parolaHash    String?
-  telefon       String
-  judet         String
-  oras          String
-  cui           String?
-  culoare       String            @default("#0b6bcb")
-  creatLa       DateTime          @default(now())
+  contact        String?
+  email          String?           @unique
+  parolaHash     String?
+  telefon        String
+  judet          String
+  oras           String
+  cui            String?
+  culoare        String            @default("#0b6bcb")
+  creatLa        DateTime          @default(now())
   /// Agenție Fondatoare: una din primele 100 de agenții înscrise până la 31.12.2026.
-  fondator      Boolean           @default(false)
+  fondator       Boolean           @default(false)
   /// Până când abonamentul de agenție e gratuit (6 luni pentru fondatori).
-  gratuitPanaLa DateTime?
-  anunturi      Anunt[]
-  sesiuni       Sesiune[]
-  invitatie     InvitatieAgentie?
+  gratuitPanaLa  DateTime?
+  /// Cine l-a recomandat (link ?ref=slug).
+  recomandatDeId String?
+  recomandatDe   Utilizator?       @relation("Recomandari", fields: [recomandatDeId], references: [id], onDelete: SetNull)
+  recomandari    Utilizator[]      @relation("Recomandari")
+  /// Zile de promovare câștigate (7 zile la fiecare 3 recomandări).
+  zilePromovare  Int               @default(0)
+  /// Luni gratuite primite pentru agenții aduse (maximum 6).
+  luniBonus      Int               @default(0)
+  /// De unde a venit la înscriere (utm_source, recomandare, site de proveniență sau direct).
+  sursa          String?
+  anunturi       Anunt[]
+  sesiuni        Sesiune[]
+  invitatie      InvitatieAgentie?
 
   @@index([tip, judet])
 }
@@ -82,4 +92,16 @@ model InvitatieAgentie {
   agentie    Utilizator? @relation(fields: [folositaDe], references: [id], onDelete: SetNull)
 
   @@index([expiraLa])
+}
+
+/// O vizită nouă pe site (o dată pe sesiune de browser), cu sursa ei, pentru statistici.
+model Vizita {
+  id       Int      @id @default(autoincrement())
+  creatLa  DateTime @default(now())
+  sursa    String
+  mediu    String?
+  campanie String?
+  pagina   String?
+
+  @@index([creatLa, sursa])
 }

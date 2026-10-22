@@ -152,3 +152,6 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .faq { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 8px 0; }
 .faq summary { cursor: pointer; font-weight: 600; }
 .faq p { margin: 8px 0 0; color: var(--muted); }
+.recomandare { margin: 24px 0; padding: 18px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); }
+.recomandare h2 { margin-top: 0; }
+.link-recomandare { width: 100%; padding: 10px; border: 1px dashed #f97316; border-radius: 8px; background: var(--bg); color: var(--fg); font: inherit; }
