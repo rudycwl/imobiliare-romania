@@ -3,7 +3,8 @@ import { createHash, createHmac } from "crypto";
 
 // Pozele stau într-un spațiu de stocare compatibil S3 (Cloudflare R2), nu pe Netlify,
 // ca traficul pentru imagini să nu consume traficul inclus în Netlify.
-// Variabile: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_PUBLIC_URL (ex. https://poze.cheiamea.ro).
+// Variabile: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY (token „Admin Read & Write”, ca să poată seta CORS),
+// R2_BUCKET, R2_PUBLIC_URL (adresa publică r2.dev a bucket-ului sau un domeniu propriu).
 
 const env = () => ({
   cont: process.env.R2_ACCOUNT_ID ?? "",
