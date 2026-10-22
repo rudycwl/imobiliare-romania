@@ -26,8 +26,8 @@ export type Filtre = {
   toate?: boolean;
 };
 
-/** Condiția pentru anunțurile publice (neexpirate). */
-const activ = (): Prisma.AnuntWhereInput => ({ expiraLa: { gt: new Date() } });
+/** Condiția pentru anunțurile publice: neexpirate și trecute de moderare. */
+const activ = (): Prisma.AnuntWhereInput => ({ expiraLa: { gt: new Date() }, moderare: "ok" });
 
 const LIMITA = 60;
 
@@ -131,7 +131,8 @@ export async function limitaAnunturi(utilizatorId: string) {
 }
 
 export function anunturiActive(proprietarId: string) {
-  return db.anunt.count({ where: { proprietarId, ...activ() } });
+  // Și cele aflate în verificare ocupă un loc, altfel limita s-ar putea ocoli.
+  return db.anunt.count({ where: { proprietarId, expiraLa: { gt: new Date() } } });
 }
 
 /** Mai poate publica (sau reactiva) un anunț fără să treacă de limită? */
@@ -142,7 +143,7 @@ export async function poatePublica(u: { id: string }) {
 
 /** Prelungește cu 60 de zile de azi; întoarce false dacă anunțul nu e al lui. */
 export async function prelungesteAnunt(id: number, proprietarId: string) {
-  const r = await db.anunt.updateMany({ where: { id, proprietarId }, data: { expiraLa: peste(ZILE_VALABILITATE) } });
+  const r = await db.anunt.updateMany({ where: { id, proprietarId, moderare: { not: "respins" } }, data: { expiraLa: peste(ZILE_VALABILITATE) } });
   return r.count > 0;
 }
 

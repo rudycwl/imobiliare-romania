@@ -13,6 +13,7 @@ import { esteTipUtilizator, slugify, TIPURI, TRANZACTII } from "@/lib/etichete";
 import { getOras } from "@/lib/geo";
 import { aplicaOfertaFondator } from "@/lib/fondatori";
 import { aplicaRecomandare } from "@/lib/atribuire";
+import { aplicaFiltru } from "@/lib/moderare";
 
 export type Stare = { eroare?: string; valori?: Record<string, string> } | undefined;
 
@@ -126,6 +127,7 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   if (!(await poatePublica(u))) return esec(MESAJ_LIMITA, f);
 
   const a = await creeazaAnunt(u.id, r.date);
+  await aplicaFiltru(a.id, r.date.titlu, r.date.descriere);
   // Paginile cache-uite (ISR) arată anunțul nou imediat, nu după expirare.
   revalidatePath("/");
   if (u.tip === "agentie") revalidatePath(`/agentii/${u.slug}`);
@@ -138,6 +140,7 @@ export async function editeazaAnunt(_: Stare, f: FormData): Promise<Stare> {
   const r = citesteAnunt(f);
   if ("eroare" in r) return esec(r.eroare, f);
   if (!(await editeaza(id, u.id, r.date))) redirect("/cont");
+  await aplicaFiltru(id, r.date.titlu, r.date.descriere);
   revalidatePath("/");
   revalidatePath(`/anunt/${id}`);
   if (u.tip === "agentie") revalidatePath(`/agentii/${u.slug}`);
