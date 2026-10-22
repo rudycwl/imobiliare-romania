@@ -235,3 +235,4 @@ button.secundar, .buton.secundar { background: transparent; color: var(--accent)
 .buton-contur-inchis { background: transparent !important; color: var(--accent) !important; border: 1px solid var(--accent); text-align: center; }
 .preturi-ascunse { display: grid; gap: 8px; margin: 12px 0 20px; }
 .preturi-ascunse p { margin: 0; }
+.actiuni-proprietar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; padding: 10px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
