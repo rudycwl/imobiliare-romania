@@ -5,7 +5,7 @@ import { ANUNTURI_GRATUITE, PROMOVARI, REDUCERE_PROMOVARI_ABONATI, ZILE_VALABILI
 
 export const metadata: Metadata = {
   title: "Prețuri",
-  description: `Publicare gratuită pentru proprietari (până la ${ANUNTURI_GRATUITE} anunțuri), promovări de la 7 lei și abonamente pentru agenții de la 149 lei pe lună.`,
+  description: `Publicare gratuită pentru proprietari (până la ${ANUNTURI_GRATUITE} anunțuri), promovări de la 7 lei și abonamente pentru agenții imobiliare.`,
   alternates: { canonical: "/preturi" },
 };
 
