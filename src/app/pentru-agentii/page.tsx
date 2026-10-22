@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 const AVANTAJE = [
   { icon: "🏢", titlu: "Profil public de agenție", text: "Pagina agenției tale, cu logo, date de contact și toate ofertele într-un singur loc." },
-  { icon: "📋", titlu: "Abonamente de la 149 lei", text: "De la 25 la un număr nelimitat de anunțuri active, în orice județ și oraș din țară." },
+  { icon: "📋", titlu: "Abonamente pentru orice agenție", text: "De la 25 la un număr nelimitat de anunțuri active, în orice județ și oraș din țară." },
   { icon: "🏷️", titlu: "Insignă „Agenție”", text: "Anunțurile tale apar marcate clar, iar clienții te găsesc la filtrul „Oferit de”." },
   { icon: "🇷🇴", titlu: "Acoperire națională", text: "Toate cele 41 de județe și Bucureștiul, organizate pe orașe." },
 ];
