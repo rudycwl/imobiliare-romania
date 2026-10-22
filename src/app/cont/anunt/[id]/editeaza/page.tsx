@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { utilizatorCurent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { FormularCampuri } from "../../../anunt-nou/Formular";
+import { SectiunePoze } from "../poze/SectiunePoze";
 
 export const metadata: Metadata = { title: "Editează anunțul", robots: { index: false } };
 
@@ -28,11 +29,20 @@ export default async function EditeazaPage({ params }: { params: Promise<{ id: s
     zona: a.zona,
   };
   return (
-    <div className="ingust">
+    <div className="editare-anunt">
       <p className="small"><Link href="/cont#anunturile-mele">← Anunțurile mele</Link></p>
       <h1>Editează anunțul</h1>
       <p className="muted small">Valabilitatea și promovările anunțului rămân neschimbate.</p>
-      <FormularCampuri judet={a.judet} oras={a.oras} editare={{ id: a.id, valori }} />
+      <div className="editare-coloane">
+      <div>
+        <FormularCampuri judet={a.judet} oras={a.oras} editare={{ id: a.id, valori }} />
+      </div>
+      <section id="poze" className="sectiune-poze">
+        <h2>Pozele anunțului</h2>
+        <p className="muted small">Pozele se salvează imediat ce le încarci, nu trebuie să apeși „Salvează modificările”.</p>
+        <SectiunePoze anuntId={a.id} />
+      </section>
+      </div>
     </div>
   );
 }

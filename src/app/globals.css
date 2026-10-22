@@ -286,3 +286,8 @@ button.pericol { background: #b91c1c; color: #fff; border-color: #b91c1c; }
 .succes-mic { color: #166534; }
 .eticheta-noi { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: #f97316; color: #fff; font-size: .8rem; font-weight: 600; }
 .card-img .favorit span { background: none; padding: 0; color: inherit; font-size: inherit; border-radius: 0; }
+.editare-anunt { max-width: 1180px; }
+.editare-coloane { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 32px; align-items: start; }
+.sectiune-poze { padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
+.sectiune-poze h2 { margin-top: 0; }
+@media (max-width: 900px) { .editare-coloane { grid-template-columns: 1fr; } }

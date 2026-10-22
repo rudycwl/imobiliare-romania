@@ -16,6 +16,7 @@ function reimprospateaza(a: { id: number; judet: string; oras: string }) {
   revalidatePath(`/anunt/${a.id}`);
   revalidatePath(`/${a.judet}/${a.oras}`);
   revalidatePath(`/cont/anunt/${a.id}/poze`);
+  revalidatePath(`/cont/anunt/${a.id}/editeaza`);
 }
 
 /** Pasul 1: browserul cere un URL semnat și încarcă poza direct în stocare. */
