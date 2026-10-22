@@ -122,3 +122,5 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .buton-contur { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); }
 .avantaj-icon { font-size: 2rem; transition: transform .3s ease; display: inline-block; }
 .avantaj:hover .avantaj-icon { transform: scale(1.2) rotate(-6deg); }
+.import-box { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 20px; padding: 14px; border: 2px dashed #f97316; border-radius: 12px; background: color-mix(in srgb, #f97316 6%, var(--card)); animation: apare-sus .5s ease both; }
+.import-box input { padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--fg); font: inherit; }
