@@ -6,12 +6,16 @@ import { FormularAutentificare } from "./Formular";
 
 export const metadata: Metadata = { title: "Autentificare" };
 
-export default async function AutentificarePage() {
-  if (await utilizatorCurent()) redirect("/cont");
+/** Doar adrese din site, ca linkul de întoarcere să nu poată trimite în altă parte. */
+const caleSigura = (c?: string) => (c && c.startsWith("/") && !c.startsWith("//") ? c : "/cont");
+
+export default async function AutentificarePage({ searchParams }: { searchParams: Promise<{ inapoi?: string }> }) {
+  const inapoi = caleSigura((await searchParams).inapoi);
+  if (await utilizatorCurent()) redirect(inapoi);
   return (
     <div className="ingust">
       <h1>Autentificare</h1>
-      <FormularAutentificare />
+      <FormularAutentificare inapoi={inapoi} />
       <p className="muted">
         Nu ai cont? <Link href="/cont/inregistrare">Creează unul gratuit</Link> ca persoană fizică, firmă sau agenție.
       </p>

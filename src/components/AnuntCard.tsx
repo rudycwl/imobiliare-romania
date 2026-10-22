@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { AnuntCuProprietar } from "@/lib/anunturi";
 import { formatPret, TIPURI, TIPURI_UTILIZATOR } from "@/lib/etichete";
 import { getJudet, getOras } from "@/lib/geo";
+import { Favorit } from "./Favorit";
 
 export function AnuntCard({ a }: { a: AnuntCuProprietar }) {
   const oras = getOras(a.judet, a.oras);
@@ -12,6 +13,7 @@ export function AnuntCard({ a }: { a: AnuntCuProprietar }) {
       <div className="card-img" style={{ background: a.imagine }}>
         <span>{TIPURI[a.tip]}</span>
         <span className={`badge badge-${u.tip}`}>{u.fondator ? "⭐ " : ""}{TIPURI_UTILIZATOR[u.tip]}</span>
+        <Favorit id={a.id} />
       </div>
       <div className="card-body">
         {(a.promovat || a.evidentiat) && <span className="eticheta-promo">{a.promovat ? "Promovat" : "Evidențiat"}</span>}

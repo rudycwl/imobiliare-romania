@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Filtre } from "@/components/Filtre";
+import { SalveazaCautarea } from "@/components/SalveazaCautarea";
+import { curataFiltre } from "@/lib/cautari";
 import { ListaAnunturi } from "@/components/AnuntCard";
 import { SeoZona } from "@/components/SeoZona";
 import { cautaAnunturi, statisticiZona, type Filtre as F } from "@/lib/anunturi";
@@ -36,6 +38,7 @@ export default async function OrasPage({ params, searchParams }: Props) {
       <Breadcrumbs items={[{ href: `/${j.slug}`, label: j.nume }, { label: o.nume }]} />
       <h1>Imobiliare {o.nume}</h1>
       <Filtre valori={sp} action={`/${j.slug}/${o.slug}`} />
+      <SalveazaCautarea filtre={curataFiltre({ ...sp, judet: j.slug, oras: o.slug })} />
       <ListaAnunturi anunturi={anunturi} total={total} />
       <SeoZona
         loc={o.nume}

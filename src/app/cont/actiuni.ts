@@ -82,7 +82,8 @@ export async function autentificare(_: Stare, f: FormData): Promise<Stare> {
   const ok = u?.parolaHash && (await bcrypt.compare(String(f.get("parola") ?? ""), u.parolaHash));
   if (!u || !ok) return esec("Email sau parolă greșită.", f);
   await deschideSesiune(u.id);
-  redirect("/cont");
+  const inapoi = text(f, "inapoi");
+  redirect(inapoi.startsWith("/") && !inapoi.startsWith("//") ? inapoi : "/cont");
 }
 
 export async function deconectare() {

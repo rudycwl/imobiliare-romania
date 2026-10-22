@@ -9,6 +9,8 @@ export function MeniuCont({ agentie, admin }: { agentie: boolean; admin: boolean
   const cale = usePathname();
   const legaturi = [
     { href: "/cont", text: "Anunțurile mele" },
+    { href: "/cont/favorite", text: "♥ Favorite" },
+    { href: "/cont/cautari", text: "🔔 Căutări salvate" },
     { href: "/cont/plati", text: "Plăți și facturi" },
     ...(agentie ? [{ href: "/cont/abonament", text: "Abonament" }] : []),
     { href: "/cont/recomanda", text: "Recomandă CheiaMea" },

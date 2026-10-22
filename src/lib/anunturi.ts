@@ -111,6 +111,22 @@ export async function numarAnunturi(judet?: string): Promise<Record<string, numb
   return Object.fromEntries(r.map((x) => ["oras" in x ? x.oras : x.judet, x._count]));
 }
 
+/** Câte anunțuri publice se potrivesc filtrelor; cu `dupa`, doar cele publicate de atunci încoace. */
+export function numarPotriviri(f: Filtre, dupa?: Date) {
+  return db.anunt.count({ where: { AND: [unde(f), dupa ? { publicatLa: { gt: dupa } } : {}] } });
+}
+
+/** Anunțurile favorite ale unui utilizator, cele mai recent salvate primele (inclusiv cele expirate). */
+export async function anunturiFavorite(utilizatorId: string) {
+  const f = await db.favorit.findMany({
+    where: { utilizatorId },
+    orderBy: { creatLa: "desc" },
+    include: { anunt: { include: cuProprietar } },
+  });
+  const acum = new Date();
+  return f.map((x) => laAnunt(x.anunt, acum));
+}
+
 export type AnuntNou = Omit<Anunt, "id" | "publicatLa" | "expiraLa" | "imagine" | "proprietarId">;
 
 const peste = (zile: number) => new Date(Date.now() + zile * 864e5);
