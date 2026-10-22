@@ -202,3 +202,15 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .subsol-plati .netopia { font-weight: 800; color: #0b6bcb; }
 .subsol-plati .carduri { font-weight: 700; letter-spacing: .03em; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; }
 .subsol p { margin: 0; }
+
+/* Plată */
+.rezumat-plata { display: grid; gap: 4px; margin-bottom: 16px; }
+.rezumat-plata p { margin: 0; }
+.card-body p.pret-mare-plata { font-size: 1.8rem; font-weight: 800; color: #c2410c; }
+.abonamente .abonament { display: grid; gap: 8px; align-content: start; }
+.abonamente .abonament h2 { margin: 0; }
+.abonamente .abonament p { margin: 0; }
+.abonamente .abonament.recomandat { border: 2px solid #f97316; }
+.abonamente .pret { font-weight: 800; color: #c2410c; font-size: 1.2rem; }
+.pret-vechi { text-decoration: line-through; color: var(--muted); margin-right: 6px; font-weight: 400; font-size: .9em; }
+.buton-contur-inchis { background: transparent !important; color: var(--accent) !important; border: 1px solid var(--accent); text-align: center; }

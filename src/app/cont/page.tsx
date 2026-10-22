@@ -87,10 +87,10 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
             <>
               Abonament <strong>{plan.nume}</strong>
               {rec?.abonamentPanaLa && rec.abonamentPanaLa > acum ? <> până la {formatData(rec.abonamentPanaLa)}</> : <> (perioada gratuită)</>}
-              {" · "}Credite luna aceasta: {cr.reactualizari} reactualizări, {cr.top} × Top în oraș 7 zile
+              {" · "}Credite luna aceasta: {cr.reactualizari} reactualizări, {cr.top} × Top în oraș 7 zile · <Link href="/cont/abonament">Gestionează</Link>
             </>
           ) : (
-            <>Nu ai un abonament activ. Vezi <Link href="/pentru-agentii#abonamente">abonamentele pentru agenții</Link>.</>
+            <>Nu ai un abonament activ. <Link href="/cont/abonament">Alege un abonament</Link>.</>
           )}
         </p>
       )}
