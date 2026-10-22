@@ -202,3 +202,14 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .subsol-plati .netopia { font-weight: 800; color: #0b6bcb; }
 .subsol-plati .carduri { font-weight: 700; letter-spacing: .03em; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; }
 .subsol p { margin: 0; }
+
+/* Poze */
+.galerie { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; border-radius: 12px; height: 340px; }
+.galerie img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: start; border-radius: 12px; background: var(--border); }
+@media (max-width: 760px) { .galerie { height: 240px; } }
+.poze-editare { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.poze-editare li { display: grid; gap: 6px; }
+.poze-editare img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: var(--border); }
+.incarcare-poze { display: grid; gap: 6px; justify-items: start; margin: 12px 0; }
+.incarcare-poze label.buton { cursor: pointer; }
+.buton-contur-inchis { background: transparent !important; color: var(--accent) !important; border: 1px solid var(--accent); text-align: center; }

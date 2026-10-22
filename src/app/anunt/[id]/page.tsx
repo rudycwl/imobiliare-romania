@@ -5,6 +5,8 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Vanzator } from "@/components/Vanzator";
 import { Distribuie } from "@/components/Distribuie";
 import { getAnunt } from "@/lib/anunturi";
+import { pozeAnunt } from "@/lib/poze";
+import { urlPublic } from "@/lib/stocare";
 import { formatPret, TIPURI, TRANZACTII } from "@/lib/etichete";
 import { getJudet, getOras } from "@/lib/geo";
 
@@ -32,6 +34,7 @@ export default async function AnuntPage({ params }: Props) {
   const j = getJudet(a.judet)!;
   const o = getOras(a.judet, a.oras)!;
   const u = a.proprietar;
+  const poze = await pozeAnunt(a.id);
   return (
     <>
       <Breadcrumbs
@@ -47,9 +50,18 @@ export default async function AnuntPage({ params }: Props) {
         </p>
       )}
       <div className="anunt">
-        <div className="anunt-img" style={{ background: a.imagine }}>
-          <span>{TIPURI[a.tip]}</span>
-        </div>
+        {poze.length ? (
+          <div className="galerie" aria-label="Pozele anunțului">
+            {poze.map((p, i) => (
+              // eslint-disable-next-line @next/next/no-img-element -- pozele vin direct din stocare, nu prin Netlify
+              <img key={p.id} src={urlPublic(p.cheie)} alt={`${a.titlu}, poza ${i + 1} din ${poze.length}`} loading={i ? "lazy" : "eager"} />
+            ))}
+          </div>
+        ) : (
+          <div className="anunt-img" style={{ background: a.imagine }}>
+            <span>{TIPURI[a.tip]}</span>
+          </div>
+        )}
         <div>
           <h1>{a.titlu}</h1>
           <div className="pret mare">{formatPret(a)}</div>

@@ -122,7 +122,7 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   // Paginile cache-uite (ISR) arată anunțul nou imediat, nu după expirare.
   revalidatePath("/");
   if (u.tip === "agentie") revalidatePath(`/agentii/${u.slug}`);
-  redirect(`/anunt/${a.id}`);
+  redirect(`/cont/anunt/${a.id}/poze?nou=1`);
 }
 
 const MESAJ_LIMITA = `Ai deja ${ANUNTURI_GRATUITE} anunțuri active, cât permite publicarea gratuită. Retrage un anunț vândut sau închiriat din „Contul meu” și apoi publică-l pe cel nou.`;
