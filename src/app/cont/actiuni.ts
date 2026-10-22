@@ -11,6 +11,7 @@ import { creeazaAnunt } from "@/lib/anunturi";
 import { esteTipUtilizator, slugify, TIPURI, TRANZACTII } from "@/lib/etichete";
 import { getOras } from "@/lib/geo";
 import { aplicaOfertaFondator } from "@/lib/fondatori";
+import { aplicaRecomandare } from "@/lib/atribuire";
 
 export type Stare = { eroare?: string; valori?: Record<string, string> } | undefined;
 
@@ -58,6 +59,7 @@ export async function inregistrare(_: Stare, f: FormData): Promise<Stare> {
       },
     });
     await deschideSesiune(u.id);
+    await aplicaRecomandare(u.id, tip);
     if (tip === "agentie") {
       await aplicaOfertaFondator(u.id, text(f, "cod"));
       revalidatePath("/agentii");

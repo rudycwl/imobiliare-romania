@@ -7,6 +7,10 @@ import { utilizatorCurent } from "@/lib/auth";
 import { cautaAnunturi } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
 import { formatData } from "@/lib/fondatori";
+import { db } from "@/lib/db";
+import { Distribuie } from "@/components/Distribuie";
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro";
 import { deconectare } from "./actiuni";
 
 export const metadata: Metadata = { title: "Contul meu" };
@@ -14,7 +18,12 @@ export const metadata: Metadata = { title: "Contul meu" };
 export default async function ContPage() {
   const u = await utilizatorCurent();
   if (!u) redirect("/cont/autentificare");
-  const { anunturi, total } = await cautaAnunturi({ proprietar: u.id });
+  const [{ anunturi, total }, rec] = await Promise.all([
+    cautaAnunturi({ proprietar: u.id }),
+    db.utilizator.findUnique({ where: { id: u.id }, select: { zilePromovare: true, luniBonus: true, _count: { select: { recomandari: true } } } }),
+  ]);
+  const linkRecomandare = `${SITE}/?ref=${u.slug}`;
+  const recomandari = rec?._count.recomandari ?? 0;
   return (
     <>
       <h1>Contul meu</h1>
@@ -36,6 +45,20 @@ export default async function ContPage() {
           <button type="submit" className="secundar">Ieși din cont</button>
         </form>
       </div>
+      <section className="recomandare">
+        <h2>🎁 Recomandă CheiaMea</h2>
+        <p>
+          Trimite linkul tău. La fiecare <strong>3 conturi</strong> create prin el primești <strong>7 zile de promovare gratuită</strong>
+          {u.tip === "agentie" && <>, iar pentru fiecare <strong>agenție</strong> adusă, <strong>+1 lună gratuită</strong> (maximum 6)</>}.
+        </p>
+        <input className="link-recomandare" readOnly value={linkRecomandare} aria-label="Linkul tău de recomandare" />
+        <Distribuie url={linkRecomandare} text="Uite CheiaMea, anunțuri imobiliare din toată țara, publicare gratuită pentru proprietari:" />
+        <p className="muted small">
+          Conturi aduse: {recomandari} · Zile de promovare câștigate: {rec?.zilePromovare ?? 0}
+          {u.tip === "agentie" && ` · Luni gratuite primite: ${rec?.luniBonus ?? 0} din 6`}
+        </p>
+      </section>
+
       <h2>Anunțurile mele</h2>
       {total ? <ListaAnunturi anunturi={anunturi} total={total} /> : <p className="muted">Nu ai publicat încă niciun anunț.</p>}
     </>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Atribuire } from "@/components/Atribuire";
 import "./globals.css";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro";
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ro">
       <body>
+        <Atribuire />
         <header className="header">
           <div className="container header-inner">
             <Link href="/" className="logo">
