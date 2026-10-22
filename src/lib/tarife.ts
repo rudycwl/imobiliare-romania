@@ -71,3 +71,8 @@ export function getPromovare(cod: string | null | undefined) {
 export function lei(suma: number) {
   return `${suma.toLocaleString("ro-RO")} lei`;
 }
+
+/** Prețul unei promovări; agențiile abonate au reducere, rotunjit în sus la leu. */
+export function pretPromovare(p: Promovare, abonat = false) {
+  return abonat ? Math.ceil(p.pret * (1 - REDUCERE_PROMOVARI_ABONATI)) : p.pret;
+}

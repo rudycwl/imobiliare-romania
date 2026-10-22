@@ -182,3 +182,12 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .anunturile-mele li.expirat { opacity: .7; }
 .butoane-anunt { display: flex; gap: 8px; flex-wrap: wrap; }
 .stare-expirat { color: #b91c1c; font-weight: 600; }
+
+/* Promovări */
+.card.evidentiat { border: 2px solid #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,.15); }
+.eticheta-promo { display: inline-block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: #fff; background: #f97316; padding: 2px 8px; border-radius: 99px; margin-bottom: 4px; }
+.promo-activa { color: #c2410c; }
+.abonament-stare { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+.lista-promovari { list-style: none; padding: 0; display: grid; gap: 10px; }
+.lista-promovari li { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.lista-promovari .pret-vechi { text-decoration: line-through; color: var(--muted); margin-right: 6px; font-weight: 400; }

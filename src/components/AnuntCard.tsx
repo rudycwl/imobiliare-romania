@@ -8,12 +8,13 @@ export function AnuntCard({ a }: { a: AnuntCuProprietar }) {
   const judet = getJudet(a.judet);
   const u = a.proprietar;
   return (
-    <Link href={`/anunt/${a.id}`} className="card">
+    <Link href={`/anunt/${a.id}`} className={a.evidentiat ? "card evidentiat" : "card"}>
       <div className="card-img" style={{ background: a.imagine }}>
         <span>{TIPURI[a.tip]}</span>
         <span className={`badge badge-${u.tip}`}>{u.fondator ? "⭐ " : ""}{TIPURI_UTILIZATOR[u.tip]}</span>
       </div>
       <div className="card-body">
+        {(a.promovat || a.evidentiat) && <span className="eticheta-promo">{a.promovat ? "Promovat" : "Evidențiat"}</span>}
         <div className="pret">{formatPret(a)}</div>
         <h3>{a.titlu}</h3>
         <p className="muted">
