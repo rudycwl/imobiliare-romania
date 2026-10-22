@@ -19,7 +19,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="header">
           <div className="container header-inner">
             <Link href="/" className="logo">
-              🔑 Cheia<span className="logo-accent">Mea</span>
+              <svg className="logo-icon" viewBox="0 0 80 80" aria-hidden="true">
+                <rect width="80" height="80" rx="20" fill="#0B2545" />
+                <path d="M40 16 L64 36 V64 H16 V36 Z" fill="#F97316" stroke="#F97316" strokeWidth="4" strokeLinejoin="round" />
+                <circle cx="40" cy="42" r="7" fill="#0B2545" />
+                <path d="M36.5 45 h7 l2.5 12 h-12 z" fill="#0B2545" />
+              </svg>
+              <span>Cheia<span className="logo-accent">Mea</span></span>
             </Link>
             <nav>
               <Link href="/cautare">Caută</Link>
