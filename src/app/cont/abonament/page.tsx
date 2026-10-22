@@ -5,6 +5,7 @@ import { utilizatorCurent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { abonamentActiv } from "@/lib/abonamente";
 import { formatData } from "@/lib/fondatori";
+import { CadruCont } from "../CadruCont";
 import { ABONAMENTE, LUNI_PLATITE_PE_AN, lei, pretAnual, pretLunar } from "@/lib/tarife";
 
 export const metadata: Metadata = { title: "Abonamentul agenției", robots: { index: false } };
@@ -18,7 +19,7 @@ export default async function AbonamentPage() {
   const activ = abonamentActiv(u);
   const gratuit = u.gratuitPanaLa && u.gratuitPanaLa > acum;
   return (
-    <>
+    <CadruCont u={s}>
       <h1>Abonamentul agenției</h1>
       {u.abonamentPanaLa && u.abonamentPanaLa > acum ? (
         <p className="succes">Ai abonamentul <strong>{activ?.nume}</strong> până la {formatData(u.abonamentPanaLa)}. Dacă plătești din nou același abonament, perioada se adaugă.</p>
@@ -51,6 +52,6 @@ export default async function AbonamentPage() {
         ))}
       </div>
       <p className="muted small">Prețuri cu TVA inclus. Abonamentul nu se reînnoiește automat. Vezi <Link href="/termeni">Termenii și condițiile</Link>.</p>
-    </>
+    </CadruCont>
   );
 }

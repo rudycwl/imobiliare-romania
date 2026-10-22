@@ -236,3 +236,38 @@ button.secundar, .buton.secundar { background: transparent; color: var(--accent)
 .preturi-ascunse { display: grid; gap: 8px; margin: 12px 0 20px; }
 .preturi-ascunse p { margin: 0; }
 .actiuni-proprietar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; padding: 10px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
+
+/* ---------- Contul meu: meniu, file, statistici ---------- */
+.cadru-cont { display: grid; grid-template-columns: 220px 1fr; gap: 28px; align-items: start; }
+.continut-cont { min-width: 0; }
+.continut-cont > h1:first-child { margin-top: 0; }
+.meniu-cont { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 2px; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
+.meniu-cont > .buton { text-align: center; margin-bottom: 8px; }
+.meniu-cont > a:not(.buton), .meniu-cont button.link { display: block; padding: 9px 12px; border-radius: 8px; color: var(--fg); text-decoration: none; text-align: left; }
+.meniu-cont > a:not(.buton):hover, .meniu-cont button.link:hover { background: var(--border); }
+.meniu-cont > a[aria-current="page"] { background: var(--accent); color: #fff; font-weight: 600; }
+.meniu-cont form { margin: 6px 0 0; border-top: 1px solid var(--border); padding-top: 6px; }
+.meniu-cont button.link { width: 100%; background: none; border: 0; font: inherit; cursor: pointer; color: var(--muted, inherit); }
+@media (max-width: 760px) {
+  .cadru-cont { grid-template-columns: 1fr; gap: 16px; }
+  .meniu-cont { position: static; flex-direction: row; overflow-x: auto; white-space: nowrap; padding: 8px; gap: 4px; }
+  .meniu-cont > .buton { display: none; }
+  .meniu-cont form { margin: 0; border: 0; padding: 0; }
+}
+.cifre-cont { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0 20px; }
+.cifre-cont > div { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.cifre-cont strong { display: block; font-size: 1.6rem; line-height: 1.2; }
+.file-cont { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin: 8px 0 12px; }
+.file-cont a { padding: 8px 14px; border-radius: 8px 8px 0 0; color: var(--fg); text-decoration: none; border: 1px solid transparent; border-bottom: 0; margin-bottom: -1px; }
+.file-cont a[aria-current="page"] { background: var(--card); border-color: var(--border); font-weight: 600; }
+.file-cont .numar { display: inline-block; min-width: 1.6em; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: var(--border); font-size: .8rem; text-align: center; }
+.anunturile-mele .mini { width: 72px; height: 54px; border-radius: 8px; flex: 0 0 auto; }
+.anunturile-mele .info-anunt { display: flex; gap: 12px; align-items: center; min-width: 0; flex: 1 1 320px; }
+.statistici-anunt { color: var(--muted, inherit); }
+.recomandare-mica { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 24px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--card); border: 1px solid var(--border); }
+.zona-periculoasa { border: 1px solid #fca5a5; border-radius: 12px; padding: 16px; margin-top: 32px; }
+button.pericol { background: #b91c1c; color: #fff; border-color: #b91c1c; }
+.tabel-plati { width: 100%; border-collapse: collapse; }
+.tabel-plati th, .tabel-plati td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+@media (max-width: 560px) { .tabel-plati thead { display: none; } .tabel-plati tr { display: block; padding: 8px 0; border-bottom: 1px solid var(--border); } .tabel-plati td { display: block; border: 0; padding: 2px 0; } }
+.setari-cont { max-width: 640px; }

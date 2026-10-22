@@ -11,6 +11,7 @@ import { formatPret, TIPURI, TRANZACTII } from "@/lib/etichete";
 import { getJudet, getOras } from "@/lib/geo";
 import { Raporteaza } from "./Raporteaza";
 import { ActiuniProprietar } from "./ActiuniProprietar";
+import { ButonTelefon, Vizualizare } from "./Statistica";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -65,6 +66,7 @@ export default async function AnuntPage({ params }: Props) {
         </p>
       )}
       <ActiuniProprietar id={a.id} activ={a.expiraLa > new Date()} />
+      <Vizualizare id={a.id} />
       <div className="anunt">
         {poze.length ? (
           <div className="galerie" aria-label="Pozele anunțului">
@@ -95,7 +97,7 @@ export default async function AnuntPage({ params }: Props) {
           </table>
           <p>{a.descriere}</p>
           <Vanzator u={u} />
-          <a className="buton" href={`tel:${u.telefon}`}>Sună {u.telefon.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3")}</a>
+          <ButonTelefon id={a.id} telefon={u.telefon} />
           <Distribuie url={`${SITE}/anunt/${a.id}`} text={`${a.titlu} – ${formatPret(a)} pe CheiaMea`} />
           <Raporteaza id={a.id} />
         </div>

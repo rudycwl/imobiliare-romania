@@ -21,13 +21,13 @@ export function laUtilizator(u: UtilizatorDb): Utilizator {
 }
 
 export async function getAgentie(slug: string) {
-  const u = await db.utilizator.findFirst({ where: { slug, tip: "agentie" } });
+  const u = await db.utilizator.findFirst({ where: { slug, tip: "agentie", stersLa: null } });
   return u && laUtilizator(u);
 }
 
 export async function getAgentii(judet?: string) {
   const lista = await db.utilizator.findMany({
-    where: { tip: "agentie", judet },
+    where: { tip: "agentie", judet, stersLa: null },
     orderBy: { nume: "asc" },
     include: { _count: { select: { anunturi: { where: { expiraLa: { gt: new Date() } } } } } },
   });
