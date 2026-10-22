@@ -55,8 +55,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </nav>
             <div className="subsol-plati">
               <span>Plăți securizate cu cardul prin</span>
-              <a href="https://netopia-payments.com" target="_blank" rel="noopener noreferrer" className="netopia">NETOPIA Payments</a>
-              <span className="carduri" aria-label="Visa și Mastercard">VISA · Mastercard</span>
+              <a href="https://netopia-payments.com" target="_blank" rel="noopener noreferrer" className="netopia">
+                {/* Sigla oficială din contul NETOPIA → Identitate vizuală (id-ul e al punctului de vânzare CheiaMea). */}
+                <picture>
+                  <source media="(prefers-color-scheme: dark)" srcSet="https://mny.ro/np-white-0.svg?id=170227" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="https://mny.ro/np-black-0.svg?id=170227" alt="NETOPIA Payments" width={160} height={32} />
+                </picture>
+              </a>
               <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener noreferrer">ANPC – SAL</a>
             </div>
             <p className="small">
