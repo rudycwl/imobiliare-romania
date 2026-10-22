@@ -155,3 +155,50 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .recomandare { margin: 24px 0; padding: 18px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); }
 .recomandare h2 { margin-top: 0; }
 .link-recomandare { width: 100%; padding: 10px; border: 1px dashed #f97316; border-radius: 8px; background: var(--bg); color: var(--fg); font: inherit; }
+
+/* Prețuri */
+.tabel-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--card); margin: 12px 0; }
+.tabel-preturi { border-collapse: collapse; width: 100%; min-width: 560px; font-variant-numeric: tabular-nums; }
+.tabel-preturi th, .tabel-preturi td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.tabel-preturi th { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+.tabel-preturi tr:last-child td { border-bottom: 0; }
+.tabel-preturi .num { text-align: right; white-space: nowrap; }
+.tabel-preturi tr.recomandat td { background: #fff7ed; }
+.tabel-preturi .pret { font-weight: 800; color: #c2410c; }
+.eticheta-recomandat { margin-left: 8px; font-size: .7rem; font-weight: 700; background: #c2410c; color: #fff; padding: 2px 8px; border-radius: 99px; }
+.gratuit { max-width: 520px; display: grid; gap: 10px; justify-items: start; }
+.card-body.gratuit p { font-size: 1rem; }
+.card-body p.pret-mare { font-size: 2.2rem; font-weight: 800; color: #15803d; margin: 0; }
+.mic { font-size: .85rem; }
+@media (prefers-color-scheme: dark) {
+  .tabel-preturi tr.recomandat td { background: #2a1c10; }
+  .tabel-preturi .pret { color: #fb923c; }
+  .card-body p.pret-mare { color: #4ade80; }
+}
+
+/* Anunțurile mele */
+.anunturile-mele { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
+.anunturile-mele li { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+.anunturile-mele li.expirat { opacity: .7; }
+.butoane-anunt { display: flex; gap: 8px; flex-wrap: wrap; }
+.stare-expirat { color: #b91c1c; font-weight: 600; }
+
+/* Promovări */
+.card.evidentiat { border: 2px solid #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,.15); }
+.eticheta-promo { display: inline-block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: #fff; background: #f97316; padding: 2px 8px; border-radius: 99px; margin-bottom: 4px; }
+.promo-activa { color: #c2410c; }
+.abonament-stare { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+.lista-promovari { list-style: none; padding: 0; display: grid; gap: 10px; }
+.lista-promovari li { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.lista-promovari .pret-vechi { text-decoration: line-through; color: var(--muted); margin-right: 6px; font-weight: 400; }
+
+/* Pagini legale și subsol */
+.legal { max-width: 760px; }
+.legal h2 { margin-top: 28px; font-size: 1.15rem; }
+.legal li { margin: 6px 0; }
+.subsol { display: grid; gap: 12px; }
+.subsol-linkuri { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.subsol-plati { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: .85rem; }
+.subsol-plati .netopia { font-weight: 800; color: #0b6bcb; }
+.subsol-plati .carduri { font-weight: 700; letter-spacing: .03em; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; }
+.subsol p { margin: 0; }

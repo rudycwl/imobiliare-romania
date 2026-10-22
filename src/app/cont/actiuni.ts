@@ -7,7 +7,8 @@ import { randomBytes } from "crypto";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { deschideSesiune, inchideSesiune, utilizatorCurent } from "@/lib/auth";
-import { creeazaAnunt } from "@/lib/anunturi";
+import { creeazaAnunt, poatePublica, prelungesteAnunt, retrageAnunt } from "@/lib/anunturi";
+import { ANUNTURI_GRATUITE } from "@/lib/tarife";
 import { esteTipUtilizator, slugify, TIPURI, TRANZACTII } from "@/lib/etichete";
 import { getOras } from "@/lib/geo";
 import { aplicaOfertaFondator } from "@/lib/fondatori";
@@ -104,6 +105,7 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   if (titlu.length < 10) return esec("Titlul trebuie să aibă cel puțin 10 caractere.", f);
   if (!(pret > 0) || !(suprafata > 0)) return esec("Prețul și suprafața trebuie să fie pozitive.", f);
   if (!getOras(judet, oras)) return esec("Alege județul și orașul.", f);
+  if (!(await poatePublica(u))) return esec(MESAJ_LIMITA, f);
 
   const a = await creeazaAnunt(u.id, {
     titlu,
@@ -121,4 +123,39 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   revalidatePath("/");
   if (u.tip === "agentie") revalidatePath(`/agentii/${u.slug}`);
   redirect(`/anunt/${a.id}`);
+}
+
+const MESAJ_LIMITA = `Ai deja ${ANUNTURI_GRATUITE} anunțuri active, cât permite publicarea gratuită. Retrage un anunț vândut sau închiriat din „Contul meu” și apoi publică-l pe cel nou.`;
+
+async function proprietarSiId(f: FormData) {
+  const u = await utilizatorCurent();
+  if (!u) redirect("/cont/autentificare");
+  const id = Number(f.get("id"));
+  if (!Number.isInteger(id)) redirect("/cont");
+  return { u, id };
+}
+
+function dupaSchimbare(u: { tip: string; slug: string }, id: number) {
+  revalidatePath("/");
+  revalidatePath(`/anunt/${id}`);
+  if (u.tip === "agentie") revalidatePath(`/agentii/${u.slug}`);
+  redirect("/cont#anunturile-mele");
+}
+
+/** „Retrage” din „Contul meu”: anunțul dispare de pe site. */
+export async function retrage(f: FormData) {
+  const { u, id } = await proprietarSiId(f);
+  await retrageAnunt(id, u.id);
+  dupaSchimbare(u, id);
+}
+
+/** „Prelungește” / „Reactivează” din „Contul meu”. Eroarea ajunge în pagină prin ?eroare=. */
+export async function prelungeste(f: FormData) {
+  const { u, id } = await proprietarSiId(f);
+  const a = await db.anunt.findFirst({ where: { id, proprietarId: u.id }, select: { expiraLa: true } });
+  if (!a) redirect("/cont");
+  // Un anunț expirat redevine activ, deci contează la limită; unul încă activ se poate prelungi oricând.
+  if (a.expiraLa <= new Date() && !(await poatePublica(u))) redirect("/cont?eroare=limita#anunturile-mele");
+  await prelungesteAnunt(id, u.id);
+  dupaSchimbare(u, id);
 }

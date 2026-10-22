@@ -9,70 +9,90 @@ datasource db {
 
 /// tip: "persoana-fizica" | "firma" | "agentie" (validat în aplicație, vezi TipUtilizator)
 model Utilizator {
-  id             String            @id @default(cuid())
-  slug           String            @unique
-  tip            String
+  id                   String            @id @default(cuid())
+  slug                 String            @unique
+  tip                  String
   /// Persoană fizică: numele complet. Firmă/agenție: denumirea.
-  nume           String
+  nume                 String
   /// Persoana de contact, doar pentru firme și agenții.
-  contact        String?
-  email          String?           @unique
-  parolaHash     String?
-  telefon        String
-  judet          String
-  oras           String
-  cui            String?
+  contact              String?
+  email                String?           @unique
+  parolaHash           String?
+  telefon              String
+  judet                String
+  oras                 String
+  cui                  String?
   /// Nr. Registrul Comerțului, pentru facturile firmelor și agențiilor.
-  regCom         String?
+  regCom               String?
   /// Adresa de facturare (stradă, număr), obligatorie pe e-Factura pentru firme.
-  adresa         String?
-  culoare        String            @default("#0b6bcb")
-  creatLa        DateTime          @default(now())
+  adresa               String?
+  culoare              String            @default("#0b6bcb")
+  creatLa              DateTime          @default(now())
   /// Agenție Fondatoare: una din primele 100 de agenții înscrise până la 31.12.2026.
-  fondator       Boolean           @default(false)
+  fondator             Boolean           @default(false)
   /// Până când abonamentul de agenție e gratuit (6 luni pentru fondatori).
-  gratuitPanaLa  DateTime?
+  gratuitPanaLa        DateTime?
   /// Cine l-a recomandat (link ?ref=slug).
-  recomandatDeId String?
-  recomandatDe   Utilizator?       @relation("Recomandari", fields: [recomandatDeId], references: [id], onDelete: SetNull)
-  recomandari    Utilizator[]      @relation("Recomandari")
+  recomandatDeId       String?
+  recomandatDe         Utilizator?       @relation("Recomandari", fields: [recomandatDeId], references: [id], onDelete: SetNull)
+  recomandari          Utilizator[]      @relation("Recomandari")
   /// Zile de promovare câștigate (7 zile la fiecare 3 recomandări).
-  zilePromovare  Int               @default(0)
+  zilePromovare        Int               @default(0)
   /// Luni gratuite primite pentru agenții aduse (maximum 6).
-  luniBonus      Int               @default(0)
+  luniBonus            Int               @default(0)
   /// De unde a venit la înscriere (utm_source, recomandare, site de proveniență sau direct).
-  sursa          String?
-  anunturi       Anunt[]
-  sesiuni        Sesiune[]
-  invitatie      InvitatieAgentie?
-  facturi        Factura[]
+  sursa                String?
+  /// Abonamentul de agenție plătit (start | pro | business | nelimitat), activ până la abonamentPanaLa.
+  abonament            String?
+  abonamentPanaLa      DateTime?
+  plataAnuala          Boolean           @default(false)
+  /// Credite de promovare rămase luna aceasta; se reîncarcă la crediteReincarcareLa.
+  creditReactualizari  Int               @default(0)
+  creditTop            Int               @default(0)
+  crediteReincarcareLa DateTime?
+  anunturi             Anunt[]
+  sesiuni              Sesiune[]
+  invitatie            InvitatieAgentie?
+  facturi              Factura[]
 
   @@index([tip, judet])
 }
 
 model Anunt {
-  id           Int        @id @default(autoincrement())
-  titlu        String
-  descriere    String
+  id                  Int        @id @default(autoincrement())
+  titlu               String
+  descriere           String
   /// apartament | casa | teren | spatiu-comercial
-  tip          String
+  tip                 String
   /// vanzare | inchiriere
-  tranzactie   String
+  tranzactie          String
   /// Euro; pentru închiriere, pe lună.
-  pret         Int
-  suprafata    Int
-  camere       Int?
-  judet        String
-  oras         String
-  zona         String
-  imagine      String
-  publicatLa   DateTime   @default(now())
-  proprietarId String
-  proprietar   Utilizator @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
+  pret                Int
+  suprafata           Int
+  camere              Int?
+  judet               String
+  oras                String
+  zona                String
+  imagine             String
+  publicatLa          DateTime   @default(now())
+  /// Anunțul e public cât timp expiraLa e în viitor (60 de zile, cu prelungire).
+  expiraLa            DateTime   @default(dbgenerated("(now() + '60 days'::interval)"))
+  /// Cheia de ordonare în liste: data publicării sau a ultimei reactualizări.
+  ordine              DateTime   @default(now())
+  /// Promovări active până la data respectivă.
+  evidentiatPanaLa    DateTime?
+  topPanaLa           DateTime?
+  primaPaginaPanaLa   DateTime?
+  /// Pachetul „Vânzare rapidă”: reactualizări automate, una pe săptămână.
+  reactualizariRamase Int        @default(0)
+  urmReactualizare    DateTime?
+  proprietarId        String
+  proprietar          Utilizator @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
 
   @@index([judet, oras, publicatLa])
+  @@index([judet, oras, ordine])
   @@index([tranzactie, tip, pret])
-  @@index([proprietarId])
+  @@index([proprietarId, expiraLa])
 }
 
 model Sesiune {
@@ -115,34 +135,34 @@ model Vizita {
 /// Seria și numărul le dă programul de facturare (Oblio), care ține numerotarea continuă
 /// și trimite factura în e-Factura (SPV). Aici păstrăm evidența și legătura cu plata.
 model Factura {
-  id             Int        @id @default(autoincrement())
-  creatLa        DateTime   @default(now())
+  id           Int         @id @default(autoincrement())
+  creatLa      DateTime    @default(now())
   /// factura | storno
-  tip            String     @default("factura")
+  tip          String      @default("factura")
   /// in-asteptare (neemisă încă) | emisa | eroare | stornata
-  stare          String     @default("in-asteptare")
+  stare        String      @default("in-asteptare")
   /// Referința plății (comanda Netopia); una singură per plată, ca să nu facturăm de două ori.
-  plataRef       String?    @unique
-  utilizatorId   String?
-  utilizator     Utilizator? @relation(fields: [utilizatorId], references: [id], onDelete: SetNull)
+  plataRef     String?     @unique
+  utilizatorId String?
+  utilizator   Utilizator? @relation(fields: [utilizatorId], references: [id], onDelete: SetNull)
   /// Datele cumpărătorului la momentul facturării (nume, cui, regCom, adresa, judet, oras, email).
-  cumparator     Json
+  cumparator   Json
   /// Liniile facturii: [{ denumire, pretBani, cantitate }], prețuri cu TVA inclus.
-  produse        Json
+  produse      Json
   /// Total cu TVA, în bani (1 leu = 100 bani).
-  totalBani      Int
-  cotaTva        Int        @default(0)
-  seria          String?
-  numar          String?
-  emisaLa        DateTime?
-  linkPdf        String?
+  totalBani    Int
+  cotaTva      Int         @default(0)
+  seria        String?
+  numar        String?
+  emisaLa      DateTime?
+  linkPdf      String?
   /// netrimisa | in-prelucrare | trimisa | eroare
-  eFactura       String?
-  eroare         String?
+  eFactura     String?
+  eroare       String?
   /// Pentru storno: factura stornată.
-  referintaId    Int?
-  referinta      Factura?   @relation("Stornari", fields: [referintaId], references: [id], onDelete: Restrict)
-  stornari       Factura[]  @relation("Stornari")
+  referintaId  Int?
+  referinta    Factura?    @relation("Stornari", fields: [referintaId], references: [id], onDelete: Restrict)
+  stornari     Factura[]   @relation("Stornari")
 
   @@unique([seria, numar])
   @@index([creatLa])
