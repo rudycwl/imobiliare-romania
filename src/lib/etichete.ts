@@ -5,6 +5,8 @@ export const TIPURI: Record<TipProprietate, string> = {
   casa: "Casă / vilă",
   teren: "Teren",
   "spatiu-comercial": "Spațiu comercial",
+  birouri: "Spații birouri",
+  depozit: "Depozit",
 };
 
 export const TRANZACTII: Record<Tranzactie, string> = {

@@ -105,7 +105,7 @@ export function extrageAnunt(html: string, url: URL): AnuntImportat {
   else if (/garsonier/i.test(text)) r.camere = "1";
 
   const t = slugify(text + " " + url.pathname);
-  r.tip = /teren/.test(t) ? "teren" : /\b(casa|case|vila)\b|casa-|vila-/.test(t) ? "casa" : /spatiu|comercial|birou/.test(t) ? "spatiu-comercial" : "apartament";
+  r.tip = /teren/.test(t) ? "teren" : /\b(casa|case|vila)\b|casa-|vila-/.test(t) ? "casa" : /birou/.test(t) ? "birouri" : /depozit|hala|hale/.test(t) ? "depozit" : /spatiu|comercial/.test(t) ? "spatiu-comercial" : "apartament";
   r.tranzactie = /inchiri|chirie|de-inchiriat/.test(t) ? "inchiriere" : "vanzare";
 
   const adresa = produs?.address as Record<string, unknown> | undefined;
