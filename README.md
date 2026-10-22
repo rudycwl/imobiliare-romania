@@ -45,6 +45,13 @@ npm run dev             # http://localhost:3000
 Filtrele (tranzacție, tip, preț, camere, tip vânzător, sortare) sunt parametri în URL, deci orice căutare poate fi partajată.
 Paginile de județ, oraș și agenție sunt pre-generate static (SEO + viteză). `sitemap.xml` și `robots.txt` sunt generate automat; setează `NEXT_PUBLIC_SITE_URL` în producție.
 
+## Punere online (Vercel + Neon)
+
+1. Creează o bază de date pe [neon.tech](https://neon.tech) (regiunea Frankfurt) și copiază connection string-ul.
+2. Importă repository-ul în [Vercel](https://vercel.com/new). La *Environment Variables* adaugă `DATABASE_URL` (de la Neon) și `NEXT_PUBLIC_SITE_URL=https://cheiamea.ro`.
+3. Vercel rulează automat `vercel-build` (aplică migrările, apoi build-ul). Date demo, opțional: `DATABASE_URL=... npm run db:seed`.
+4. În Vercel → *Domains* adaugă `cheiamea.ro` și `www.cheiamea.ro`, apoi setează la registrar înregistrările DNS afișate de Vercel.
+
 ## Pașii următori
 
 1. Fotografii la anunțuri (stocare S3 / Vercel Blob) și editare / ștergere anunțuri.
