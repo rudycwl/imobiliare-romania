@@ -87,9 +87,15 @@ model Anunt {
   /// Pachetul „Vânzare rapidă”: reactualizări automate, una pe săptămână.
   reactualizariRamase Int        @default(0)
   urmReactualizare    DateTime?
+  /// ok | verificare | respins. Doar „ok” apare pe site.
+  moderare            String     @default("ok")
+  /// De ce a fost oprit (filtrul automat sau administratorul).
+  motivModerare       String?
+  raportari           Raportare[]
   proprietarId        String
   proprietar          Utilizator @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
 
+  @@index([moderare])
   @@index([judet, oras, publicatLa])
   @@index([judet, oras, ordine])
   @@index([tranzactie, tip, pret])
@@ -195,4 +201,20 @@ model Comanda {
   stareNetopia Int?
 
   @@index([utilizatorId, creatLa])
+}
+
+/// „Raportează anunțul”, trimis de vizitatori. O singură raportare per anunț și vizitator.
+model Raportare {
+  id       Int      @id @default(autoincrement())
+  anuntId  Int
+  anunt    Anunt    @relation(fields: [anuntId], references: [id], onDelete: Cascade)
+  motiv    String
+  detalii  String?
+  /// Hash din IP + browser, ca același vizitator să nu raporteze de mai multe ori.
+  amprenta String
+  rezolvat Boolean  @default(false)
+  creatLa  DateTime @default(now())
+
+  @@unique([anuntId, amprenta])
+  @@index([rezolvat])
 }

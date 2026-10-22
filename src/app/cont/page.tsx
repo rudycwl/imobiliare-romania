@@ -5,7 +5,7 @@ import { Vanzator } from "@/components/Vanzator";
 import { utilizatorCurent } from "@/lib/auth";
 import { cautaAnunturi } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
-import { formatData } from "@/lib/fondatori";
+import { esteAdmin, formatData } from "@/lib/fondatori";
 import { db } from "@/lib/db";
 import { Distribuie } from "@/components/Distribuie";
 
@@ -62,6 +62,7 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
       <div className="actiuni">
         <Link href="/cont/anunt-nou" className="buton">+ Adaugă anunț</Link>
         {u.tip === "agentie" && <Link href={`/agentii/${u.slug}`}>Vezi profilul public al agenției</Link>}
+        {esteAdmin(u.email) && <Link href="/admin/moderare">Moderare anunțuri</Link>}
         <form action={deconectare}>
           <button type="submit" className="secundar">Ieși din cont</button>
         </form>
@@ -109,16 +110,24 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
                   <Link href={`/anunt/${a.id}`}><strong>{a.titlu}</strong></Link>
                   <span className="muted small"> · {formatPret(a)}</span>
                   <div className="small">
-                    {expirat ? <span className="stare-expirat">Expirat sau retras</span> : <span className="muted">Activ până la {formatData(a.expiraLa)}</span>}
+                    {a.moderare === "respins" ? (
+                      <span className="stare-expirat">Respins de moderare: {a.motivModerare}</span>
+                    ) : a.moderare === "verificare" && !expirat ? (
+                      <span className="stare-verificare">În verificare: nu apare încă pe site. De obicei durează câteva ore.</span>
+                    ) : expirat ? (
+                      <span className="stare-expirat">Expirat sau retras</span>
+                    ) : (
+                      <span className="muted">Activ până la {formatData(a.expiraLa)}</span>
+                    )}
                     {!expirat && <EtichetePromovare a={a} acum={acum} />}
                   </div>
                 </div>
                 <form className="butoane-anunt">
                   <input type="hidden" name="id" value={a.id} />
-                  {(expirat || zile <= ZILE_AVERTIZARE) && (
+                  {a.moderare !== "respins" && (expirat || zile <= ZILE_AVERTIZARE) && (
                     <button type="submit" formAction={prelungeste}>{expirat ? "Reactivează" : `Prelungește ${ZILE_VALABILITATE} de zile`}</button>
                   )}
-                  <Link href={`/cont/anunt/${a.id}/editeaza`} className="buton secundar">Editează</Link>
+                  {a.moderare !== "respins" && <Link href={`/cont/anunt/${a.id}/editeaza`} className="buton secundar">Editează</Link>}
                   {!expirat && <Link href={`/cont/promoveaza/${a.id}`} className="buton">Promovează</Link>}
                   {!expirat && <button type="submit" formAction={retrage} className="secundar">Retrage</button>}
                 </form>
