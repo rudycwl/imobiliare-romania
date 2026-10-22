@@ -1,0 +1,4 @@
+# Găzduirea de producție (lansare). Plugin-ul Next.js e detectat automat de Netlify.
+[build]
+  command = "prisma migrate deploy && next build"
+  publish = ".next"

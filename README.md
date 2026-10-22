@@ -45,7 +45,10 @@ npm run dev             # http://localhost:3000
 Filtrele (tranzacție, tip, preț, camere, tip vânzător, sortare) sunt parametri în URL, deci orice căutare poate fi partajată.
 Paginile de județ, oraș și agenție sunt pre-generate static (SEO + viteză). `sitemap.xml` și `robots.txt` sunt generate automat; setează `NEXT_PUBLIC_SITE_URL` în producție.
 
-## Punere online (Vercel + Neon)
+## Punere online (Neon + Vercel pentru test, Netlify la lansare)
+
+Planul Hobby de pe Vercel e doar pentru uz necomercial, așa că îl folosim pentru test. La lansare, site-ul rulează pe Netlify (planul gratuit permite uz comercial). Pe Netlify pașii sunt aceiași: imporți repository-ul din GitHub și pui aceleași variabile de mediu. Build-ul e configurat în `netlify.toml`.
+
 
 1. Creează o bază de date pe [neon.tech](https://neon.tech) (regiunea Frankfurt) și copiază connection string-ul.
 2. Importă repository-ul în [Vercel](https://vercel.com/new). La *Environment Variables* adaugă `DATABASE_URL` (de la Neon) și `NEXT_PUBLIC_SITE_URL=https://cheiamea.ro`.
