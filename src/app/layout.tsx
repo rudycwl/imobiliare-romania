@@ -49,6 +49,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/termeni">Termeni și condiții</Link>
               <Link href="/confidentialitate">Confidențialitate și cookie-uri</Link>
               <Link href="/anulare-rambursare">Anulare și rambursare</Link>
+              <Link href="/livrare">Livrare</Link>
+              <Link href="/retragere">Retragere din contract</Link>
               <Link href="/contact">Contact</Link>
             </nav>
             <div className="subsol-plati">
@@ -60,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <p className="small">
               © 2026 CheiaMea · anunțuri imobiliare din toată țara · operat de {FIRMA.nume}, CUI {FIRMA.cui}, {FIRMA.regCom}, {FIRMA.sediu} ·{" "}
               <a href={`mailto:${FIRMA.email}`}>{FIRMA.email}</a>
+              {FIRMA.telefon && <> · <a href={`tel:${FIRMA.telefon.replace(/\s/g, "")}`}>{FIRMA.telefon}</a></>}
             </p>
           </div>
         </footer>

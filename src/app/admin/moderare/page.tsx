@@ -19,7 +19,7 @@ export default async function ModerarePage() {
       <h1>Moderare anunțuri</h1>
       <p className="muted">
         Aici apar anunțurile oprite de filtrul automat sau raportate de vizitatori. Cele „în verificare” nu sunt vizibile pe site
-        până nu le aprobi. · <Link href="/admin/invitatii">Invitații</Link> · <Link href="/admin/facturi">Facturi</Link>
+        până nu le aprobi. · <Link href="/admin/invitatii">Invitații</Link> · <Link href="/admin/facturi">Facturi</Link> · <Link href="/admin/retrageri">Retrageri</Link>
       </p>
       {anunturi.length === 0 && <p className="succes">Nimic de verificat acum. 👍</p>}
       {anunturi.map((a) => (
