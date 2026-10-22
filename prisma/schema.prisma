@@ -54,6 +54,7 @@ model Utilizator {
   sesiuni              Sesiune[]
   invitatie            InvitatieAgentie?
   facturi              Factura[]
+  comenzi              Comanda[]
 
   @@index([tip, judet])
 }
@@ -168,4 +169,30 @@ model Factura {
   @@index([creatLa])
   @@index([stare])
   @@index([utilizatorId])
+}
+
+/// O comandă plătită cu cardul prin NETOPIA: o promovare pe un anunț sau un abonament de agenție.
+model Comanda {
+  /// Trimis la NETOPIA ca orderID și folosit ca plataRef pe factură.
+  id           String     @id
+  creatLa      DateTime   @default(now())
+  utilizatorId String
+  utilizator   Utilizator @relation(fields: [utilizatorId], references: [id], onDelete: Cascade)
+  /// promovare | abonament
+  tip          String
+  /// Codul promovării sau al abonamentului (vezi src/lib/tarife.ts).
+  produs       String
+  anuntId      Int?
+  anual        Boolean    @default(false)
+  descriere    String
+  /// Total cu TVA, în bani.
+  sumaBani     Int
+  /// noua | platita | respinsa
+  stare        String     @default("noua")
+  ntpID        String?
+  platitaLa    DateTime?
+  /// Ultimul cod de stare primit de la NETOPIA, pentru depanare.
+  stareNetopia Int?
+
+  @@index([utilizatorId, creatLa])
 }

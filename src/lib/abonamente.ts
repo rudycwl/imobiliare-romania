@@ -30,7 +30,10 @@ export async function activeazaAbonament(utilizatorId: string, cod: string, anua
   const u = await db.utilizator.findUniqueOrThrow({ where: { id: utilizatorId } });
   const acum = new Date();
   // La reînnoirea aceluiași abonament, perioada se adaugă la cea rămasă; la schimbarea abonamentului începe de azi.
-  const start = u.abonament === cod && u.abonamentPanaLa && u.abonamentPanaLa > acum ? u.abonamentPanaLa : acum;
+  // Plătit în perioada gratuită (Fondatoare, luni bonus), începe după ea.
+  const reinnoire = u.abonament === cod && u.abonamentPanaLa && u.abonamentPanaLa > acum ? u.abonamentPanaLa.getTime() : 0;
+  const gratuit = u.gratuitPanaLa && u.gratuitPanaLa > acum ? u.gratuitPanaLa.getTime() : 0;
+  const start = new Date(Math.max(reinnoire, gratuit, acum.getTime()));
   await db.utilizator.update({
     where: { id: utilizatorId },
     data: {

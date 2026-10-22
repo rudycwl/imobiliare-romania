@@ -63,16 +63,17 @@ export default async function PromoveazaPage({ params, searchParams }: { params:
               <strong>{p.nume}</strong>
               <div className="muted small">{p.descriere}</div>
             </div>
-            <div>
+            <div className="butoane-anunt">
               <strong className="pret">
                 {abonat && <span className="pret-vechi">{lei(p.pret)}</span>}
                 {lei(pretPromovare(p, abonat))}
               </strong>
+              {a.expiraLa > acum && <Link href={`/cont/plata?promovare=${p.cod}&anunt=${a.id}`} className="buton">Cumpără</Link>}
             </div>
           </li>
         ))}
       </ul>
-      <p className="muted">Plata cu cardul va fi disponibilă în curând.</p>
+      <p className="muted small">Plata se face cu cardul, prin NETOPIA Payments. Prețuri cu TVA inclus.</p>
     </div>
   );
 }
