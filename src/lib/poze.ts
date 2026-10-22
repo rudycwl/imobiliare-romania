@@ -3,7 +3,7 @@ import { randomBytes } from "crypto";
 import { db } from "./db";
 import { stergeObiect, urlPublic } from "./stocare";
 
-export const MAX_POZE = 15;
+export const MAX_POZE = 10;
 /** Pozele se micșorează în browser (max 1600 px, WebP) înainte de încărcare, deci 2 MB ajung. */
 export const MAX_MARIME = 2 * 1024 * 1024;
 export const TIPURI_POZE = ["image/webp", "image/jpeg"];
