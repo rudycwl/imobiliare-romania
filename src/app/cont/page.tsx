@@ -118,6 +118,7 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
                   {(expirat || zile <= ZILE_AVERTIZARE) && (
                     <button type="submit" formAction={prelungeste}>{expirat ? "Reactivează" : `Prelungește ${ZILE_VALABILITATE} de zile`}</button>
                   )}
+                  <Link href={`/cont/anunt/${a.id}/editeaza`} className="buton secundar">Editează</Link>
                   {!expirat && <Link href={`/cont/promoveaza/${a.id}`} className="buton">Promovează</Link>}
                   {!expirat && <button type="submit" formAction={retrage} className="secundar">Retrage</button>}
                 </form>

@@ -119,6 +119,12 @@ export async function creeazaAnunt(proprietarId: string, a: AnuntNou) {
   return db.anunt.create({ data: { ...a, proprietarId, imagine: "#64748b", expiraLa: peste(ZILE_VALABILITATE) } });
 }
 
+/** Modifică un anunț propriu; întoarce false dacă anunțul nu e al lui. */
+export async function editeaza(id: number, proprietarId: string, a: AnuntNou) {
+  const r = await db.anunt.updateMany({ where: { id, proprietarId }, data: a });
+  return r.count > 0;
+}
+
 /** Câte anunțuri active poate avea un cont; null = fără limită (abonamentul Nelimitat). */
 export async function limitaAnunturi(utilizatorId: string) {
   return limitaPentru(await db.utilizator.findUniqueOrThrow({ where: { id: utilizatorId } }));

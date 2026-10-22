@@ -7,7 +7,7 @@ import { randomBytes } from "crypto";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { deschideSesiune, inchideSesiune, utilizatorCurent } from "@/lib/auth";
-import { creeazaAnunt, poatePublica, prelungesteAnunt, retrageAnunt } from "@/lib/anunturi";
+import { creeazaAnunt, editeaza, poatePublica, prelungesteAnunt, retrageAnunt, type AnuntNou } from "@/lib/anunturi";
 import { ANUNTURI_GRATUITE } from "@/lib/tarife";
 import { esteTipUtilizator, slugify, TIPURI, TRANZACTII } from "@/lib/etichete";
 import { getOras } from "@/lib/geo";
@@ -88,41 +88,60 @@ export async function deconectare() {
   redirect("/");
 }
 
-export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
-  const u = await utilizatorCurent();
-  if (!u) redirect("/cont/autentificare");
+/** Citește și validează câmpurile comune formularelor de adăugare și editare. */
+function citesteAnunt(f: FormData): { eroare: string } | { date: AnuntNou } {
   const tip = text(f, "tip");
   const tranzactie = text(f, "tranzactie");
   const titlu = text(f, "titlu");
-  const descriere = text(f, "descriere");
   const pret = Number(f.get("pret"));
   const suprafata = Number(f.get("suprafata"));
-  const camere = Number(f.get("camere")) || null;
   const judet = text(f, "judet");
   const oras = text(f, "oras");
 
-  if (!(tip in TIPURI) || !(tranzactie in TRANZACTII)) return esec("Alege tipul proprietății și tranzacția.", f);
-  if (titlu.length < 10) return esec("Titlul trebuie să aibă cel puțin 10 caractere.", f);
-  if (!(pret > 0) || !(suprafata > 0)) return esec("Prețul și suprafața trebuie să fie pozitive.", f);
-  if (!getOras(judet, oras)) return esec("Alege județul și orașul.", f);
+  if (!(tip in TIPURI) || !(tranzactie in TRANZACTII)) return { eroare: "Alege tipul proprietății și tranzacția." };
+  if (titlu.length < 10) return { eroare: "Titlul trebuie să aibă cel puțin 10 caractere." };
+  if (!(pret > 0) || !(suprafata > 0)) return { eroare: "Prețul și suprafața trebuie să fie pozitive." };
+  if (!getOras(judet, oras)) return { eroare: "Alege județul și orașul." };
+  return {
+    date: {
+      titlu,
+      descriere: text(f, "descriere"),
+      tip: tip as keyof typeof TIPURI,
+      tranzactie: tranzactie as keyof typeof TRANZACTII,
+      pret: Math.round(pret),
+      suprafata: Math.round(suprafata),
+      camere: Number(f.get("camere")) || null,
+      judet,
+      oras,
+      zona: text(f, "zona") || "Centru",
+    },
+  };
+}
+
+export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
+  const u = await utilizatorCurent();
+  if (!u) redirect("/cont/autentificare");
+  const r = citesteAnunt(f);
+  if ("eroare" in r) return esec(r.eroare, f);
   if (!(await poatePublica(u))) return esec(MESAJ_LIMITA, f);
 
-  const a = await creeazaAnunt(u.id, {
-    titlu,
-    descriere,
-    tip: tip as keyof typeof TIPURI,
-    tranzactie: tranzactie as keyof typeof TRANZACTII,
-    pret: Math.round(pret),
-    suprafata: Math.round(suprafata),
-    camere,
-    judet,
-    oras,
-    zona: text(f, "zona") || "Centru",
-  });
+  const a = await creeazaAnunt(u.id, r.date);
   // Paginile cache-uite (ISR) arată anunțul nou imediat, nu după expirare.
   revalidatePath("/");
   if (u.tip === "agentie") revalidatePath(`/agentii/${u.slug}`);
   redirect(`/anunt/${a.id}`);
+}
+
+/** Salvează modificările unui anunț propriu; valabilitatea și promovările rămân neschimbate. */
+export async function editeazaAnunt(_: Stare, f: FormData): Promise<Stare> {
+  const { u, id } = await proprietarSiId(f);
+  const r = citesteAnunt(f);
+  if ("eroare" in r) return esec(r.eroare, f);
+  if (!(await editeaza(id, u.id, r.date))) redirect("/cont");
+  revalidatePath("/");
+  revalidatePath(`/anunt/${id}`);
+  if (u.tip === "agentie") revalidatePath(`/agentii/${u.slug}`);
+  redirect(`/anunt/${id}`);
 }
 
 const MESAJ_LIMITA = `Ai deja ${ANUNTURI_GRATUITE} anunțuri active, cât permite publicarea gratuită. Retrage un anunț vândut sau închiriat din „Contul meu” și apoi publică-l pe cel nou.`;
