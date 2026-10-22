@@ -155,3 +155,23 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .recomandare { margin: 24px 0; padding: 18px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); }
 .recomandare h2 { margin-top: 0; }
 .link-recomandare { width: 100%; padding: 10px; border: 1px dashed #f97316; border-radius: 8px; background: var(--bg); color: var(--fg); font: inherit; }
+
+/* Prețuri */
+.tabel-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--card); margin: 12px 0; }
+.tabel-preturi { border-collapse: collapse; width: 100%; min-width: 560px; font-variant-numeric: tabular-nums; }
+.tabel-preturi th, .tabel-preturi td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.tabel-preturi th { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+.tabel-preturi tr:last-child td { border-bottom: 0; }
+.tabel-preturi .num { text-align: right; white-space: nowrap; }
+.tabel-preturi tr.recomandat td { background: #fff7ed; }
+.tabel-preturi .pret { font-weight: 800; color: #c2410c; }
+.eticheta-recomandat { margin-left: 8px; font-size: .7rem; font-weight: 700; background: #c2410c; color: #fff; padding: 2px 8px; border-radius: 99px; }
+.gratuit { max-width: 520px; display: grid; gap: 10px; justify-items: start; }
+.card-body.gratuit p { font-size: 1rem; }
+.card-body p.pret-mare { font-size: 2.2rem; font-weight: 800; color: #15803d; margin: 0; }
+.mic { font-size: .85rem; }
+@media (prefers-color-scheme: dark) {
+  .tabel-preturi tr.recomandat td { background: #2a1c10; }
+  .tabel-preturi .pret { color: #fb923c; }
+  .card-body p.pret-mare { color: #4ade80; }
+}
