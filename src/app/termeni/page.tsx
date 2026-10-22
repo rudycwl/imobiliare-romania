@@ -12,13 +12,15 @@ export default function TermeniPage() {
       <h2>1. Cine suntem</h2>
       <p>
         Site-ul {FIRMA.site} („CheiaMea”) este operat de {FIRMA.nume}, CUI {FIRMA.cui}, nr. Reg. Com. {FIRMA.regCom}, cu sediul în {FIRMA.sediu}.
-        Ne poți scrie la <a href={`mailto:${FIRMA.email}`}>{FIRMA.email}</a>.
+        Ne poți scrie la <a href={`mailto:${FIRMA.email}`}>{FIRMA.email}</a>
+        {FIRMA.telefon && <> sau ne poți suna la {FIRMA.telefon}</>}. {FIRMA.nume} este vânzătorul serviciilor plătite de pe site și emite factura
+        pentru ele.
       </p>
 
       <h2>2. Ce oferim</h2>
       <p>
         CheiaMea este o platformă de anunțuri imobiliare. Publicăm anunțurile utilizatorilor și oferim servicii plătite de promovare a anunțurilor și
-        abonamente pentru agenții imobiliare. Nu suntem agenție imobiliară, nu intermediem tranzacții și nu primim comision din vânzări sau închirieri.
+        abonamente pentru agenții imobiliare. Rolul nostru este de prestator de servicii de publicitate online (platformă de anunțuri). Nu suntem agenție imobiliară, nu intermediem tranzacții și nu primim comision din vânzări sau închirieri.
         Contractul de vânzare sau închiriere se încheie direct între utilizatori.
       </p>
 

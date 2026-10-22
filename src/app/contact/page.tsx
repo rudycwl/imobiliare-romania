@@ -11,6 +11,7 @@ export default function ContactPage() {
       <p>
         Pentru întrebări, anunțuri suspecte, facturi sau rambursări scrie-ne la <a href={`mailto:${FIRMA.email}`}><strong>{FIRMA.email}</strong></a>.
         Răspundem în zilele lucrătoare, de obicei în aceeași zi.
+        {FIRMA.telefon && <> Telefon: <a href={`tel:${FIRMA.telefon.replace(/\s/g, "")}`}><strong>{FIRMA.telefon}</strong></a>.</>}
       </p>
       <p>
         Agențiile imobiliare găsesc detalii despre abonamente pe pagina <Link href="/pentru-agentii">Pentru agenții</Link>.
@@ -21,6 +22,8 @@ export default function ContactPage() {
         <li>CUI {FIRMA.cui}</li>
         <li>Nr. Reg. Com. {FIRMA.regCom}</li>
         <li>Sediu: {FIRMA.sediu}</li>
+        <li>Email: {FIRMA.email}</li>
+        {FIRMA.telefon && <li>Telefon: {FIRMA.telefon}</li>}
       </ul>
     </article>
   );

@@ -232,3 +232,15 @@ model Poza {
 
   @@index([anuntId, ordine])
 }
+
+/// Cerere de retragere din contract trimisă prin formularul online (art. 11¹ din OUG nr. 34/2014).
+model CerereRetragere {
+  id        String   @id
+  creatLa   DateTime @default(now())
+  nume      String
+  email     String
+  /// Numărul comenzii sau al facturii, așa cum l-a scris clientul.
+  comanda   String
+  mesaj     String?
+  rezolvat  Boolean  @default(false)
+}

@@ -17,7 +17,8 @@ export default function AnularePage() {
       <p>
         Ca persoană fizică (consumator) ai, în principiu, 14 zile să te retragi dintr-un contract încheiat la distanță (OUG nr. 34/2014). Pentru că
         serviciile noastre încep imediat după plată, la finalizarea comenzii îți ceri expres începerea lor și confirmi că pierzi dreptul de retragere după
-        ce serviciul a fost prestat integral (art. 16 lit. a din OUG nr. 34/2014).
+        ce serviciul a fost prestat integral (art. 16 lit. a din OUG nr. 34/2014). Te poți retrage online din pagina{" "}
+        <a href="/retragere">Retragere din contract</a>, fără să ne spui motivul.
       </p>
       <ul>
         <li><strong>Promovările</strong> (reactualizare, Evidențiat, Top în oraș, prima pagină a județului, „Vânzare rapidă”) se consideră prestate în momentul activării, deci nu se rambursează după activare.</li>
