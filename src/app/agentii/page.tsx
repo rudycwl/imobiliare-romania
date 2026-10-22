@@ -15,7 +15,7 @@ export default async function AgentiiPage() {
       <Breadcrumbs items={[{ label: "Agenții imobiliare" }]} />
       <h1>Agenții imobiliare din România</h1>
       <p className="muted">
-        Ești agenție? <Link href="/cont/inregistrare?tip=agentie">Creează un cont de agenție</Link> și publică toate ofertele tale.
+        Ești agenție? <Link href="/pentru-agentii">Intră în zona pentru agenții</Link> și publică toate ofertele tale.
       </p>
       <div className="grid">
         {agentii.map((a) => (

@@ -69,3 +69,56 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .actiuni { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
 button.secundar { background: transparent; color: var(--accent); border: 1px solid var(--border); }
 .logo-accent { color: #f97316; }
+
+/* ---------- Animații (doar CSS, fără JavaScript: site-ul rămâne rapid) ---------- */
+@keyframes apare-sus { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes gradient-miscare { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes pluteste { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-14px) rotate(6deg); } }
+@keyframes leagana { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+@keyframes puls { 0% { box-shadow: 0 0 0 0 rgba(249,115,22,.5); } 100% { box-shadow: 0 0 0 12px rgba(249,115,22,0); } }
+
+.header { position: sticky; top: 0; z-index: 20; backdrop-filter: saturate(180%) blur(10px); background: color-mix(in srgb, var(--card) 85%, transparent); }
+.header nav a:not(.buton) { position: relative; }
+.header nav a:not(.buton)::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 2px; background: #f97316; transform: scaleX(0); transform-origin: left; transition: transform .25s ease; }
+.header nav a:not(.buton):hover::after { transform: scaleX(1); }
+.logo:hover .logo-icon { animation: leagana .6s ease; }
+
+.buton, button { transition: transform .15s ease, box-shadow .2s ease, filter .2s; }
+.buton:hover, button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(11,107,203,.3); filter: brightness(1.05); }
+.buton:active, button:active:not(:disabled) { transform: translateY(0) scale(.97); }
+.header .buton { animation: puls 2s ease-out 1s 3; }
+
+.hero-anim { position: relative; overflow: hidden; margin-top: 16px; padding: 40px 24px 24px; border-radius: 20px; color: #fff;
+  background: linear-gradient(120deg, #0b2545, #13315c, #1d4e89, #f97316, #0b2545); background-size: 300% 300%; animation: gradient-miscare 18s ease infinite; }
+.hero-anim h1, .hero-anim p, .hero-anim .filtre { position: relative; z-index: 1; animation: apare-sus .6s ease both; }
+.hero-anim p { color: rgba(255,255,255,.85); animation-delay: .12s; }
+.hero-anim .filtre { animation-delay: .24s; }
+.hero-anim .forme span { position: absolute; font-size: 2.2rem; opacity: .18; animation: pluteste 7s ease-in-out infinite; pointer-events: none; }
+.hero-anim .forme span:nth-child(1) { top: 12%; right: 6%; }
+.hero-anim .forme span:nth-child(2) { bottom: 14%; right: 22%; animation-delay: -2s; font-size: 3rem; }
+.hero-anim .forme span:nth-child(3) { top: 30%; right: 40%; animation-delay: -4s; }
+
+.grid .card { animation: apare-sus .5s ease both; }
+.grid .card:nth-child(2) { animation-delay: .06s; } .grid .card:nth-child(3) { animation-delay: .12s; }
+.grid .card:nth-child(4) { animation-delay: .18s; } .grid .card:nth-child(5) { animation-delay: .24s; }
+.grid .card:nth-child(6) { animation-delay: .3s; }  .grid .card:nth-child(n+7) { animation-delay: .36s; }
+.card { transition: transform .25s ease, box-shadow .25s ease, border-color .25s; }
+.card:hover { transform: translateY(-6px); box-shadow: 0 14px 30px rgba(0,0,0,.12); border-color: #f97316; }
+.card .card-img { transition: transform .4s ease; }
+.card:hover .card-img { transform: scale(1.04); }
+
+.judete a { display: block; padding: 6px 10px; border-radius: 8px; transition: background .2s, transform .2s; }
+.judete a:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); transform: translateX(4px); }
+
+/* La derulare, titlurile și listele apar treptat (în browserele care știu asta; celelalte le arată direct). */
+@supports (animation-timeline: view()) {
+  main h2, .judete { animation: apare-sus linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+.buton-alb { background: #fff; color: #0b2545; }
+.buton-contur { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); }
+.avantaj-icon { font-size: 2rem; transition: transform .3s ease; display: inline-block; }
+.avantaj:hover .avantaj-icon { transform: scale(1.2) rotate(-6deg); }
