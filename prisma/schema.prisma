@@ -62,12 +62,14 @@ model Anunt {
   zona         String
   imagine      String
   publicatLa   DateTime   @default(now())
+  /// Anunțul e public cât timp expiraLa e în viitor (60 de zile, cu prelungire).
+  expiraLa     DateTime   @default(dbgenerated("(now() + '60 days'::interval)"))
   proprietarId String
   proprietar   Utilizator @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
 
   @@index([judet, oras, publicatLa])
   @@index([tranzactie, tip, pret])
-  @@index([proprietarId])
+  @@index([proprietarId, expiraLa])
 }
 
 model Sesiune {

@@ -28,6 +28,8 @@ export type Anunt = {
   oras: string;
   zona: string;
   publicatLa: Date;
+  /** Până când e public anunțul. */
+  expiraLa: Date;
   imagine: string;
   proprietarId: string;
 };
