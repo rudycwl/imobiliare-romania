@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { utilizatorCurent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { adaugaPoza, cheieNoua, facePrima, MAX_MARIME, MAX_POZE, stergePoza, TIPURI_POZE } from "@/lib/poze";
-import { exista, stocareConfigurata, urlIncarcare } from "@/lib/stocare";
+import { asiguraCors, exista, stocareConfigurata, urlIncarcare } from "@/lib/stocare";
 
 async function anuntPropriu(anuntId: number) {
   const u = await utilizatorCurent();
@@ -26,6 +26,7 @@ export async function cerereIncarcare(anuntId: number, tip: string, marime: numb
   if (!TIPURI_POZE.includes(tip) || !(marime > 0) || marime > MAX_MARIME) return { eroare: "Poza trebuie să fie JPG sau WebP, de cel mult 2 MB." };
   if ((await db.poza.count({ where: { anuntId } })) >= MAX_POZE) return { eroare: `Poți adăuga cel mult ${MAX_POZE} poze.` };
   const cheie = cheieNoua(anuntId, tip);
+  await asiguraCors();
   return { url: urlIncarcare(cheie, tip, marime), cheie };
 }
 

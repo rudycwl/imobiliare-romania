@@ -62,3 +62,51 @@ export async function exista(cheie: string) {
   const r = await fetch(urlPublic(cheie), { method: "HEAD", signal: AbortSignal.timeout(10000) });
   return r.ok;
 }
+
+/** Cerere semnată (AWS Signature V4, antet Authorization) la nivel de bucket, ex. ?cors. */
+async function cerereBucket(metoda: "PUT" | "GET", subresursa: string, corp = "") {
+  const e = env();
+  const host = `${e.cont}.r2.cloudflarestorage.com`;
+  const acum = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const zi = acum.slice(0, 8);
+  const scope = `${zi}/auto/s3/aws4_request`;
+  const hashCorp = sha256(corp);
+  const antete: Record<string, string> = { host, "x-amz-content-sha256": hashCorp, "x-amz-date": acum };
+  if (corp) antete["content-md5"] = createHash("md5").update(corp).digest("base64");
+  const semnate = Object.keys(antete).sort();
+  const canonic = [metoda, `/${e.bucket}`, `${subresursa}=`, semnate.map((k) => `${k}:${antete[k]}\n`).join(""), semnate.join(";"), hashCorp].join("\n");
+  const deSemnat = ["AWS4-HMAC-SHA256", acum, scope, sha256(canonic)].join("\n");
+  const kSemnare = hmac(hmac(hmac(hmac(`AWS4${e.secret}`, zi), "auto"), "s3"), "aws4_request");
+  const semnatura = createHmac("sha256", kSemnare).update(deSemnat).digest("hex");
+  const trimise = Object.fromEntries(Object.entries(antete).filter(([k]) => k !== "host"));
+  return fetch(`https://${host}/${e.bucket}?${subresursa}=`, {
+    method: metoda,
+    headers: { ...trimise, Authorization: `AWS4-HMAC-SHA256 Credential=${e.cheie}/${scope}, SignedHeaders=${semnate.join(";")}, Signature=${semnatura}` },
+    body: corp || undefined,
+    signal: AbortSignal.timeout(10000),
+  });
+}
+
+let corsSetat: Promise<void> | null = null;
+
+/**
+ * Permite browserului să încarce poze direct în bucket doar de pe site-ul nostru (CORS).
+ * Se setează automat la prima încărcare, ca să nu trebuiască configurat de mână în Cloudflare.
+ */
+export function asiguraCors() {
+  corsSetat ??= (async () => {
+    const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro").replace(/\/$/, "");
+    const origini = [...new Set([site, "https://cheiamea.ro", "https://www.cheiamea.ro", "https://cheiamea.com", "https://www.cheiamea.com"])];
+    const xml =
+      `<CORSConfiguration><CORSRule>${origini.map((o) => `<AllowedOrigin>${o}</AllowedOrigin>`).join("")}` +
+      `<AllowedMethod>PUT</AllowedMethod><AllowedMethod>GET</AllowedMethod><AllowedHeader>content-type</AllowedHeader>` +
+      `<MaxAgeSeconds>86400</MaxAgeSeconds></CORSRule></CORSConfiguration>`;
+    const r = await cerereBucket("PUT", "cors", xml);
+    if (!r.ok) throw new Error(`${r.status} ${(await r.text()).slice(0, 300)}`);
+  })().catch((e) => {
+    // Nu blocăm încărcarea: dacă regula există deja (pusă de mână), pozele merg oricum.
+    corsSetat = null;
+    console.error("R2 CORS:", (e as Error).message);
+  });
+  return corsSetat;
+}
