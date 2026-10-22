@@ -55,6 +55,17 @@ Planul Hobby de pe Vercel e doar pentru uz necomercial, așa că îl folosim pen
 3. Vercel rulează automat `vercel-build` (aplică migrările, apoi build-ul). Date demo, opțional: `DATABASE_URL=... npm run db:seed`.
 4. În Vercel → *Domains* adaugă `cheiamea.ro` și `www.cheiamea.ro`, apoi setează la registrar înregistrările DNS afișate de Vercel.
 
+## Facturare (Oblio + e-Factura)
+
+Facturile pentru plățile de pe site (promovări, abonamente agenții) le emite programul de facturare **Oblio**, prin API: el ține seria și numerotarea continuă, trimite PDF-ul pe email clientului și factura în **RO e-Factura (SPV)**. În baza noastră (tabelul `Factura`) păstrăm evidența și legătura cu plata.
+
+- `src/lib/facturare/index.ts` – `emiteFactura({ plataRef, utilizatorId, linii })`, de apelat după ce Netopia confirmă plata. O plată are o singură factură (`plataRef` unic). Mai conține storno, trimitere/verificare SPV și exportul CSV.
+- `src/lib/facturare/oblio.ts` – clientul API Oblio.
+- `/admin/facturi` – lista pe luni, reemitere, storno, stare e-Factura; `/admin/facturi/export?luna=AAAA-LL` – fișier CSV (Excel) pentru contabil.
+- Variabile de mediu: `OBLIO_EMAIL`, `OBLIO_SECRET` (Oblio > Setări > Date cont), `FACTURARE_CIF`, `FACTURARE_SERIE`, `FACTURARE_PLATITOR_TVA` (`da` doar dacă Hugetech e plătitoare de TVA), `FACTURARE_COTA_TVA`. Fără ele, facturile rămân „în așteptare” și se emit din panou după configurare.
+- În Oblio: activează *Setări > Preferințe > Trimite automat e-Factura în SPV* și creează seria `CHM`.
+- Datele de facturare (CUI, Nr. Reg. Com., adresa) se copiază în factură la emitere; `regCom` și `adresa` sunt câmpuri noi pe `Utilizator`.
+
 ## Pașii următori
 
 1. Fotografii la anunțuri (stocare S3 / Vercel Blob) și editare / ștergere anunțuri.
