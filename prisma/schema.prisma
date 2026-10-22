@@ -55,6 +55,8 @@ model Utilizator {
   invitatie            InvitatieAgentie?
   facturi              Factura[]
   comenzi              Comanda[]
+  /// Contul a fost șters de utilizator: datele personale sunt golite, comenzile și facturile rămân pentru contabilitate.
+  stersLa              DateTime?
 
   @@index([tip, judet])
 }
@@ -91,6 +93,9 @@ model Anunt {
   moderare            String     @default("ok")
   /// De ce a fost oprit (filtrul automat sau administratorul).
   motivModerare       String?
+  /// Statistici pentru proprietar, numărate din browserul vizitatorilor (fără roboți și fără proprietar).
+  vizualizari         Int        @default(0)
+  afisariTelefon      Int        @default(0)
   raportari           Raportare[]
   poze                Poza[]
   proprietarId        String
