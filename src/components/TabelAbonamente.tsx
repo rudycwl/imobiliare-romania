@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin } from "@/lib/fondatori";
 import { ABONAMENTE, LUNI_PLATITE_PE_AN, lei, pretLunar } from "@/lib/tarife";
 
-/** Prețurile abonamentelor le văd doar agențiile autentificate (și administratorii); restul văd invitația la înscriere. */
+/** Prețurile abonamentelor le văd doar agențiile autentificate; restul (inclusiv un administrator logat cu cont de client) văd invitația. */
 export async function TabelAbonamente() {
   const u = await utilizatorCurent();
-  if (u?.tip !== "agentie" && !esteAdmin(u?.email))
+  if (u?.tip !== "agentie")
     return (
       <div className="card card-body preturi-ascunse">
         <p>
