@@ -11,7 +11,7 @@ export function AnuntCard({ a }: { a: AnuntCuProprietar }) {
     <Link href={`/anunt/${a.id}`} className="card">
       <div className="card-img" style={{ background: a.imagine }}>
         <span>{TIPURI[a.tip]}</span>
-        <span className={`badge badge-${u.tip}`}>{TIPURI_UTILIZATOR[u.tip]}</span>
+        <span className={`badge badge-${u.tip}`}>{u.fondator ? "⭐ " : ""}{TIPURI_UTILIZATOR[u.tip]}</span>
       </div>
       <div className="card-body">
         <div className="pret">{formatPret(a)}</div>

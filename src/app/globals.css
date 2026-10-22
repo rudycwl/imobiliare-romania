@@ -124,3 +124,12 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .avantaj:hover .avantaj-icon { transform: scale(1.2) rotate(-6deg); }
 .import-box { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 20px; padding: 14px; border: 2px dashed #f97316; border-radius: 12px; background: color-mix(in srgb, #f97316 6%, var(--card)); animation: apare-sus .5s ease both; }
 .import-box input { padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--fg); font: inherit; }
+.badge-fondator { background: linear-gradient(90deg, #fde68a, #f97316); color: #431407; margin-left: 6px; }
+.contor { display: inline-flex; align-items: baseline; gap: 8px; margin: 12px 0 0; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,.15); color: #fff; font-weight: 600; }
+.contor strong { font-size: 1.5rem; color: #fde68a; }
+.oferta { margin: 24px 0; padding: 20px; border-radius: 16px; border: 2px solid #f97316; background: color-mix(in srgb, #f97316 6%, var(--card)); }
+.oferta h2 { margin-top: 0; }
+.rezervat { background: #fde68a; color: #431407; padding: 10px 14px; border-radius: 10px; font-weight: 600; position: relative; z-index: 1; }
+.tabel { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.tabel th, .tabel td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }
+.hero-anim p.rezervat { color: #431407; }
