@@ -2,24 +2,32 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { formatPret, getAnunt, TIPURI, TRANZACTII } from "@/lib/anunturi";
-import { getJudet, getOras } from "@/lib/geo";
-import { getUtilizator } from "@/lib/utilizatori";
 import { Vanzator } from "@/components/Vanzator";
+import { getAnunt } from "@/lib/anunturi";
+import { formatPret, TIPURI, TRANZACTII } from "@/lib/etichete";
+import { getJudet, getOras } from "@/lib/geo";
 
 type Props = { params: Promise<{ id: string }> };
 
+// Anunțurile se generează la prima vizită și se reîmprospătează la cel mult 5 minute.
+export const revalidate = 300;
+
+// Listă goală: paginile se generează static la prima vizită (ISR), nu la build.
+export function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const a = getAnunt((await params).id);
-  return { title: a?.titlu ?? "Anunț inexistent" };
+  const a = await getAnunt((await params).id);
+  return { title: a?.titlu ?? "Anunț inexistent", description: a?.descriere };
 }
 
 export default async function AnuntPage({ params }: Props) {
-  const a = getAnunt((await params).id);
+  const a = await getAnunt((await params).id);
   if (!a) notFound();
   const j = getJudet(a.judet)!;
   const o = getOras(a.judet, a.oras)!;
-  const u = getUtilizator(a.proprietarId)!;
+  const u = a.proprietar;
   return (
     <>
       <Breadcrumbs
@@ -43,7 +51,7 @@ export default async function AnuntPage({ params }: Props) {
               <tr><th>Suprafață</th><td>{a.suprafata} m²</td></tr>
               {a.camere && <tr><th>Camere</th><td>{a.camere}</td></tr>}
               <tr><th>Localizare</th><td>{a.zona}, <Link href={`/${j.slug}/${o.slug}`}>{o.nume}</Link>, {j.nume}</td></tr>
-              <tr><th>Publicat</th><td>{new Date(a.dataPublicarii).toLocaleDateString("ro-RO")}</td></tr>
+              <tr><th>Publicat</th><td>{a.publicatLa.toLocaleDateString("ro-RO")}</td></tr>
             </tbody>
           </table>
           <p>{a.descriere}</p>

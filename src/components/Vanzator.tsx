@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Utilizator } from "@/modules/types";
-import { TIPURI_UTILIZATOR } from "@/lib/utilizatori";
+import { TIPURI_UTILIZATOR } from "@/lib/etichete";
 
 export function Vanzator({ u }: { u: Utilizator }) {
   return (

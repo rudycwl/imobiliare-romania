@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import type { TipUtilizator } from "@/modules/types";
+import { Localitate } from "@/components/Localitate";
+import { inregistrare } from "../actiuni";
 
 const OPTIUNI: { tip: TipUtilizator; titlu: string; text: string }[] = [
   { tip: "persoana-fizica", titlu: "Persoană fizică", text: "Vând sau închiriez propria locuință." },
@@ -11,25 +13,12 @@ const OPTIUNI: { tip: TipUtilizator; titlu: string; text: string }[] = [
 
 export function FormularInregistrare({ tipInitial }: { tipInitial: TipUtilizator }) {
   const [tip, setTip] = useState<TipUtilizator>(tipInitial);
-  const [trimis, setTrimis] = useState(false);
+  const [stare, actiune, inLucru] = useActionState(inregistrare, undefined);
   const juridic = tip !== "persoana-fizica";
-
-  if (trimis)
-    return (
-      <p className="succes">
-        Mulțumim! Contul tău de <strong>{OPTIUNI.find((o) => o.tip === tip)?.titlu.toLowerCase()}</strong> a fost
-        înregistrat (demo, fără salvare încă).
-      </p>
-    );
+  const v = stare?.valori;
 
   return (
-    <form
-      className="formular"
-      onSubmit={(e) => {
-        e.preventDefault();
-        setTrimis(true);
-      }}
-    >
+    <form className="formular" action={actiune}>
       <fieldset className="tipuri-cont">
         <legend>Tip cont</legend>
         {OPTIUNI.map((o) => (
@@ -45,34 +34,38 @@ export function FormularInregistrare({ tipInitial }: { tipInitial: TipUtilizator
         <>
           <label>
             Denumire {tip === "agentie" ? "agenție" : "firmă"}
-            <input name="denumire" required />
+            <input name="denumire" defaultValue={v?.denumire} required autoComplete="organization" />
           </label>
           <label>
             CUI
-            <input name="cui" required pattern="(RO)?[0-9]{2,10}" placeholder="RO12345678" />
+            <input name="cui" defaultValue={v?.cui} required pattern="(RO|ro)?[0-9]{2,10}" placeholder="RO12345678" />
           </label>
         </>
       )}
       <label>
         {juridic ? "Persoană de contact" : "Nume și prenume"}
-        <input name="nume" required autoComplete="name" />
+        <input name="nume" defaultValue={v?.nume} required autoComplete="name" />
       </label>
       <label>
         Email
-        <input name="email" type="email" required autoComplete="email" />
+        <input name="email" defaultValue={v?.email} type="email" required autoComplete="email" />
       </label>
       <label>
         Telefon
-        <input name="telefon" type="tel" required autoComplete="tel" pattern="0[0-9]{9}" placeholder="07xxxxxxxx" />
+        <input name="telefon" defaultValue={v?.telefon} type="tel" required autoComplete="tel" pattern="0[0-9]{9}" placeholder="07xxxxxxxx" />
       </label>
+      <Localitate orasInitial={v?.oras} />
       <label>
-        Parolă
+        Parolă (minim 8 caractere)
         <input name="parola" type="password" required minLength={8} autoComplete="new-password" />
       </label>
       <label className="check">
-        <input type="checkbox" required /> Accept termenii și politica de confidențialitate (GDPR)
+        <input type="checkbox" required defaultChecked={!!v} /> Accept termenii și politica de confidențialitate (GDPR)
       </label>
-      <button type="submit">Creează cont</button>
+      {stare?.eroare && <p className="eroare" role="alert">{stare.eroare}</p>}
+      <button type="submit" disabled={inLucru}>
+        {inLucru ? "Se creează contul…" : "Creează cont"}
+      </button>
     </form>
   );
 }

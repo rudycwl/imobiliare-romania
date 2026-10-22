@@ -2,14 +2,14 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Vanzator } from "@/components/Vanzator";
-import { cautaAnunturi } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
 import { getAgentii } from "@/lib/utilizatori";
 
 export const metadata: Metadata = { title: "Agenții imobiliare" };
+export const revalidate = 300;
 
-export default function AgentiiPage() {
-  const agentii = getAgentii();
+export default async function AgentiiPage() {
+  const agentii = await getAgentii();
   return (
     <>
       <Breadcrumbs items={[{ label: "Agenții imobiliare" }]} />
@@ -22,7 +22,7 @@ export default function AgentiiPage() {
           <div key={a.id} className="card card-body">
             <Vanzator u={a} />
             <p className="muted small">
-              {getOras(a.judet, a.oras)?.nume}, {getJudet(a.judet)?.nume} · {cautaAnunturi({ proprietar: a.id }).length} anunțuri
+              {getOras(a.judet, a.oras)?.nume}, {getJudet(a.judet)?.nume} · {a.numarAnunturi} anunțuri
             </p>
           </div>
         ))}

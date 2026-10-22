@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// tip: "persoana-fizica" | "firma" | "agentie" (validat în aplicație, vezi TipUtilizator)
+model Utilizator {
+  id         String    @id @default(cuid())
+  slug       String    @unique
+  tip        String
+  /// Persoană fizică: numele complet. Firmă/agenție: denumirea.
+  nume       String
+  /// Persoana de contact, doar pentru firme și agenții.
+  contact    String?
+  email      String?   @unique
+  parolaHash String?
+  telefon    String
+  judet      String
+  oras       String
+  cui        String?
+  culoare    String    @default("#0b6bcb")
+  creatLa    DateTime  @default(now())
+  anunturi   Anunt[]
+  sesiuni    Sesiune[]
+
+  @@index([tip, judet])
+}
+
+model Anunt {
+  id             Int        @id @default(autoincrement())
+  titlu          String
+  descriere      String
+  /// apartament | casa | teren | spatiu-comercial
+  tip            String
+  /// vanzare | inchiriere
+  tranzactie     String
+  /// Euro; pentru închiriere, pe lună.
+  pret           Int
+  suprafata      Int
+  camere         Int?
+  judet          String
+  oras           String
+  zona           String
+  imagine        String
+  publicatLa     DateTime   @default(now())
+  proprietarId   String
+  proprietar     Utilizator @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
+
+  @@index([judet, oras, publicatLa])
+  @@index([tranzactie, tip, pret])
+  @@index([proprietarId])
+}
+
+model Sesiune {
+  /// Hash SHA-256 al token-ului din cookie; token-ul în sine nu se salvează.
+  id           String     @id
+  utilizatorId String
+  utilizator   Utilizator @relation(fields: [utilizatorId], references: [id], onDelete: Cascade)
+  expiraLa     DateTime
+
+  @@index([utilizatorId])
+}
