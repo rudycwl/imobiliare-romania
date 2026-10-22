@@ -92,6 +92,7 @@ model Anunt {
   /// De ce a fost oprit (filtrul automat sau administratorul).
   motivModerare       String?
   raportari           Raportare[]
+  poze                Poza[]
   proprietarId        String
   proprietar          Utilizator @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
 
@@ -217,4 +218,17 @@ model Raportare {
 
   @@unique([anuntId, amprenta])
   @@index([rezolvat])
+}
+
+/// O fotografie a unui anunț, stocată în afara Netlify (Cloudflare R2). Prima (ordine minimă) e coperta.
+model Poza {
+  id      Int      @id @default(autoincrement())
+  anuntId Int
+  anunt   Anunt    @relation(fields: [anuntId], references: [id], onDelete: Cascade)
+  /// Cheia obiectului în stocare, ex. anunturi/123/abc.webp
+  cheie   String   @unique
+  ordine  Int      @default(0)
+  creatLa DateTime @default(now())
+
+  @@index([anuntId, ordine])
 }
