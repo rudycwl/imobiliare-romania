@@ -168,10 +168,10 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .eticheta-recomandat { margin-left: 8px; font-size: .7rem; font-weight: 700; background: #c2410c; color: #fff; padding: 2px 8px; border-radius: 99px; }
 .gratuit { max-width: 520px; display: grid; gap: 10px; justify-items: start; }
 .card-body.gratuit p { font-size: 1rem; }
-.card-body .pret-mare { font-size: 2.2rem; font-weight: 800; color: #15803d; margin: 0; }
+.card-body p.pret-mare { font-size: 2.2rem; font-weight: 800; color: #15803d; margin: 0; }
 .mic { font-size: .85rem; }
 @media (prefers-color-scheme: dark) {
   .tabel-preturi tr.recomandat td { background: #2a1c10; }
   .tabel-preturi .pret { color: #fb923c; }
-  .card-body .pret-mare { color: #4ade80; }
+  .card-body p.pret-mare { color: #4ade80; }
 }
