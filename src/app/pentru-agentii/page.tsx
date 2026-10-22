@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Distribuie } from "@/components/Distribuie";
 import type { Metadata } from "next";
 import { formatData, getInvitatieValabila, locuriRamase, LOCURI_FONDATOARE, LUNI_GRATUITE } from "@/lib/fondatori";
 
@@ -65,6 +66,7 @@ export default async function PentruAgentiiPage({ searchParams }: { searchParams
         ))}
       </div>
 
+      <Distribuie url="https://cheiamea.ro/pentru-agentii" text="CheiaMea: 6 luni gratuit pentru primele 100 de agenții imobiliare." />
       <p className="muted" style={{ marginTop: 24 }}>
         Vezi și <Link href="/agentii">lista agențiilor de pe CheiaMea</Link>.
       </p>

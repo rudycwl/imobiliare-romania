@@ -133,3 +133,14 @@ button.secundar { background: transparent; color: var(--accent); border: 1px sol
 .tabel { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .tabel th, .tabel td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }
 .hero-anim p.rezervat { color: #431407; }
+.banner-import { display: flex; align-items: center; gap: 14px; margin: 20px 0 8px; padding: 14px 18px; border-radius: 14px; background: linear-gradient(90deg, #fff7ed, #ffedd5); border: 1px solid #fdba74; color: #431407; transition: transform .2s, box-shadow .2s; }
+.banner-import:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(249,115,22,.25); }
+.banner-import > span:nth-child(2) { display: flex; flex-direction: column; flex: 1; }
+.banner-icon { font-size: 2rem; animation: pluteste 4s ease-in-out infinite; }
+.banner-cta { background: #f97316; color: #fff; padding: 8px 14px; border-radius: 8px; font-weight: 700; white-space: nowrap; }
+@media (max-width: 560px) { .banner-cta { display: none; } }
+.distribuie { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0; }
+.share { padding: 7px 14px; border-radius: 999px; color: #fff; font-weight: 600; font-size: .9rem; transition: transform .15s; }
+.share:hover { transform: translateY(-2px); }
+.share-wa { background: #25d366; }
+.share-fb { background: #1877f2; }
