@@ -17,6 +17,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ro">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,800&display=swap" rel="stylesheet" />
+      </head>
       <body>
         <Atribuire />
         <header className="header">
@@ -32,6 +38,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <nav>
               <Link href="/cautare">Caută</Link>
+              <Link href="/#proiecte">Proiecte noi</Link>
+              <Link href="/legislatie">Legislație</Link>
               <Link href="/agentii">Agenții</Link>
               <Link href="/pentru-agentii">Pentru agenții</Link>
               <Link href="/preturi">Prețuri</Link>
@@ -46,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="subsol-linkuri">
               <Link href="/pentru-agentii">Pentru agenții</Link>
               <Link href="/preturi">Prețuri</Link>
+              <Link href="/legislatie">Legislație</Link>
               <Link href="/termeni">Termeni și condiții</Link>
               <Link href="/confidentialitate">Confidențialitate și cookie-uri</Link>
               <Link href="/anulare-rambursare">Anulare și rambursare</Link>
@@ -79,6 +88,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </p>
           </div>
         </footer>
+        <nav className="bara-mobil" aria-label="Navigare rapidă">
+          <Link href="/">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v10H3z" /></svg>Acasă
+          </Link>
+          <Link href="/cautare">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>Caută
+          </Link>
+          <Link href="/cont/anunt-nou" className="adauga">
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></span>Adaugă
+          </Link>
+          <Link href="/cont/favorite">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" /></svg>Favorite
+          </Link>
+          <Link href="/cont">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>Cont
+          </Link>
+        </nav>
       </body>
     </html>
   );
