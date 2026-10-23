@@ -39,6 +39,29 @@ function text(e: Email) {
     .join("\n\n");
 }
 
+export const expeditor = () => process.env.EMAIL_EXPEDITOR?.trim() || "noreply@cheiamea.ro";
+
+/** Cerere către API-ul Brevo (pagina /admin/email); întoarce răspunsul JSON sau eroarea Brevo. */
+export async function brevo(metoda: "GET" | "POST" | "PUT", cale: string, corp?: unknown): Promise<{ ok: boolean; date: any }> {
+  const cheie = process.env.BREVO_API_KEY?.trim();
+  if (!cheie) return { ok: false, date: { message: "lipsește BREVO_API_KEY" } };
+  const r = await fetch(`https://api.brevo.com/v3${cale}`, {
+    method: metoda,
+    headers: { "api-key": cheie, "content-type": "application/json", accept: "application/json" },
+    body: corp === undefined ? undefined : JSON.stringify(corp),
+    cache: "no-store",
+    signal: AbortSignal.timeout(15000),
+  }).catch((e) => ({ ok: false, status: 0, text: async () => JSON.stringify({ message: String(e) }) }) as const);
+  const text = await r.text().catch(() => "");
+  let date: any = {};
+  try {
+    date = text ? JSON.parse(text) : {};
+  } catch {
+    date = { message: text };
+  }
+  return { ok: r.ok, date };
+}
+
 export async function trimiteEmail(e: Email): Promise<boolean> {
   const cheie = process.env.BREVO_API_KEY?.trim();
   if (!cheie) {
@@ -49,7 +72,7 @@ export async function trimiteEmail(e: Email): Promise<boolean> {
     method: "POST",
     headers: { "api-key": cheie, "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify({
-      sender: { name: "CheiaMea", email: process.env.EMAIL_EXPEDITOR?.trim() || "noreply@cheiamea.ro" },
+      sender: { name: "CheiaMea", email: expeditor() },
       replyTo: { email: FIRMA.email },
       to: [{ email: e.catre }],
       subject: e.subiect,
