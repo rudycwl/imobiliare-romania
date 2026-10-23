@@ -1,7 +1,7 @@
 import "server-only";
 import { randomBytes } from "crypto";
 import { db } from "./db";
-import { stergeObiect, urlPublic } from "./stocare";
+import { prefixCheie, stergeObiect, urlPublic } from "./stocare";
 
 export const MAX_POZE = 10;
 /** Pozele se micșorează în browser (max 1600 px, WebP) înainte de încărcare, deci 2 MB ajung. */
@@ -11,7 +11,7 @@ export const TIPURI_POZE = ["image/webp", "image/jpeg"];
 export const CULOARE_FARA_POZA = "#64748b";
 
 export function cheieNoua(anuntId: number, tip: string) {
-  return `anunturi/${anuntId}/${randomBytes(8).toString("hex")}.${tip === "image/webp" ? "webp" : "jpg"}`;
+  return `${prefixCheie()}anunturi/${anuntId}/${randomBytes(8).toString("hex")}.${tip === "image/webp" ? "webp" : "jpg"}`;
 }
 
 export function pozeAnunt(anuntId: number) {

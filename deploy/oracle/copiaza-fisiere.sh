@@ -2,6 +2,8 @@
 # Copiază din repo scripturile, serviciile și Caddyfile-ul pe mașină (la instalare și după fiecare actualizare).
 set -euo pipefail
 SRC=/opt/cheiamea/sursa/deploy/oracle
+# Folderul pozelor: scris de aplicație (cheiamea), citit de Caddy.
+install -d -m 755 -o cheiamea -g cheiamea /var/lib/cheiamea-poze
 install -m 755 "$SRC/actualizeaza.sh" /opt/cheiamea/bin/actualizeaza.sh
 install -m 644 "$SRC/configurare.mjs" "$SRC/cu-env.mjs" /opt/cheiamea/bin/
 schimbat=0
