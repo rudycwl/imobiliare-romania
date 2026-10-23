@@ -23,7 +23,9 @@ if ! grep -q '"DATABASE_URL": *"postgres' /etc/cheiamea/env.json; then
   stare "asteapta-configurare" "$SHA"; exit 0
 fi
 
-DIR=$BAZA/releases/$SHA
+# Folder nou la fiecare build: la o reconstruire a aceleiași versiuni (după salvarea configurării)
+# nu ștergem folderul din care rulează site-ul (altfel paginile rămân fără CSS până se termină build-ul).
+DIR=$BAZA/releases/$SHA-$(date +%s)
 # Comenzile de build rulează ca utilizatorul cheiamea, cu variabilele din env.json.
 run() { runuser -u cheiamea -- env HOME=$BAZA NEXT_TELEMETRY_DISABLED=1 node $BAZA/bin/cu-env.mjs "$@"; }
 stare "construieste" "$SHA"
@@ -38,6 +40,10 @@ stare "construieste" "$SHA"
   run npx next build
 } > "$LOG" 2>&1 || { echo "$SHA" > $BAZA/esuat; stare "eroare" "$SHA"; exit 1; }
 
+# Fișierele statice (CSS/JS) din toate versiunile rămân disponibile: o pagină deschisă înainte de publicare
+# cere încă CSS-ul vechi, iar fără el s-ar afișa fără design. Caddy le servește din $BAZA/web.
+mkdir -p $BAZA/web/_next/static && cp -rn "$DIR/.next/static/." $BAZA/web/_next/static/
+find $BAZA/web/_next/static -type f -mtime +30 -delete 2>/dev/null || true
 ln -sfn "$DIR" $BAZA/curent.nou && mv -T $BAZA/curent.nou $BAZA/curent
 systemctl restart cheiamea.service
 echo "$SHA" > $BAZA/versiune
