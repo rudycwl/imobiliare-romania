@@ -141,11 +141,11 @@ export default async function Home() {
             </div>
             <div className="banner banner-crem">
               <div>
-                <span className="supratitlu">Agenție Fondatoare</span>
-                <h2>6 luni gratuit, apoi –50% pentru totdeauna.</h2>
-                <p>Doar pentru primele 100 de agenții înscrise până la 31.12.2026.</p>
+                <span className="supratitlu">Legislație la zi</span>
+                <h2>Cumperi sau vinzi? Află regulile pe scurt.</h2>
+                <p>Notar, impozit, TVA și actele necesare, explicate pe înțelesul tuturor.</p>
               </div>
-              <Link href="/pentru-agentii" className="buton-banner">Înscrie agenția <span className="sageata">→</span></Link>
+              <Link href="/legislatie" className="buton-banner">Vezi regulile <span className="sageata">→</span></Link>
             </div>
           </div>
         </div>
@@ -248,7 +248,7 @@ export default async function Home() {
           </div>
           <div className="chemare chemare-albastra ridica">
             <h2>Ești agenție sau dezvoltator?</h2>
-            <p>Abonamente fără comision și ofertă Agenție Fondatoare.</p>
+            <p>Zonă separată pentru agenții, cu pagină proprie și abonamente fără comision.</p>
             <Link href="/pentru-agentii" className="buton-banner alb">Vezi oferta <span className="sageata">→</span></Link>
           </div>
         </section>
