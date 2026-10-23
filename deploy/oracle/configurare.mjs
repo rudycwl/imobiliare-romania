@@ -35,6 +35,9 @@ const CAMPURI = [
   { k: "FACTURARE_SERIE", implicit: "CHM" },
   { k: "FACTURARE_PLATITOR_TVA", ajutor: "Scrie „da” doar dacă Hugetech e plătitoare de TVA." },
   { k: "FACTURARE_COTA_TVA", implicit: "21" },
+  { grup: "Emailuri trimise de site (Brevo)" },
+  { k: "BREVO_API_KEY", secret: true, ajutor: "Brevo → numele tău (sus, dreapta) → SMTP & API → API Keys → Generate a new API key. Fără ea, „Am uitat parola” și alertele pe email nu merg." },
+  { k: "EMAIL_EXPEDITOR", implicit: "noreply@cheiamea.ro", ajutor: "Lasă așa. Domeniul cheiamea.ro trebuie verificat în Brevo (Senders, Domains & Dedicated IPs → Domains)." },
   { grup: "ERP Hugetech" },
   { k: "ERP_KEY", secret: true, ajutor: "Render → hugetech-erp → Environment → valoarea CHEIAMEA_ERP_KEY." },
 ];

@@ -57,6 +57,7 @@ model Utilizator {
   comenzi              Comanda[]
   favorite             Favorit[]
   cautari              CautareSalvata[]
+  resetariParola       ResetareParola[]
   /// Contul a fost șters de utilizator: datele personale sunt golite, comenzile și facturile rămân pentru contabilitate.
   stersLa              DateTime?
 
@@ -281,6 +282,21 @@ model CautareSalvata {
   creatLa      DateTime   @default(now())
   /// Ultima dată când utilizatorul a deschis căutarea; anunțurile publicate după sunt „noi”.
   vazutLa      DateTime   @default(now())
+  /// Alerta zilnică pe email cu anunțurile noi; se oprește din Contul meu sau din linkul din email.
+  alertaEmail  Boolean    @default(true)
+  /// Până unde au fost trimise anunțurile în alerta pe email.
+  alertaLa     DateTime   @default(now())
+
+  @@index([utilizatorId])
+}
+
+/// Link de „Am uitat parola”: valabil o oră, se șterge după folosire. Se salvează doar hash-ul token-ului.
+model ResetareParola {
+  id           String     @id
+  utilizatorId String
+  utilizator   Utilizator @relation(fields: [utilizatorId], references: [id], onDelete: Cascade)
+  expiraLa     DateTime
+  creatLa      DateTime   @default(now())
 
   @@index([utilizatorId])
 }

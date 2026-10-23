@@ -17,6 +17,9 @@ export default async function AutentificarePage({ searchParams }: { searchParams
       <h1>Autentificare</h1>
       <FormularAutentificare inapoi={inapoi} />
       <p className="muted">
+        <Link href="/cont/parola-uitata">Ai uitat parola?</Link>
+      </p>
+      <p className="muted">
         Nu ai cont? <Link href="/cont/inregistrare">Creează unul gratuit</Link> ca persoană fizică, firmă sau agenție.
       </p>
     </div>
