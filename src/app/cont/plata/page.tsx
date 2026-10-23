@@ -37,7 +37,7 @@ export default async function PlataPage({ searchParams }: { searchParams: Promis
         <p>{d.descriere}</p>
         {anunt && <p className="muted small">{anunt.titlu}</p>}
         <p className="pret-mare-plata">{lei(d.sumaBani / 100)}</p>
-        <p className="muted small">TVA inclus, dacă se aplică. Factura vine pe email.</p>
+        <p className="muted small">Preț final, fără TVA (Hugetech SRL nu este plătitoare de TVA). Factura vine pe email.</p>
       </div>
       {!netopiaConfigurat() ? (
         <p className="eroare">Plata cu cardul va fi disponibilă în curând.</p>

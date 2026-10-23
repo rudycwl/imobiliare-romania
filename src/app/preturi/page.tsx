@@ -44,7 +44,7 @@ export default function PreturiPage() {
           </tbody>
         </table>
       </div>
-      <p className="muted mic">Prețuri cu TVA inclus. Agențiile abonate au {Math.round(REDUCERE_PROMOVARI_ABONATI * 100)}% reducere la promovări.</p>
+      <p className="muted mic">Prețuri finale, fără TVA (Hugetech SRL nu este plătitoare de TVA). Agențiile abonate au {Math.round(REDUCERE_PROMOVARI_ABONATI * 100)}% reducere la promovări.</p>
 
       <h2 id="agentii">Agenții imobiliare</h2>
       <p>Abonament lunar cu pagină de agenție, logo pe anunțuri, statistici și credite lunare de promovare.</p>

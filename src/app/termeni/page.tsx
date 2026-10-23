@@ -42,7 +42,7 @@ export default function TermeniPage() {
       <h2>5. Servicii plătite</h2>
       <p>
         Promovările (reactualizare, Evidențiat, Top în oraș, prima pagină a județului, pachetul „Vânzare rapidă”) și abonamentele pentru agenții se plătesc
-        online, cu cardul, prin procesatorul de plăți NETOPIA Payments. Prețurile sunt în lei și includ TVA, acolo unde se aplică. Serviciul se activează
+        online, cu cardul, prin procesatorul de plăți NETOPIA Payments. Prețurile sunt în lei și sunt finale: Hugetech SRL nu este plătitoare de TVA, deci nu se adaugă TVA. Serviciul se activează
         automat imediat după confirmarea plății, iar factura se trimite pe email.
       </p>
       <p>
