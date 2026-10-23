@@ -5,6 +5,7 @@ set -euo pipefail
 BAZA=/opt/cheiamea
 SURSA=$BAZA/sursa
 LOG=$BAZA/ultimul-build.log
+export HOME=/root
 exec 9>/run/cheiamea-actualizare.lock
 flock -n 9 || exit 0
 
