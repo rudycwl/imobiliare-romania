@@ -36,6 +36,11 @@ const CAMPURI = [
   { grup: "ERP Hugetech" },
   { k: "ERP_KEY", secret: true, ajutor: "Render → hugetech-erp → Environment → valoarea CHEIAMEA_ERP_KEY." },
 ];
+const VALID = {
+  DATABASE_URL: (v) => /^postgres(ql)?:\/\/\S+$/.test(v),
+  NETOPIA_LIVE: (v) => v === "da",
+  NEXT_PUBLIC_SITE_URL: (v) => /^https:\/\//.test(v),
+};
 const CHEI = new Set(CAMPURI.filter((c) => c.k).map((c) => c.k));
 
 const citesteEnv = () => (existsSync(ENV) ? JSON.parse(readFileSync(ENV, "utf8")) : {});
@@ -70,14 +75,15 @@ function pagina(env, mesaj) {
     const ph = c.secret && are ? "salvat; lasă gol ca să rămână" : "";
     const intrare = c.lung
       ? `<textarea name="${c.k}" rows="4" placeholder="${ph}">${esc(val)}</textarea>`
-      : `<input name="${c.k}" type="${c.secret ? "password" : "text"}" value="${esc(val)}" placeholder="${ph}" autocomplete="off">`;
+      // Câmpurile secrete nu sunt type="password": browserul ar pune singur în ele parola salvată pentru cheiamea.ro.
+      : `<input name="${c.k}" type="text"${c.secret ? ' class="secret"' : ""} value="${esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore>`;
     return `<label><b>${c.k}</b>${are ? " ✓" : ""}${intrare}${c.ajutor ? `<small>${esc(c.ajutor)}</small>` : ""}</label>`;
   }).join("\n");
   return `<!doctype html><html lang="ro"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Configurare CheiaMea</title>
 <style>body{font:16px system-ui,sans-serif;max-width:720px;margin:24px auto;padding:0 16px;color:#1b2a41}
 label{display:block;margin:14px 0}input,textarea{display:block;width:100%;box-sizing:border-box;padding:8px;margin-top:4px;font:inherit}
-small{color:#555}h2{margin-top:28px;border-bottom:1px solid #ddd}button{background:#f28c28;color:#fff;border:0;padding:12px 24px;font-size:17px;border-radius:6px;cursor:pointer}
+.secret{-webkit-text-security:disc}small{color:#555}h2{margin-top:28px;border-bottom:1px solid #ddd}button{background:#f28c28;color:#fff;border:0;padding:12px 24px;font-size:17px;border-radius:6px;cursor:pointer}
 .stare{background:#eef4fb;padding:12px;border-radius:6px}.ok{background:#e7f6e7;padding:12px;border-radius:6px}pre{background:#f4f4f4;padding:8px;overflow:auto;font-size:12px}</style>
 <h1>Configurare CheiaMea</h1>
 ${mesaj ? `<p class="ok">${esc(mesaj)}</p>` : ""}
@@ -116,6 +122,8 @@ createServer((req, res) => {
       if (!CHEI.has(k)) continue;
       const val = v.replace(/\r\n/g, "\n").trim();
       const camp = CAMPURI.find((c) => c.k === k);
+      // O valoare care nu poate fi bună nu o înlocuiește pe cea veche (de ex. o parolă completată de browser).
+      if (VALID[k] && val && !VALID[k](val)) continue;
       if (val) env[k] = val;
       else if (!camp.secret) delete env[k];
     }
