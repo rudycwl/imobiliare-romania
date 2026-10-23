@@ -8,7 +8,13 @@ import { createHash, createPublicKey, createVerify, X509Certificate } from "cryp
 const LIVE = process.env.NETOPIA_LIVE === "da";
 const BAZA = process.env.NETOPIA_URL ?? (LIVE ? "https://secure.mobilpay.ro/pay" : "https://secure.sandbox.netopia-payments.com");
 
-export const netopiaConfigurat = () => !!(process.env.NETOPIA_API_KEY && process.env.NETOPIA_POS_SIGNATURE);
+// În modul de test se folosesc cheile NETOPIA_SANDBOX_* dacă există, ca cele LIVE să poată sta puse în paralel
+// (NETOPIA testează implementarea în sandbox înainte de aprobare; după aprobare se scrie doar NETOPIA_LIVE=da).
+const alege = (nume: string) => (!LIVE && process.env[`NETOPIA_SANDBOX_${nume}`]) || process.env[`NETOPIA_${nume}`];
+const cheieApi = () => alege("API_KEY") ?? "";
+const semnaturaPos = () => alege("POS_SIGNATURE") ?? "";
+
+export const netopiaConfigurat = () => !!(cheieApi() && semnaturaPos());
 export const modTest = () => !LIVE;
 
 export type Facturare = {
@@ -39,7 +45,7 @@ export async function pornestePlata(p: {
     payment: { options: { installments: 0, bonus: 0 }, data: {} },
     order: {
       ntpID: "",
-      posSignature: process.env.NETOPIA_POS_SIGNATURE,
+      posSignature: semnaturaPos(),
       dateTime: new Date().toISOString(),
       description: p.descriere,
       orderID: p.comandaId,
@@ -64,7 +70,7 @@ export async function pornestePlata(p: {
   };
   const r = await fetch(`${BAZA}/payment/card/start`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: process.env.NETOPIA_API_KEY ?? "" },
+    headers: { "Content-Type": "application/json", Authorization: cheieApi() },
     body: JSON.stringify(corp),
     signal: AbortSignal.timeout(15000),
   });
@@ -88,7 +94,7 @@ function refaPem(text: string) {
  * PEM pe un singur rând, PEM codat base64 sau direct conținutul DER în base64.
  */
 function cheiePublica() {
-  const v = process.env.NETOPIA_PUBLIC_KEY?.trim();
+  const v = alege("PUBLIC_KEY")?.trim();
   if (!v) return null;
   const pem = refaPem(v) ?? refaPem(Buffer.from(v, "base64").toString("utf8"));
   if (pem) return createPublicKey(pem);
@@ -134,7 +140,7 @@ export function verificaNotificare(corp: string, token: string | null) {
     alg,
     semnatura,
     iss: c.iss === "NETOPIA Payments",
-    aud: aud.includes(process.env.NETOPIA_POS_SIGNATURE),
+    aud: aud.includes(semnaturaPos()),
     sub: c.sub === hash,
   };
   const ok = semnatura && verificari.iss && verificari.aud && verificari.sub;
@@ -152,8 +158,8 @@ export async function stareaPlatii(orderID: string, ntpID: string | null) {
   try {
     const r = await fetch(`${BAZA}/operation/status`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: process.env.NETOPIA_API_KEY ?? "" },
-      body: JSON.stringify({ posID: process.env.NETOPIA_POS_SIGNATURE, ntpID: ntpID ?? "", orderID }),
+      headers: { "Content-Type": "application/json", Authorization: cheieApi() },
+      body: JSON.stringify({ posID: semnaturaPos(), ntpID: ntpID ?? "", orderID }),
       signal: AbortSignal.timeout(10000),
     });
     const j = (await r.json().catch(() => null)) as { payment?: { status?: number; amount?: number; ntpID?: string }; error?: { code?: string } } | null;
