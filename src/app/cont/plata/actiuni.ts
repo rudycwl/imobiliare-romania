@@ -63,7 +63,9 @@ export async function platesteActiune(_: { eroare?: string } | undefined, f: For
     if (r.ntpID) await db.comanda.update({ where: { id: c.id }, data: { ntpID: r.ntpID } });
   } catch (e) {
     console.error("NETOPIA start", c.id, e);
-    return { eroare: "Nu am putut deschide pagina de plată. Încearcă din nou peste câteva minute." };
+    // Motivul de la NETOPIA (cod + mesaj, fără chei) ajută la depanare: jurnalul serverului nu e la îndemână.
+    const motiv = (e instanceof Error ? e.message : String(e)).slice(0, 200);
+    return { eroare: `Nu am putut deschide pagina de plată. Încearcă din nou peste câteva minute. (${motiv})` };
   }
   redirect(url);
 }
