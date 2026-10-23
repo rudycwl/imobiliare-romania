@@ -7,6 +7,8 @@ COD="${1:?lipsește codul de configurare}"
 REPO=https://github.com/rudycwl/imobiliare-romania.git
 BAZA=/opt/cheiamea
 export DEBIAN_FRONTEND=noninteractive
+# cloud-init rulează fără HOME; git și npm au nevoie de el.
+export HOME="${HOME:-/root}"
 
 # Memorie de rezervă: build-ul Next.js are nevoie de mai mult de 1 GB pe forma mică.
 if ! swapon --show | grep -q /swapfile; then
@@ -42,7 +44,6 @@ id cheiamea >/dev/null 2>&1 || useradd --system --create-home --home-dir "$BAZA"
 mkdir -p "$BAZA/releases" "$BAZA/bin" /etc/cheiamea
 chown cheiamea:cheiamea "$BAZA" "$BAZA/releases"
 [ -d "$BAZA/sursa/.git" ] || git clone "$REPO" "$BAZA/sursa"
-git config --global --add safe.directory "$BAZA/sursa"
 
 # Codul pentru pagina de configurare și fișierul cu variabile (citit de aplicație).
 umask 077
