@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { utilizatorCurent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { confirmaDinNetopia } from "@/lib/plati/comenzi";
+import { modTest } from "@/lib/plati/netopia";
 import { lei } from "@/lib/tarife";
 
 export const metadata: Metadata = { title: "Rezultatul plății", robots: { index: false } };
@@ -21,7 +22,7 @@ export default async function RezultatPage({ searchParams }: { searchParams: Pro
     <div className="ingust">
       <h1>Rezultatul plății</h1>
       <p className="muted">Comanda {c.id} · {c.descriere} · {lei(c.sumaBani / 100)}</p>
-      {stare === "platita" && <p className="succes">Plata a reușit. Serviciul e activ, iar factura vine pe email.</p>}
+      {stare === "platita" && <p className="succes">Plata a reușit. Serviciul e activ{modTest() ? " (plată de test, fără factură)." : ", iar factura vine pe email."}</p>}
       {stare === "respinsa" && <p className="eroare">Plata a fost respinsă. Nu s-a încasat nimic. Poți încerca din nou cu alt card.</p>}
       {stare === "noua" && (
         <p className="eroare">

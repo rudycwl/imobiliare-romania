@@ -4,7 +4,7 @@ import { db } from "../db";
 import { abonamentActiv, activeazaAbonament } from "../abonamente";
 import { aplicaPromovare } from "../promovari";
 import { emiteFactura } from "../facturare";
-import { STARI_PLATITE, stareaPlatii } from "./netopia";
+import { STARI_PLATITE, modTest, stareaPlatii } from "./netopia";
 import { getAbonament, getPromovare, pretAnual, pretLunar, pretPromovare, type CodPromovare } from "../tarife";
 
 export type CerereComanda = { tip: "promovare"; produs: string; anuntId: number } | { tip: "abonament"; produs: string; anual: boolean };
@@ -67,6 +67,8 @@ export async function plataReusita(comandaId: string, ntpID: string | null, star
     if (c.tip === "promovare" && c.anuntId) await aplicaPromovare(c.anuntId, c.produs as CodPromovare);
     if (c.tip === "abonament") await activeazaAbonament(c.utilizatorId, c.produs, c.anual);
   }
+  // Plățile de test (sandbox NETOPIA) nu încasează bani, deci nu primesc factură fiscală în Oblio.
+  if (modTest()) return c;
   // Factura e idempotentă după plataRef, deci se poate cere și la notificările repetate (ex. dacă prima dată a eșuat).
   await emiteFactura({ plataRef: c.id, utilizatorId: c.utilizatorId, linii: [{ denumire: c.descriere, pretBani: c.sumaBani }] });
   return c;
