@@ -2,7 +2,7 @@
 # Creează în Oracle Cloud tot ce trebuie pentru CheiaMea: rețea, porturi deschise (22, 80, 443) și mașina virtuală.
 # Se rulează în Oracle Cloud Shell (iconița >_ din dreapta sus), unde comanda `oci` e deja conectată la cont:
 #   curl -fsSL https://raw.githubusercontent.com/rudycwl/imobiliare-romania/main/deploy/oracle/creeaza.sh | bash -s <cod-configurare>
-# Poate fi rulat de mai multe ori: refolosește ce există deja.
+# Poate fi rulat de mai multe ori: refolosește ce există deja. Cheia SSH e RSA (Cloud Shell rulează în mod FIPS, fără ed25519).
 set -euo pipefail
 COD="${1:?lipsește codul de configurare}"
 T="${OCI_TENANCY:?nu găsesc contul (rulează comanda în Oracle Cloud Shell)}"
@@ -29,7 +29,7 @@ SUB=$(q oci network subnet list -c "$T" --vcn-id "$VCN" --lifecycle-state AVAILA
 [ -n "$SUB" ] || SUB=$(q oci network subnet create -c "$T" --vcn-id "$VCN" --cidr-block 10.0.0.0/24 --display-name $NUME-subnet --dns-label public --wait-for-state AVAILABLE --query data.id)
 
 echo "3/5 Cheia SSH (rămâne în Cloud Shell, în ~/.ssh/cheiamea)..."
-[ -f ~/.ssh/cheiamea ] || { mkdir -p ~/.ssh && ssh-keygen -q -t ed25519 -N '' -f ~/.ssh/cheiamea; }
+[ -f ~/.ssh/cheiamea.pub ] || { mkdir -p ~/.ssh && ssh-keygen -q -t rsa -b 4096 -N '' -f ~/.ssh/cheiamea; }
 
 cat > /tmp/cheiamea-cloud-init.yaml <<CI
 #cloud-config
