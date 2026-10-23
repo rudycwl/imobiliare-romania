@@ -51,7 +51,7 @@ export default async function AbonamentPage() {
           </div>
         ))}
       </div>
-      <p className="muted small">Prețuri cu TVA inclus. Abonamentul nu se reînnoiește automat. Vezi <Link href="/termeni">Termenii și condițiile</Link>.</p>
+      <p className="muted small">Prețuri finale, fără TVA (Hugetech SRL nu este plătitoare de TVA). Abonamentul nu se reînnoiește automat. Vezi <Link href="/termeni">Termenii și condițiile</Link>.</p>
     </CadruCont>
   );
 }

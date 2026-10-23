@@ -73,7 +73,7 @@ export default async function PromoveazaPage({ params, searchParams }: { params:
           </li>
         ))}
       </ul>
-      <p className="muted small">Plata se face cu cardul, prin NETOPIA Payments. Prețuri cu TVA inclus.</p>
+      <p className="muted small">Plata se face cu cardul, prin NETOPIA Payments. Prețuri finale, fără TVA (Hugetech SRL nu este plătitoare de TVA).</p>
     </div>
   );
 }

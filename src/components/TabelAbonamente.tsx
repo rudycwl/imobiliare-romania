@@ -58,7 +58,7 @@ export async function TabelAbonamente() {
         </table>
       </div>
       <p className="muted mic">
-        Prețuri cu TVA inclus. La plata anuală plătești {LUNI_PLATITE_PE_AN} luni și primești 12. Agențiile Fondatoare au primele 6 luni gratuite, apoi 50% reducere permanent.
+        Prețuri finale, fără TVA (Hugetech SRL nu este plătitoare de TVA). La plata anuală plătești {LUNI_PLATITE_PE_AN} luni și primești 12. Agențiile Fondatoare au primele 6 luni gratuite, apoi 50% reducere permanent.
       </p>
     </>
   );

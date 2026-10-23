@@ -1,8 +1,8 @@
 // Toate prețurile CheiaMea, într-un singur loc. Se schimbă doar aici.
-// Prețuri în lei, cu TVA inclus (de confirmat cu contabilul dacă Hugetech e plătitoare de TVA).
+// Prețuri finale în lei. Hugetech SRL nu este plătitoare de TVA (confirmat 23.10.2026).
 
 /** Cota de TVA folosită pentru afișare; 0 dacă firma nu e plătitoare de TVA. */
-export const COTA_TVA = 0.21;
+export const COTA_TVA = 0;
 
 /** Persoane fizice și firme care nu sunt agenții. */
 export const ANUNTURI_GRATUITE = 3;
