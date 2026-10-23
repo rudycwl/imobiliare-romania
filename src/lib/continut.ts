@@ -11,10 +11,11 @@ export type Public = { id: string; nume: string; reguli: Regula[] };
 export const BANDA: { eticheta: string; text: string; href: string }[] = [
   { eticheta: "Legislație", text: "TVA 9% la locuințe noi s-a aplicat până la 31 iulie 2026. Vezi ce se aplică acum", href: "/legislatie#tva" },
   { eticheta: "Vânzători", text: "Impozit la vânzare: 3% sub 3 ani de deținere, 1% peste 3 ani, fără plafon neimpozabil", href: "/legislatie#vanzatori" },
-  { eticheta: "Proiecte", text: "Iași: ansamblu nou cu 11 blocuri propus în Bucium", href: "/#proiecte" },
+  { eticheta: "Calculator", text: "Cât ai plăti pe lună pentru o locuință? Calculează rata în câteva secunde", href: "/#credit" },
   { eticheta: "Nou", text: "Legislație la zi: reguli pe scurt pentru cumpărători, vânzători, firme și dezvoltatori", href: "/legislatie" },
 ];
 
+// Dezactivat de pe pagina de start (decizia lui Rudy, 23.10.2026): fără reclamă gratuită pentru proiectele altora.
 export const PROIECTE: Proiect[] = [
   {
     stadiu: "În aprobare",

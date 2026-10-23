@@ -38,7 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <nav>
               <Link href="/cautare">Caută</Link>
-              <Link href="/#proiecte">Proiecte noi</Link>
               <Link href="/legislatie">Legislație</Link>
               <Link href="/agentii">Agenții</Link>
               <Link href="/pentru-agentii">Pentru agenții</Link>

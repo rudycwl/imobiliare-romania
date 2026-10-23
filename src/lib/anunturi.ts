@@ -111,6 +111,12 @@ export async function numarAnunturi(judet?: string): Promise<Record<string, numb
   return Object.fromEntries(r.map((x) => ["oras" in x ? x.oras : x.judet, x._count]));
 }
 
+/** Numărul de anunțuri publice pe tipul proprietății (pentru categoriile de pe pagina de start). */
+export async function numarPeTip(): Promise<Record<string, number>> {
+  const r = await db.anunt.groupBy({ by: ["tip"], where: activ(), _count: true });
+  return Object.fromEntries(r.map((x) => [x.tip, x._count]));
+}
+
 /** Câte anunțuri publice se potrivesc filtrelor; cu `dupa`, doar cele publicate de atunci încoace. */
 export function numarPotriviri(f: Filtre, dupa?: Date) {
   return db.anunt.count({ where: { AND: [unde(f), dupa ? { publicatLa: { gt: dupa } } : {}] } });
