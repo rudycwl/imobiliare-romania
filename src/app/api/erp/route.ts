@@ -5,20 +5,22 @@ import { db } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 // Date pentru ERP-ul Hugetech (doar citire). ERP-ul cere la 10 minute ce s-a schimbat de la ultima sincronizare:
-//   GET /api/erp?de=2026-10-01T00:00:00Z   cu antetul X-ERP-Key: <ERP_KEY din Netlify>
+//   GET /api/erp?de=2026-10-01T00:00:00Z   cu antetul X-ERP-Key: <ERP_KEY din pagina /configurare>
 // Fără `de` se întorc toate datele (prima sincronizare).
 
 const ZI = 864e5;
 
 function cheieBuna(primita: string | null) {
-  const asteptata = process.env.ERP_KEY;
+  const asteptata = process.env.ERP_KEY?.trim();
   if (!asteptata || !primita) return false;
   const h = (s: string) => createHash("sha256").update(s).digest();
   return timingSafeEqual(h(primita), h(asteptata));
 }
 
 export async function GET(req: NextRequest) {
-  if (!cheieBuna(req.headers.get("x-erp-key"))) return new NextResponse(null, { status: 403 });
+  // Fără cheie setată pe site răspundem altfel decât la o cheie greșită, ca ERP-ul să arate cauza exactă.
+  if (!process.env.ERP_KEY?.trim()) return NextResponse.json({ eroare: "ERP_KEY nu e setată pe site" }, { status: 503 });
+  if (!cheieBuna(req.headers.get("x-erp-key")?.trim() ?? null)) return new NextResponse(null, { status: 403 });
   const p = req.nextUrl.searchParams.get("de");
   const de = p && !Number.isNaN(Date.parse(p)) ? new Date(p) : new Date(0);
   const acum = new Date();
