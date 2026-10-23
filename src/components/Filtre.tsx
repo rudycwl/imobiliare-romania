@@ -7,6 +7,7 @@ export function Filtre({ valori, action, cuJudet = false }: { valori: F; action:
   return (
     <form method="get" action={action} className="filtre">
       <input name="q" placeholder="Caută (ex. centru, vilă)" defaultValue={valori.q} />
+      {cuJudet && valori.oras && <input type="hidden" name="oras" value={valori.oras} />}
       {cuJudet && (
         <select name="judet" defaultValue={valori.judet ?? ""}>
           <option value="">Toate județele</option>

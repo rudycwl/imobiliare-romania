@@ -13,6 +13,7 @@ import { Raporteaza } from "./Raporteaza";
 import { ActiuniProprietar } from "./ActiuniProprietar";
 import { ButonTelefon, Vizualizare } from "./Statistica";
 import { Favorit } from "@/components/Favorit";
+import { HartaLoc } from "@/components/harta/HartaLoc";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -106,6 +107,20 @@ export default async function AnuntPage({ params }: Props) {
           <Raporteaza id={a.id} />
         </div>
       </div>
+      {a.lat != null && a.lng != null && (
+        <section className="loc-anunt">
+          <div className="titlu-cu-actiune">
+            <h2>Pe hartă</h2>
+            <Link href={`/harta?judet=${j.slug}&oras=${o.slug}&tranzactie=${a.tranzactie}`} className="small">
+              Alte anunțuri din zonă pe hartă →
+            </Link>
+          </div>
+          <HartaLoc lat={a.lat} lng={a.lng} />
+          <p className="muted small">
+            {a.punctProprietar ? "Locul marcat de vânzător." : `Locație aproximativă: zona ${a.zona}, ${o.nume}.`}
+          </p>
+        </section>
+      )}
     </>
   );
 }

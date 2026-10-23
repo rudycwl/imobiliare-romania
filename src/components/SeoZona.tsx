@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { statisticiZona } from "@/lib/anunturi";
 
 type Stat = Awaited<ReturnType<typeof statisticiZona>>;
@@ -29,7 +30,18 @@ export function intrebariZona(loc: string, s: Stat) {
 }
 
 /** Bloc de conținut unic pentru fiecare oraș/județ: cifre reale + întrebări frecvente (cu schema.org FAQPage). */
-export function SeoZona({ loc, s, breadcrumb }: { loc: string; s: Stat; breadcrumb: { name: string; url: string }[] }) {
+export function SeoZona({
+  loc,
+  s,
+  breadcrumb,
+  indice,
+}: {
+  loc: string;
+  s: Stat;
+  breadcrumb: { name: string; url: string }[];
+  /** Linkul spre prețurile pe cartiere (doar la orașe). */
+  indice?: string;
+}) {
   const faq = intrebariZona(loc, s);
   const jsonLd = [
     {
@@ -51,6 +63,11 @@ export function SeoZona({ loc, s, breadcrumb }: { loc: string; s: Stat; breadcru
         {s.pretMp && <div><strong>{nr(s.pretMp)} €/m²</strong><span>preț mediu apartamente</span></div>}
         {s.chirieMedie && <div><strong>{nr(s.chirieMedie)} €</strong><span>chirie medie apartament</span></div>}
       </div>
+      {indice && (
+        <p>
+          <Link href={indice}>Vezi prețurile pe fiecare cartier din {loc} →</Link>
+        </p>
+      )}
       <h2>Întrebări frecvente despre imobiliare în {loc}</h2>
       {faq.map((f) => (
         <details key={f.q} className="faq">

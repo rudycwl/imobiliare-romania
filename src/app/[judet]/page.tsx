@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Filtre } from "@/components/Filtre";
+import { LinkHarta } from "@/components/harta/LinkHarta";
 import { SalveazaCautarea } from "@/components/SalveazaCautarea";
 import { curataFiltre } from "@/lib/cautari";
 import { ListaAnunturi } from "@/components/AnuntCard";
@@ -38,7 +39,10 @@ export default async function JudetPage({ params, searchParams }: Props) {
   return (
     <>
       <Breadcrumbs items={[{ label: j.nume }]} />
-      <h1>Imobiliare {j.slug === "bucuresti" ? "București" : `județul ${j.nume}`}</h1>
+      <div className="titlu-cu-actiune">
+        <h1>Imobiliare {j.slug === "bucuresti" ? "București" : `județul ${j.nume}`}</h1>
+        <LinkHarta filtre={{ ...sp, judet: j.slug, oras: undefined }} />
+      </div>
       <ul className="judete">
         {j.orase.map((o) => (
           <li key={o.slug}>

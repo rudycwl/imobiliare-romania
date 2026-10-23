@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { randomBytes } from "crypto";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -15,6 +16,7 @@ import { aplicaOfertaFondator } from "@/lib/fondatori";
 import { aplicaRecomandare } from "@/lib/atribuire";
 import { aplicaFiltru } from "@/lib/moderare";
 import { stocareConfigurata } from "@/lib/stocare";
+import { completeazaCoordonate } from "@/lib/geocodare";
 
 export type Stare = { eroare?: string; valori?: Record<string, string> } | undefined;
 
@@ -92,6 +94,15 @@ export async function deconectare() {
 }
 
 /** Citește și validează câmpurile comune formularelor de adăugare și editare. */
+/** Punctul pus de proprietar pe hartă, rotunjit la ~10 m; fără punct, îl căutăm noi după cartier. */
+function citestePunct(f: FormData) {
+  const lat = Math.round(Number(f.get("lat")) * 1e4) / 1e4;
+  const lng = Math.round(Number(f.get("lng")) * 1e4) / 1e4;
+  // Doar puncte din România (cu o margine mică).
+  const ok = f.get("lat") && f.get("lng") && lat > 43.5 && lat < 48.4 && lng > 20.2 && lng < 29.8;
+  return ok ? { lat, lng, punctProprietar: true } : { lat: null, lng: null, punctProprietar: false };
+}
+
 function citesteAnunt(f: FormData): { eroare: string } | { date: AnuntNou } {
   const tip = text(f, "tip");
   const tranzactie = text(f, "tranzactie");
@@ -128,7 +139,8 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   if ("eroare" in r) return esec(r.eroare, f);
   if (!(await poatePublica(u))) return esec(MESAJ_LIMITA, f);
 
-  const a = await creeazaAnunt(u.id, r.date);
+  const a = await creeazaAnunt(u.id, r.date, citestePunct(f));
+  after(() => completeazaCoordonate());
   await aplicaFiltru(a.id, r.date.titlu, r.date.descriere);
   // Paginile cache-uite (ISR) arată anunțul nou imediat, nu după expirare.
   revalidatePath("/");
@@ -142,7 +154,8 @@ export async function editeazaAnunt(_: Stare, f: FormData): Promise<Stare> {
   const { u, id } = await proprietarSiId(f);
   const r = citesteAnunt(f);
   if ("eroare" in r) return esec(r.eroare, f);
-  if (!(await editeaza(id, u.id, r.date))) redirect("/cont");
+  if (!(await editeaza(id, u.id, r.date, citestePunct(f)))) redirect("/cont");
+  after(() => completeazaCoordonate());
   await aplicaFiltru(id, r.date.titlu, r.date.descriere);
   revalidatePath("/");
   revalidatePath(`/anunt/${id}`);

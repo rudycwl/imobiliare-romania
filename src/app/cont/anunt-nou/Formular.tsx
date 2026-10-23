@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { Localitate } from "@/components/Localitate";
+import { AlegePunct } from "@/components/harta/AlegePunct";
 import { TIPURI, TRANZACTII } from "@/lib/etichete";
 import type { AnuntImportat } from "@/lib/import-anunt";
 import { editeazaAnunt, publicaAnunt } from "../actiuni";
@@ -126,6 +127,7 @@ export function FormularCampuri({
         Zonă / cartier
         <input name="zona" defaultValue={v?.zona} placeholder="ex. Centru" />
       </label>
+      <AlegePunct initial={v.lat && v.lng ? { lat: Number(v.lat), lng: Number(v.lng) } : null} />
       <label>
         Descriere
         <textarea name="descriere" defaultValue={v?.descriere} rows={6} maxLength={5000} />

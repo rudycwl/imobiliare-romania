@@ -27,6 +27,8 @@ export default async function EditeazaPage({ params }: { params: Promise<{ id: s
     judet: a.judet,
     oras: a.oras,
     zona: a.zona,
+    // Punctul găsit automat după cartier nu se trimite: la schimbarea cartierului se recalculează.
+    ...(a.punctProprietar && a.lat != null && a.lng != null ? { lat: String(a.lat), lng: String(a.lng) } : {}),
   };
   return (
     <div className="editare-anunt">
