@@ -77,7 +77,11 @@ export async function pornestePlata(p: {
   const j = (await r.json().catch(() => null)) as { payment?: { paymentURL?: string; ntpID?: string }; error?: { code?: string; message?: string } } | null;
   // Codul 101 = clientul trebuie trimis pe pagina de plată NETOPIA (cazul normal fără datele cardului la noi).
   const url = j?.payment?.paymentURL;
-  if (!url) throw new Error(`NETOPIA: ${j?.error?.code ?? r.status} ${j?.error?.message ?? "răspuns fără paymentURL"}`);
+  if (!url) {
+    // Modul și care cheie s-a folosit (nu cheia însăși), ca să se vadă din pagină ce e greșit.
+    const cheie = !LIVE && process.env.NETOPIA_SANDBOX_API_KEY ? "cheie SANDBOX" : "cheie NETOPIA_API_KEY";
+    throw new Error(`NETOPIA ${LIVE ? "LIVE" : "test"}, ${cheie}: ${j?.error?.code ?? r.status} ${j?.error?.message ?? "răspuns fără paymentURL"}`);
+  }
   return { url, ntpID: j?.payment?.ntpID ?? null };
 }
 
