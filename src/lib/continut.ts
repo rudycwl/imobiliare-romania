@@ -12,7 +12,7 @@ export const BANDA: { eticheta: string; text: string; href: string }[] = [
   { eticheta: "Legislație", text: "TVA 9% la locuințe noi s-a aplicat până la 31 iulie 2026. Vezi ce se aplică acum", href: "/legislatie#tva" },
   { eticheta: "Vânzători", text: "Impozit la vânzare: 3% sub 3 ani de deținere, 1% peste 3 ani, fără plafon neimpozabil", href: "/legislatie#vanzatori" },
   { eticheta: "Proiecte", text: "Iași: ansamblu nou cu 11 blocuri propus în Bucium", href: "/#proiecte" },
-  { eticheta: "Agenții", text: "Agenție Fondatoare: 6 luni gratuit pentru primele 100 de agenții", href: "/pentru-agentii" },
+  { eticheta: "Nou", text: "Legislație la zi: reguli pe scurt pentru cumpărători, vânzători, firme și dezvoltatori", href: "/legislatie" },
 ];
 
 export const PROIECTE: Proiect[] = [
