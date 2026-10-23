@@ -1,0 +1,9 @@
+[Unit]
+Description=CheiaMea - alerte pe email în fiecare dimineață, la 8 (ora României)
+
+[Timer]
+OnCalendar=*-*-* 08:00:00 Europe/Bucharest
+Persistent=true
+
+[Install]
+WantedBy=timers.target

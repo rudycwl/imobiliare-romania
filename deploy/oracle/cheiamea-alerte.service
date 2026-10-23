@@ -1,0 +1,7 @@
+[Unit]
+Description=CheiaMea - emailurile cu anunțuri noi pentru căutările salvate
+After=cheiamea.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'curl -fsS -m 600 -X POST -H "x-cheie: $(cat /etc/cheiamea/cheie-alerte)" http://127.0.0.1:3000/api/alerte'

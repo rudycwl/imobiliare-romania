@@ -128,6 +128,16 @@ export function numarPotriviri(f: Filtre, dupa?: Date) {
   return db.anunt.count({ where: { AND: [unde(f), dupa ? { publicatLa: { gt: dupa } } : {}] } });
 }
 
+/** Anunțurile publicate după `dupa` care se potrivesc filtrelor, cele mai noi primele (pentru alertele pe email). */
+export function anunturiNoi(f: Filtre, dupa: Date, limita = 10) {
+  return db.anunt.findMany({
+    where: { AND: [unde(f), { publicatLa: { gt: dupa } }] },
+    orderBy: { publicatLa: "desc" },
+    take: limita,
+    select: { id: true, titlu: true, pret: true, tranzactie: true, oras: true, judet: true, zona: true },
+  });
+}
+
 /** Anunțurile favorite ale unui utilizator, cele mai recent salvate primele (inclusiv cele expirate). */
 export async function anunturiFavorite(utilizatorId: string) {
   const f = await db.favorit.findMany({

@@ -7,11 +7,12 @@ import { numarPotriviri } from "@/lib/anunturi";
 import { curataFiltre } from "@/lib/cautari";
 import { formatData } from "@/lib/fondatori";
 import { CadruCont } from "../CadruCont";
-import { stergeCautarea } from "./actiuni";
+import { comutaAlerta, stergeCautarea } from "./actiuni";
 
 export const metadata: Metadata = { title: "Căutări salvate", robots: { index: false } };
 
-export default async function CautariPage() {
+export default async function CautariPage({ searchParams }: { searchParams: Promise<{ alerta?: string }> }) {
+  const { alerta } = await searchParams;
   const u = await utilizatorCurent();
   if (!u) redirect("/cont/autentificare?inapoi=/cont/cautari");
   const cautari = await db.cautareSalvata.findMany({ where: { utilizatorId: u.id }, orderBy: { creatLa: "desc" } });
@@ -24,6 +25,8 @@ export default async function CautariPage() {
   return (
     <CadruCont u={u}>
       <h1>🔔 Căutări salvate</h1>
+      {alerta === "oprita" && <p className="succes" role="status">Gata, nu mai primești emailuri pentru acea căutare. O poți reporni oricând de aici.</p>}
+      {alerta === "link-gresit" && <p className="eroare" role="alert">Linkul din email nu e complet. Oprește alerta de mai jos.</p>}
       {cautari.length ? (
         <ul className="anunturile-mele">
           {cautari.map((c, i) => (
@@ -34,6 +37,8 @@ export default async function CautariPage() {
                 {numere[i].noi > 0 && <span className="eticheta-noi">{numere[i].noi === 1 ? "1 anunț nou" : `${numere[i].noi} anunțuri noi`}</span>}
                 <div className="small muted">
                   {numere[i].total === 1 ? "1 anunț" : `${numere[i].total} anunțuri`} acum · salvată pe {formatData(c.creatLa)}
+                  {" · "}
+                  {c.alertaEmail ? "primești pe email anunțurile noi, o dată pe zi" : "alerta pe email e oprită"}
                 </div>
               </div>
               <form className="butoane-anunt" action={stergeCautarea}>
@@ -41,13 +46,18 @@ export default async function CautariPage() {
                 <a href={`/cont/cautari/${c.id}`} className="buton">Vezi anunțurile</a>
                 <button type="submit" className="secundar">Șterge</button>
               </form>
+              <form className="butoane-anunt" action={comutaAlerta}>
+                <input type="hidden" name="id" value={c.id} />
+                {!c.alertaEmail && <input type="hidden" name="porneste" value="1" />}
+                <button type="submit" className="secundar">{c.alertaEmail ? "Oprește emailurile" : "Pornește emailurile"}</button>
+              </form>
             </li>
           ))}
         </ul>
       ) : (
         <p className="muted">
           Nu ai căutări salvate. Fă o căutare (de exemplu apartamente de vânzare în orașul tău), apoi apasă „🔔 Salvează căutarea” de sub filtre.
-          Aici vei vedea câte anunțuri noi au apărut de la ultima ta vizită. <Link href="/cautare">Începe o căutare</Link>
+          Aici vei vedea câte anunțuri noi au apărut de la ultima ta vizită, iar pe email primești anunțurile noi o dată pe zi. <Link href="/cautare">Începe o căutare</Link>
         </p>
       )}
     </CadruCont>
