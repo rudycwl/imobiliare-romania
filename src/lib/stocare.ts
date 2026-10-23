@@ -1,5 +1,7 @@
 import "server-only";
-import { createHash, createHmac } from "crypto";
+import { createHash, createHmac, timingSafeEqual } from "crypto";
+import { access, mkdir, unlink, writeFile } from "fs/promises";
+import path from "path";
 
 // Pozele stau într-un spațiu de stocare compatibil S3 (Cloudflare R2), nu pe Netlify,
 // ca traficul pentru imagini să nu consume traficul inclus în Netlify.
@@ -14,9 +16,45 @@ const env = () => ({
   public: (process.env.R2_PUBLIC_URL ?? "").replace(/\/$/, ""),
 });
 
-export const stocareConfigurata = () => Object.values(env()).every(Boolean);
+// Pe serverul propriu (Oracle) pozele noi stau pe disc, în POZE_DIR, și se servesc de Caddy la /poze/.
+// Cheile lor încep cu „local/”; pozele vechi din R2 rămân la adresa lor publică.
+const LOCAL = "local/";
+const dirLocal = () => process.env.POZE_DIR ?? "";
+export const stocareLocala = () => !!dirLocal();
+const r2Configurat = () => Object.values(env()).every(Boolean);
 
-export const urlPublic = (cheie: string) => `${env().public}/${cheie}`;
+export const stocareConfigurata = () => stocareLocala() || r2Configurat();
+
+export const urlPublic = (cheie: string) => (cheie.startsWith(LOCAL) ? `/poze/${cheie.slice(LOCAL.length)}` : `${env().public}/${cheie}`);
+
+/** Prefixul cheilor noi: „local/” când pozele stau pe disc. */
+export const prefixCheie = () => (stocareLocala() ? LOCAL : "");
+
+/** Calea pe disc a unei poze locale; refuză orice cheie care nu are forma generată de cheieNoua. */
+export function caleLocala(cheie: string) {
+  if (!/^local\/anunturi\/\d+\/[0-9a-f]{16}\.(webp|jpg)$/.test(cheie)) return null;
+  return path.join(dirLocal(), cheie.slice(LOCAL.length));
+}
+
+const cheieSemnare = () => createHash("sha256").update(`poze:${process.env.DATABASE_URL ?? ""}`).digest();
+const semnaturaLocala = (date: string) => createHmac("sha256", cheieSemnare()).update(date).digest("hex");
+
+/** Verifică parametrii semnați din URL-ul de încărcare locală (cheie, tip, mărime, expirare). */
+export function verificaIncarcareLocala(q: URLSearchParams) {
+  const [c, t, m, e, s] = ["c", "t", "m", "e", "s"].map((k) => q.get(k) ?? "");
+  const asteptat = Buffer.from(semnaturaLocala([c, t, m, e].join("|")));
+  const primit = Buffer.from(s);
+  if (asteptat.length !== primit.length || !timingSafeEqual(asteptat, primit)) return null;
+  if (!(Number(e) > Date.now())) return null;
+  return { cheie: c, tip: t, marime: Number(m) };
+}
+
+export async function salveazaLocal(cheie: string, date: Buffer) {
+  const cale = caleLocala(cheie);
+  if (!cale) throw new Error("Cheie invalidă");
+  await mkdir(path.dirname(cale), { recursive: true });
+  await writeFile(cale, date);
+}
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 const hmac = (k: Buffer | string, s: string) => createHmac("sha256", k).update(s).digest();
@@ -50,16 +88,31 @@ function urlSemnat(metoda: "PUT" | "DELETE", cheie: string, antete: Record<strin
 
 /** URL prin care browserul încarcă direct poza; tipul și mărimea sunt semnate, deci nu pot fi schimbate. */
 export function urlIncarcare(cheie: string, tip: string, marime: number) {
+  if (cheie.startsWith(LOCAL)) {
+    const date = [cheie, tip, String(marime), String(Date.now() + 300_000)];
+    const q = new URLSearchParams({ c: date[0], t: date[1], m: date[2], e: date[3], s: semnaturaLocala(date.join("|")) });
+    return `/api/poze?${q}`;
+  }
   return urlSemnat("PUT", cheie, { "content-type": tip, "content-length": String(marime) });
 }
 
 export async function stergeObiect(cheie: string) {
+  if (cheie.startsWith(LOCAL)) {
+    const cale = caleLocala(cheie);
+    if (cale) await unlink(cale).catch((e) => { if (e.code !== "ENOENT") throw e; });
+    return;
+  }
+  if (!r2Configurat()) return;
   const r = await fetch(urlSemnat("DELETE", cheie, {}), { method: "DELETE", signal: AbortSignal.timeout(10000) });
   if (!r.ok && r.status !== 404) throw new Error(`Ștergerea pozei a eșuat: ${r.status}`);
 }
 
 /** Verifică că poza chiar a ajuns în stocare înainte s-o legăm de anunț. */
 export async function exista(cheie: string) {
+  if (cheie.startsWith(LOCAL)) {
+    const cale = caleLocala(cheie);
+    return !!cale && (await access(cale).then(() => true, () => false));
+  }
   const r = await fetch(urlPublic(cheie), { method: "HEAD", signal: AbortSignal.timeout(10000) });
   return r.ok;
 }
@@ -95,6 +148,7 @@ let corsSetat: Promise<void> | null = null;
  * Se setează automat la prima încărcare, ca să nu trebuiască configurat de mână în Cloudflare.
  */
 export function asiguraCors() {
+  if (stocareLocala()) return Promise.resolve();
   corsSetat ??= (async () => {
     const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro").replace(/\/$/, "");
     const origini = [...new Set([site, "https://cheiamea.ro", "https://nou.cheiamea.ro", "https://www.cheiamea.ro", "https://cheiamea.com", "https://www.cheiamea.com"])];

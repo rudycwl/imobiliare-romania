@@ -34,7 +34,7 @@ export async function cerereIncarcare(anuntId: number, tip: string, marime: numb
 /** Pasul 2: după încărcare, poza se leagă de anunț. */
 export async function confirmaPoza(anuntId: number, cheie: string) {
   const a = await anuntPropriu(anuntId);
-  if (!a || !cheie.startsWith(`anunturi/${anuntId}/`)) return { eroare: "Poza nu e validă." };
+  if (!a || !cheie.replace(/^local\//, "").startsWith(`anunturi/${anuntId}/`)) return { eroare: "Poza nu e validă." };
   if ((await db.poza.count({ where: { anuntId } })) >= MAX_POZE) return { eroare: `Poți adăuga cel mult ${MAX_POZE} poze.` };
   if (!(await exista(cheie))) return { eroare: "Poza nu a ajuns în stocare. Încearcă din nou." };
   await adaugaPoza(anuntId, cheie);
