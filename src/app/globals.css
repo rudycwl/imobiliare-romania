@@ -310,7 +310,7 @@ button.pericol { background: #b91c1c; color: #fff; border-color: #b91c1c; }
 .footer .muted, .footer a { color: #cbd5e1; }
 .footer a:hover { color: #fdba74; }
 .footer .subsol-plati .netopia img { background: #fff; border-radius: 6px; padding: 3px 6px; }
-h1, .titlu-mare { font-family: Fraunces, Georgia, serif; letter-spacing: -0.02em; }
+h1, .titlu-mare { font-family: Inter, system-ui, sans-serif; font-weight: 800; letter-spacing: -0.03em; }
 .supratitlu { display: inline-flex; align-items: center; gap: 10px; margin: 0; font-size: .82rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--portocaliu-text); }
 .ascuns { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sageata { display: inline-block; transition: transform .2s ease; }
@@ -379,7 +379,7 @@ a:hover .sageata { transform: translateX(4px); }
 .bannere-pista:hover { animation-play-state: paused; }
 .banner { width: 33.3333%; min-height: 220px; padding: 34px 44px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; }
 .banner > div { display: flex; flex-direction: column; gap: 10px; max-width: 640px; }
-.banner h2 { margin: 0; font-family: Fraunces, Georgia, serif; font-size: clamp(1.6rem, 3.5vw, 2.5rem); line-height: 1.1; }
+.banner h2 { margin: 0; font-size: clamp(1.6rem, 3.5vw, 2.5rem); line-height: 1.1; }
 .banner p { margin: 0; font-size: 1.05rem; }
 .banner-portocaliu { background: var(--portocaliu); color: #0b2545; }
 .banner-portocaliu .supratitlu { color: #0b2545; }
@@ -422,7 +422,7 @@ a:hover .sageata { transform: translateX(4px); }
 
 .stiri { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
 .stire-mare { grid-row: span 3; position: relative; overflow: hidden; min-height: 340px; padding: 32px; border-radius: 22px; background: #0b2545; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; }
-.stire-mare h3 { margin: 0; font-family: Fraunces, Georgia, serif; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.15; }
+.stire-mare h3 { margin: 0; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.15; }
 .stire-mare p { margin: 0; color: #cbd5e1; line-height: 1.55; }
 .eticheta-stire { align-self: flex-start; padding: 4px 12px; border-radius: 999px; background: var(--portocaliu); color: #0b2545; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .citeste { font-weight: 700; color: #fdba74; }
@@ -439,7 +439,7 @@ a:hover .sageata { transform: translateX(4px); }
 .reguli { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px; }
 .regula { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; animation: apare-sus .5s ease both; }
 .regula:nth-child(2) { animation-delay: .06s; } .regula:nth-child(3) { animation-delay: .12s; } .regula:nth-child(4) { animation-delay: .18s; }
-.regula .nr { font-family: Fraunces, Georgia, serif; font-size: 1.8rem; font-weight: 800; color: var(--portocaliu); }
+.regula .nr { font-size: 1.8rem; font-weight: 800; color: var(--portocaliu); }
 .regula h3 { margin: 4px 0 6px; font-size: 1.05rem; }
 .regula p { margin: 0; color: var(--muted); line-height: 1.55; }
 .pagina-legi section { scroll-margin-top: 90px; margin-top: 28px; }
@@ -449,7 +449,7 @@ a:hover .sageata { transform: translateX(4px); }
 
 .chemari { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
 .chemare { border-radius: 22px; padding: 32px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
-.chemare h2 { font-family: Fraunces, Georgia, serif; font-size: 1.9rem; }
+.chemare h2 { font-size: 1.9rem; }
 .chemare p { margin: 0; line-height: 1.5; }
 .chemare-portocalie { background: var(--portocaliu); color: #0b2545; }
 .chemare-albastra { background: #0b2545; color: #fff; }
