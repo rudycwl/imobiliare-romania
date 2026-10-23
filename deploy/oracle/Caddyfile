@@ -1,5 +1,6 @@
 # CheiaMea pe Oracle Cloud. Caddy ia singur certificatele HTTPS când domeniile arată spre această mașină.
-cheiamea.ro, nou.cheiamea.ro {
+# 158-180-27-245.sslip.io = adresa serverului fără DNS (pentru configurare și test înainte de mutarea domeniului).
+cheiamea.ro, nou.cheiamea.ro, 158-180-27-245.sslip.io {
 	encode zstd gzip
 	handle /configurare* {
 		reverse_proxy 127.0.0.1:3001
