@@ -19,7 +19,8 @@ function numeRand(host: string | undefined, domeniu: string) {
   return h.endsWith("." + domeniu) ? h.slice(0, -domeniu.length - 1) : h;
 }
 
-export default async function EmailPage() {
+export default async function EmailPage({ searchParams }: { searchParams: Promise<{ m?: string; ok?: string }> }) {
+  const { m, ok } = await searchParams;
   const u = await utilizatorCurent();
   if (!esteAdmin(u?.email)) notFound();
   const domeniu = expeditor().split("@")[1];
@@ -36,6 +37,8 @@ export default async function EmailPage() {
 
   const d = await brevo("GET", `/senders/domains/${domeniu}`);
   const exista = d.ok;
+  // Orice alt răspuns decât „domeniul nu există” (ex. cheie greșită, IP neautorizat) trebuie arătat, nu ascuns.
+  const eroare = !d.ok && !/not.?found|does not exist/i.test(`${d.date?.code ?? ""} ${d.date?.message ?? ""}`) ? d.date?.message ?? JSON.stringify(d.date) : null;
   const gata = exista && d.date?.authenticated && d.date?.verified;
   const randuri = Object.entries((d.date?.dns_records ?? {}) as Record<string, RandDns>).filter(([, r]) => r?.value);
 
@@ -45,6 +48,8 @@ export default async function EmailPage() {
       <p className="muted">
         Expeditor: {expeditor()}. De aici pleacă „Am uitat parola” și alertele pentru căutări. · <Link href="/admin/moderare">Moderare</Link>
       </p>
+      {m && <p className={ok === "1" ? "succes" : "eroare"}>{m}</p>}
+      {eroare && <p className="eroare">Brevo a refuzat cheia: {eroare}</p>}
 
       {!exista ? (
         <form action={adaugaDomeniul}>
