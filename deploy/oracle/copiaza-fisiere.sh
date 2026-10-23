@@ -6,6 +6,11 @@ SRC=/opt/cheiamea/sursa/deploy/oracle
 install -d -m 755 -o cheiamea -g cheiamea /var/lib/cheiamea-poze
 install -m 755 "$SRC/actualizeaza.sh" /opt/cheiamea/bin/actualizeaza.sh
 install -m 644 "$SRC/configurare.mjs" "$SRC/cu-env.mjs" /opt/cheiamea/bin/
+# Pagina de configurare rulează mereu: o repornim când s-a schimbat fișierul pe care l-a încărcat.
+h=$(sha256sum /opt/cheiamea/bin/configurare.mjs | cut -d' ' -f1)
+if [ "$(cat /run/cheiamea-configurare.sha 2>/dev/null)" != "$h" ]; then
+  systemctl restart cheiamea-configurare.service 2>/dev/null && echo "$h" > /run/cheiamea-configurare.sha || true
+fi
 schimbat=0
 for u in cheiamea.service cheiamea-configurare.service cheiamea-actualizare.service cheiamea-actualizare.timer; do
   cmp -s "$SRC/$u" "/etc/systemd/system/$u" || { install -m 644 "$SRC/$u" /etc/systemd/system/; schimbat=1; }
