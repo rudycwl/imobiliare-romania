@@ -21,6 +21,13 @@ export function cheieAlerte(): string | null {
   }
 }
 
+/** Cererile de la timerele de pe server (alerte, copia pozelor) vin cu cheia în antetul x-cheie. */
+export function cerereDeLaServer(req: Request) {
+  const k = cheieAlerte();
+  const dat = req.headers.get("x-cheie") ?? "";
+  return !!k && dat.length === k.length && timingSafeEqual(Buffer.from(dat), Buffer.from(k));
+}
+
 export function semnatura(cautareId: number) {
   const k = cheieAlerte();
   return k ? createHmac("sha256", k).update(`oprire-alerta:${cautareId}`).digest("base64url").slice(0, 32) : null;

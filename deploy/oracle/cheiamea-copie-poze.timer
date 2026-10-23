@@ -1,0 +1,9 @@
+[Unit]
+Description=CheiaMea - copia pozelor în fiecare noapte, la 3:30 (ora României)
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 Europe/Bucharest
+Persistent=true
+
+[Install]
+WantedBy=timers.target
