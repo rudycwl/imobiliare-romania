@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { utilizatorCurent } from "@/lib/auth";
 import { esteAdmin } from "@/lib/fondatori";
 import { brevo, expeditor, trimiteEmail } from "@/lib/email";
+import { adaugaRanduri } from "@/lib/netlify-dns";
 
 const domeniu = () => expeditor().split("@")[1];
 
@@ -37,4 +38,31 @@ export async function emailDeTest() {
     subiect: "Test CheiaMea: emailurile site-ului merg",
     paragrafe: ["Dacă citești asta, site-ul poate trimite emailuri: „Am uitat parola” și alertele pentru căutările salvate funcționează."],
   });
+}
+
+/** Pune în Netlify DNS rândurile cerute de Brevo, apoi cere verificarea. */
+export async function puneInNetlify() {
+  await admin();
+  const d = await brevo("GET", `/senders/domains/${domeniu()}`);
+  const randuri = Object.values((d.date?.dns_records ?? {}) as Record<string, { type?: string; host_name?: string; value?: string }>)
+    .filter((r) => r?.type && r.value)
+    .map((r) => {
+      const h = (r.host_name ?? "").replace(/\.$/, "");
+      const nume = !h || h === "@" ? domeniu() : h.endsWith(domeniu()) ? h : `${h}.${domeniu()}`;
+      return { type: r.type!, hostname: nume, value: r.value! };
+    });
+  await adaugaRanduri(domeniu(), randuri);
+  await verificaDomeniul();
+}
+
+/** cheiamea.com și www-urile arată spre serverul Oracle; Caddy le redirecționează la cheiamea.ro. */
+export async function leagaDomeniile() {
+  await admin();
+  const ip = "158.180.27.245";
+  await adaugaRanduri("cheiamea.ro", [{ type: "A", hostname: "www.cheiamea.ro", value: ip }]);
+  await adaugaRanduri("cheiamea.com", [
+    { type: "A", hostname: "cheiamea.com", value: ip },
+    { type: "A", hostname: "www.cheiamea.com", value: ip },
+  ]);
+  revalidatePath("/admin/email");
 }

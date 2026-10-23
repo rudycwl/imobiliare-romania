@@ -38,6 +38,7 @@ const CAMPURI = [
   { grup: "Emailuri trimise de site (Brevo)" },
   { k: "BREVO_API_KEY", secret: true, ajutor: "Brevo → numele tău (sus, dreapta) → SMTP & API → API Keys → Generate a new API key. Fără ea, „Am uitat parola” și alertele pe email nu merg." },
   { k: "EMAIL_EXPEDITOR", implicit: "noreply@cheiamea.ro", ajutor: "Lasă așa. Domeniul cheiamea.ro trebuie verificat în Brevo (Senders, Domains & Dedicated IPs → Domains)." },
+  { k: "NETLIFY_TOKEN", secret: true, ajutor: "Opțional: app.netlify.com/user/applications → Personal access tokens → New access token. Cu el, site-ul își pune singur rândurile DNS (Brevo, cheiamea.com)." },
   { grup: "ERP Hugetech" },
   { k: "ERP_KEY", secret: true, ajutor: "Render → hugetech-erp → Environment → valoarea CHEIAMEA_ERP_KEY." },
 ];

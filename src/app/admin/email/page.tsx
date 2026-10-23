@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { utilizatorCurent } from "@/lib/auth";
 import { esteAdmin } from "@/lib/fondatori";
 import { brevo, emailConfigurat, expeditor } from "@/lib/email";
-import { adaugaDomeniul, emailDeTest, verificaDomeniul } from "./actiuni";
+import { adaugaDomeniul, emailDeTest, leagaDomeniile, puneInNetlify, verificaDomeniul } from "./actiuni";
+import { netlifyConfigurat } from "@/lib/netlify-dns";
 
 export const metadata: Metadata = { title: "Emailurile site-ului", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -79,6 +80,16 @@ export default async function EmailPage() {
         </>
       )}
 
+      {exista && !gata && netlifyConfigurat() && (
+        <form action={puneInNetlify} style={{ marginTop: 16 }}>
+          <button type="submit">Pune rândurile în Netlify DNS și verifică</button>
+        </form>
+      )}
+      {netlifyConfigurat() && (
+        <form action={leagaDomeniile} style={{ marginTop: 16 }}>
+          <button type="submit" className="secundar">Leagă www.cheiamea.ro și cheiamea.com de server</button>
+        </form>
+      )}
       {exista && (
         <form action={verificaDomeniul} style={{ marginTop: 16 }}>
           <button type="submit">Verifică din nou la Brevo</button>
