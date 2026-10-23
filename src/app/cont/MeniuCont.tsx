@@ -12,7 +12,7 @@ export function MeniuCont({ agentie, admin }: { agentie: boolean; admin: boolean
     { href: "/cont/favorite", text: "♥ Favorite" },
     { href: "/cont/cautari", text: "🔔 Căutări salvate" },
     { href: "/cont/plati", text: "Plăți și facturi" },
-    ...(agentie ? [{ href: "/cont/abonament", text: "Abonament" }] : []),
+    ...(agentie ? [{ href: "/cont/import", text: "Import anunțuri" }, { href: "/cont/abonament", text: "Abonament" }] : []),
     { href: "/cont/recomanda", text: "Recomandă CheiaMea" },
     { href: "/cont/setari", text: "Setări cont" },
     ...(admin ? [{ href: "/admin/moderare", text: "Moderare anunțuri" }] : []),

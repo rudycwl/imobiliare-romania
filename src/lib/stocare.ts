@@ -21,7 +21,7 @@ const env = () => ({
 const LOCAL = "local/";
 const dirLocal = () => process.env.POZE_DIR ?? "";
 export const stocareLocala = () => !!dirLocal();
-const r2Configurat = () => Object.values(env()).every(Boolean);
+export const r2Configurat = () => Object.values(env()).every(Boolean);
 
 export const stocareConfigurata = () => stocareLocala() || r2Configurat();
 
@@ -105,6 +105,17 @@ export async function stergeObiect(cheie: string) {
   if (!r2Configurat()) return;
   const r = await fetch(urlSemnat("DELETE", cheie, {}), { method: "DELETE", signal: AbortSignal.timeout(10000) });
   if (!r.ok && r.status !== 404) throw new Error(`Ștergerea pozei a eșuat: ${r.status}`);
+}
+
+/** Copia de rezervă a unei poze de pe disc în R2 (vezi src/lib/copie-poze.ts). */
+export async function puneInR2(cheie: string, date: Buffer, tip: string) {
+  const r = await fetch(urlSemnat("PUT", cheie, { "content-type": tip }), {
+    method: "PUT",
+    headers: { "content-type": tip },
+    body: new Uint8Array(date),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!r.ok) throw new Error(`Copierea în R2 a eșuat: ${r.status}`);
 }
 
 /** Verifică că poza chiar a ajuns în stocare înainte s-o legăm de anunț. */

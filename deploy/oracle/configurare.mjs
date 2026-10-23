@@ -15,7 +15,7 @@ const CAMPURI = [
   { grup: "Site" },
   { k: "NEXT_PUBLIC_SITE_URL", implicit: "https://cheiamea.ro", ajutor: "Lasă așa." },
   { k: "ADMIN_EMAILS", ajutor: "Emailul cu care intri în contul tău de pe CheiaMea (pentru Moderare)." },
-  { grup: "Poze (Cloudflare R2)" },
+  { grup: "Copia de rezervă a pozelor (Cloudflare R2)" },
   { k: "R2_ACCOUNT_ID", ajutor: "Cloudflare → R2 → în dreapta, „Account ID”." },
   { k: "R2_ACCESS_KEY_ID", secret: true, ajutor: "Cloudflare → R2 → Manage API tokens → token nou „Admin Read & Write” → Access Key ID." },
   { k: "R2_SECRET_ACCESS_KEY", secret: true, ajutor: "Din același token: Secret Access Key." },
