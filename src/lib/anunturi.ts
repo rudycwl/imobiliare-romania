@@ -7,6 +7,7 @@ import { laUtilizator } from "./utilizatori";
 import { ZILE_VALABILITATE } from "./tarife";
 import { limitaPentru } from "./abonamente";
 import { ruleazaReactualizari } from "./promovari";
+import { getOras } from "./geo";
 
 export type Filtre = {
   q?: string;
@@ -27,7 +28,7 @@ export type Filtre = {
 };
 
 /** Condiția pentru anunțurile publice: neexpirate și trecute de moderare. */
-const activ = (): Prisma.AnuntWhereInput => ({ expiraLa: { gt: new Date() }, moderare: "ok" });
+export const activ = (): Prisma.AnuntWhereInput => ({ expiraLa: { gt: new Date() }, moderare: "ok" });
 
 const LIMITA = 60;
 
@@ -56,7 +57,8 @@ function unde(f: Filtre): Prisma.AnuntWhereInput {
   return {
     ...(f.toate ? {} : activ()),
     judet: f.judet || undefined,
-    oras: f.oras || undefined,
+    // Orașul contează doar dacă e din județul ales (pe /cautare și /harta județul se poate schimba).
+    oras: f.oras && f.judet && getOras(f.judet, f.oras) ? f.oras : undefined,
     tip: f.tip && f.tip in TIPURI ? f.tip : undefined,
     tranzactie: f.tranzactie && f.tranzactie in TRANZACTII ? f.tranzactie : undefined,
     pret: pretMin || pretMax ? { gte: pretMin, lte: pretMax } : undefined,
@@ -64,7 +66,11 @@ function unde(f: Filtre): Prisma.AnuntWhereInput {
     proprietarId: f.proprietar || undefined,
     proprietar: f.oferit ? { tip: f.oferit } : undefined,
     OR: q
-      ? [{ titlu: { contains: q, mode: "insensitive" } }, { descriere: { contains: q, mode: "insensitive" } }]
+      ? [
+          { titlu: { contains: q, mode: "insensitive" } },
+          { descriere: { contains: q, mode: "insensitive" } },
+          { zona: { contains: q, mode: "insensitive" } },
+        ]
       : undefined,
   };
 }
@@ -137,13 +143,16 @@ export type AnuntNou = Omit<Anunt, "id" | "publicatLa" | "expiraLa" | "imagine" 
 
 const peste = (zile: number) => new Date(Date.now() + zile * 864e5);
 
-export async function creeazaAnunt(proprietarId: string, a: AnuntNou) {
-  return db.anunt.create({ data: { ...a, proprietarId, imagine: "#64748b", expiraLa: peste(ZILE_VALABILITATE) } });
+/** Locul pe hartă; fără punctul proprietarului rămâne gol și îl completează geocodarea (src/lib/geocodare.ts). */
+export type PunctAnunt = { lat: number | null; lng: number | null; punctProprietar: boolean };
+
+export async function creeazaAnunt(proprietarId: string, a: AnuntNou, punct: PunctAnunt) {
+  return db.anunt.create({ data: { ...a, ...punct, proprietarId, imagine: "#64748b", expiraLa: peste(ZILE_VALABILITATE) } });
 }
 
 /** Modifică un anunț propriu; întoarce false dacă anunțul nu e al lui. */
-export async function editeaza(id: number, proprietarId: string, a: AnuntNou) {
-  const r = await db.anunt.updateMany({ where: { id, proprietarId }, data: a });
+export async function editeaza(id: number, proprietarId: string, a: AnuntNou, punct: PunctAnunt) {
+  const r = await db.anunt.updateMany({ where: { id, proprietarId }, data: { ...a, ...punct } });
   return r.count > 0;
 }
 
@@ -193,3 +202,21 @@ export async function statisticiZona(judet: string, oras?: string) {
     chirieMedie: apChirie._count ? Math.round(apChirie._avg.pret ?? 0) : null,
   };
 }
+
+const campuriHarta = {
+  id: true, titlu: true, pret: true, tranzactie: true, tip: true, suprafata: true, camere: true,
+  zona: true, judet: true, oras: true, lat: true, lng: true, imagine: true,
+} satisfies Prisma.AnuntSelect;
+
+/** Anunțurile care se potrivesc filtrelor și au loc pe hartă (doar câmpurile pentru hartă), plus totalul. */
+export async function puncteHarta(f: Filtre, limita = 3000) {
+  await ruleazaReactualizari();
+  const where = unde(f);
+  const [puncte, total] = await Promise.all([
+    db.anunt.findMany({ where: { AND: [where, { lat: { not: null }, lng: { not: null } }] }, orderBy: [{ ordine: "desc" }, { id: "desc" }], take: limita, select: campuriHarta }),
+    db.anunt.count({ where }),
+  ]);
+  return { puncte: puncte.map((p) => ({ ...p, lat: p.lat!, lng: p.lng! })), total };
+}
+
+export type PunctHarta = Awaited<ReturnType<typeof puncteHarta>>["puncte"][number];

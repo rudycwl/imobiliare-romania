@@ -514,3 +514,51 @@ a:hover .sageata { transform: translateX(4px); }
 @media (prefers-reduced-motion: reduce) {
   .banda-pista, .cuvinte-pista, .bannere-pista { animation: none !important; }
 }
+
+/* ---------- Hartă (Leaflet + OpenStreetMap) și prețuri pe cartiere ---------- */
+.titlu-cu-actiune { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.titlu-cu-actiune h1, .titlu-cu-actiune h2 { margin-right: auto; }
+.buton-harta { display: inline-flex; align-items: center; gap: 8px; }
+.buton-harta svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+.harta { height: 100%; min-height: 320px; border-radius: 14px; border: 1px solid var(--border); background: #e5e7eb; z-index: 0; font: inherit; }
+.harta-mica { height: 300px; }
+.cautare-harta { display: grid; grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr); gap: 16px; height: calc(100vh - 150px); min-height: 520px; }
+.cautare-harta .harta { height: 100%; }
+.lista-harta { overflow-y: auto; padding-right: 4px; }
+.lista-harta p { margin: 0 0 8px; }
+.lista-harta ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.anunt-mic { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; color: var(--fg); transition: border-color .15s; }
+.anunt-mic:hover { border-color: var(--portocaliu); }
+.anunt-mic-img { height: 72px; border-radius: 8px; }
+.anunt-mic > span:last-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.anunt-mic-titlu { font-size: .9rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 760px) {
+  .cautare-harta { grid-template-columns: 1fr; height: auto; }
+  .cautare-harta .harta { height: 60vh; }
+  .lista-harta { overflow: visible; }
+}
+/* Pinii: eticheta cu prețul stă deasupra punctului. */
+.pin-pret, .pin-grup { background: none; border: 0; }
+.pin-pret span { position: absolute; left: 0; bottom: 6px; transform: translateX(-50%); white-space: nowrap; background: #0b2545; color: #fff; font-weight: 700; font-size: .78rem; padding: 4px 8px; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,.3); cursor: pointer; transition: background .15s, transform .15s; }
+.pin-pret span::after { content: ""; position: absolute; left: 50%; bottom: -5px; margin-left: -5px; border: 5px solid transparent; border-bottom: 0; border-top-color: #0b2545; }
+.pin-pret:hover span, .pin-pret.activ span { background: #f97316; color: #0b2545; transform: translateX(-50%) scale(1.08); }
+.pin-pret:hover span::after, .pin-pret.activ span::after { border-top-color: #f97316; }
+.pin-pret.activ { z-index: 1000 !important; }
+.pin-grup span { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: #f97316; color: #0b2545; font-weight: 800; border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(249,115,22,.35); cursor: pointer; }
+.pin-loc span { display: block; width: 22px; height: 22px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: #f97316; border: 3px solid #0b2545; }
+.leaflet-popup-content { margin: 10px; }
+.popup-anunt { display: flex; flex-direction: column; gap: 3px; color: #0f172a !important; }
+.popup-anunt .popup-img { height: 110px; border-radius: 8px; margin-bottom: 4px; }
+.popup-anunt strong { color: #c2410c; font-size: 1rem; }
+.popup-anunt span { font-weight: 600; }
+.popup-anunt small { color: #5b6474; }
+.alege-punct { display: flex; flex-direction: column; gap: 4px; }
+.alege-punct .eticheta { font-weight: 500; }
+.alege-punct .harta { cursor: crosshair; }
+.loc-anunt { margin-top: 24px; }
+.loc-anunt .harta { height: 320px; }
+
+.tabel-cartiere { min-width: 680px; }
+.bara-pret { position: relative; display: flex; align-items: baseline; gap: 8px; padding: 2px 6px; min-width: 200px; }
+.bara-pret .bara { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: color-mix(in srgb, #f97316 18%, transparent); }
+.bara-pret > :not(.bara) { position: relative; }

@@ -78,6 +78,11 @@ model Anunt {
   judet               String
   oras                String
   zona                String
+  /// Locul pe hartă: punctul pus de proprietar sau, dacă n-a pus, centrul cartierului găsit în OpenStreetMap.
+  lat                 Float?
+  lng                 Float?
+  /// true = punctul l-a pus proprietarul; false = l-am găsit noi după cartier și se recalculează la editare.
+  punctProprietar     Boolean    @default(false)
   imagine             String
   publicatLa          DateTime   @default(now())
   /// Anunțul e public cât timp expiraLa e în viitor (60 de zile, cu prelungire).
