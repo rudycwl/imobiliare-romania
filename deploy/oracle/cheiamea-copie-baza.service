@@ -1,0 +1,7 @@
+[Unit]
+Description=CheiaMea - copia de rezervă a bazei de date (pe disc și în Cloudflare R2)
+After=cheiamea.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'curl -fsS -m 600 -X POST -H "x-cheie: $(cat /etc/cheiamea/cheie-alerte)" http://127.0.0.1:3000/api/copie-baza'
