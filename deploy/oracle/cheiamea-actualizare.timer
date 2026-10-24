@@ -3,7 +3,9 @@ Description=CheiaMea - verifică main la 2 minute
 
 [Timer]
 OnBootSec=1min
-OnUnitInactiveSec=2min
+# Ceas de perete, nu „la 2 minute după ultima rulare”: după un daemon-reload timerul de tip monoton se putea opri.
+OnCalendar=*:0/2
+Persistent=true
 
 [Install]
 WantedBy=timers.target

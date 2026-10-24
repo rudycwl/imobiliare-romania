@@ -4,6 +4,7 @@ import { createServer } from "node:http";
 import { readFileSync, writeFileSync, renameSync, existsSync } from "node:fs";
 import { timingSafeEqual } from "node:crypto";
 import { execFile, execFileSync } from "node:child_process";
+import { contR2, stareServicii, verificaServiciile } from "./servicii.mjs";
 
 const ENV = "/etc/cheiamea/env.json";
 const COD = readFileSync("/etc/cheiamea/cod", "utf8").trim();
@@ -16,7 +17,7 @@ const CAMPURI = [
   { k: "NEXT_PUBLIC_SITE_URL", implicit: "https://cheiamea.ro", ajutor: "Lasă așa." },
   { k: "ADMIN_EMAILS", ajutor: "Emailul cu care intri în contul tău de pe CheiaMea (pentru Moderare)." },
   { grup: "Copia de rezervă a pozelor (Cloudflare R2)" },
-  { k: "R2_ACCOUNT_ID", ajutor: "Cloudflare → R2 → în dreapta, „Account ID”." },
+  { k: "R2_ACCOUNT_ID", ajutor: "Cloudflare → R2 → în dreapta, „Account ID”. Merge și adresa S3 (https://….r2.cloudflarestorage.com) copiată de la token." },
   { k: "R2_ACCESS_KEY_ID", secret: true, ajutor: "Cloudflare → R2 → Manage API tokens → token nou „Admin Read & Write” → Access Key ID." },
   { k: "R2_SECRET_ACCESS_KEY", secret: true, ajutor: "Din același token: Secret Access Key." },
   { k: "R2_BUCKET", implicit: "cheiamea-poze", ajutor: "Lasă așa." },
@@ -60,9 +61,23 @@ const codBun = (c) => {
   const a = Buffer.from(String(c ?? "")), b = Buffer.from(COD);
   return a.length === b.length && timingSafeEqual(a, b);
 };
+const citeste = (f) => { try { return readFileSync(f, "utf8").trim(); } catch { return null; } };
 const stare = () => {
   try { return JSON.parse(readFileSync("/opt/cheiamea/stare.json", "utf8")); } catch { return { stare: "necunoscut" }; }
 };
+/** Starea publică: versiunea, când a verificat ultima dată main, ultima eroare și serviciile externe (fără chei). */
+const starePublica = () => ({
+  ...stare(),
+  verificatMain: citeste("/opt/cheiamea/verificat"),
+  ultimaEroare: citeste("/opt/cheiamea/ultima-eroare"),
+  servicii: stareServicii(),
+});
+
+const verifica = () => verificaServiciile(citesteEnv()).catch((e) => console.error("Servicii:", e));
+setTimeout(verifica, 15_000);
+setInterval(verifica, 10 * 60_000);
+// Paza: dacă timerul de actualizare se oprește, pornim noi verificarea lui main (flock-ul din script evită dublurile).
+setInterval(() => execFile("systemctl", ["start", "--no-block", "cheiamea-actualizare.service"], () => {}), 3 * 60_000);
 const TEXT_STARE = {
   "asteapta-configurare": "Aștept datele de mai jos (cel puțin DATABASE_URL).",
   construieste: "Se construiește site-ul (3–10 minute). Reîncarcă pagina mai târziu.",
@@ -94,6 +109,7 @@ label{display:block;margin:14px 0}input,textarea{display:block;width:100%;box-si
 <h1>Configurare CheiaMea</h1>
 ${mesaj ? `<p class="ok">${esc(mesaj)}</p>` : ""}
 <p class="stare"><b>Stare:</b> ${esc(TEXT_STARE[s.stare] ?? s.stare)} ${s.versiune ? `(versiunea ${esc(s.versiune)})` : ""}</p>
+<pre>${esc(JSON.stringify(stareServicii(), null, 2))}</pre>
 <form method="post" action="/configurare">
 <input type="hidden" name="cod" value="${esc(COD)}">
 ${campuri}
@@ -110,7 +126,7 @@ function trimite(res, cod, corp, tip = "text/html; charset=utf-8") {
 
 createServer((req, res) => {
   const url = new URL(req.url, "http://localhost");
-  if (url.pathname === "/configurare/stare") return trimite(res, 200, JSON.stringify(stare()), "application/json");
+  if (url.pathname === "/configurare/stare") return trimite(res, 200, JSON.stringify(starePublica()), "application/json");
   if (url.pathname !== "/configurare") return trimite(res, 404, "Nu există.");
 
   if (req.method === "GET") {
@@ -126,7 +142,8 @@ createServer((req, res) => {
     const env = citesteEnv();
     for (const [k, v] of f) {
       if (!CHEI.has(k)) continue;
-      const val = v.replace(/\r\n/g, "\n").trim();
+      let val = v.replace(/\r\n/g, "\n").trim();
+      if (k === "R2_ACCOUNT_ID" && val) val = contR2(val);
       const camp = CAMPURI.find((c) => c.k === k);
       // O valoare care nu poate fi bună nu o înlocuiește pe cea veche (de ex. o parolă completată de browser).
       if (VALID[k] && val && !VALID[k](val)) continue;
@@ -136,6 +153,7 @@ createServer((req, res) => {
     scrieEnv(env);
     writeFileSync("/opt/cheiamea/forteaza", "");
     execFile("systemctl", ["start", "--no-block", "cheiamea-actualizare.service"], () => {});
+    setTimeout(verifica, 3000);
     res.writeHead(303, { Location: `/configurare?cod=${encodeURIComponent(COD)}&salvat=1` });
     res.end();
   });

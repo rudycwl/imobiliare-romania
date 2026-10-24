@@ -7,7 +7,7 @@ import { FormularAutentificare } from "./Formular";
 export const metadata: Metadata = { title: "Autentificare" };
 
 /** Doar adrese din site, ca linkul de întoarcere să nu poată trimite în altă parte. */
-const caleSigura = (c?: string) => (c && c.startsWith("/") && !c.startsWith("//") ? c : "/cont");
+const caleSigura = (c?: string) => (c && /^\/(?![\/\\])/.test(c) ? c : "/cont");
 
 export default async function AutentificarePage({ searchParams }: { searchParams: Promise<{ inapoi?: string }> }) {
   const inapoi = caleSigura((await searchParams).inapoi);

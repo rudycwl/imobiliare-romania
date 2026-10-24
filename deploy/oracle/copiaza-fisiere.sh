@@ -10,9 +10,9 @@ if [ ! -s /etc/cheiamea/cheie-alerte ]; then
   chown root:cheiamea /etc/cheiamea/cheie-alerte
 fi
 install -m 755 "$SRC/actualizeaza.sh" /opt/cheiamea/bin/actualizeaza.sh
-install -m 644 "$SRC/configurare.mjs" "$SRC/cu-env.mjs" /opt/cheiamea/bin/
-# Pagina de configurare rulează mereu: o repornim când s-a schimbat fișierul pe care l-a încărcat.
-h=$(sha256sum /opt/cheiamea/bin/configurare.mjs | cut -d' ' -f1)
+install -m 644 "$SRC/configurare.mjs" "$SRC/servicii.mjs" "$SRC/cu-env.mjs" /opt/cheiamea/bin/
+# Pagina de configurare rulează mereu: o repornim când s-au schimbat fișierele pe care le-a încărcat.
+h=$(cat /opt/cheiamea/bin/configurare.mjs /opt/cheiamea/bin/servicii.mjs | sha256sum | cut -d' ' -f1)
 if [ "$(cat /run/cheiamea-configurare.sha 2>/dev/null)" != "$h" ]; then
   systemctl restart cheiamea-configurare.service 2>/dev/null && echo "$h" > /run/cheiamea-configurare.sha || true
 fi
@@ -20,7 +20,10 @@ schimbat=0
 for u in cheiamea.service cheiamea-configurare.service cheiamea-actualizare.service cheiamea-actualizare.timer cheiamea-alerte.service cheiamea-alerte.timer cheiamea-copie-poze.service cheiamea-copie-poze.timer; do
   cmp -s "$SRC/$u" "/etc/systemd/system/$u" || { install -m 644 "$SRC/$u" /etc/systemd/system/; schimbat=1; }
 done
-[ "$schimbat" = 1 ] && systemctl daemon-reload
+if [ "$schimbat" = 1 ]; then
+  systemctl daemon-reload
+  systemctl restart cheiamea-actualizare.timer 2>/dev/null || true
+fi
 for t in cheiamea-alerte.timer cheiamea-copie-poze.timer; do
   systemctl is-enabled -q $t 2>/dev/null || systemctl enable --now $t 2>/dev/null || true
 done

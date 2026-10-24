@@ -21,9 +21,9 @@ export function Localitate({ judetInitial = "", orasInitial = "" }: { judetIniti
         </select>
       </label>
       <label>
-        Oraș
+        Localitate
         <select name="oras" required defaultValue={orasInitial} key={judet} disabled={!judet}>
-          <option value="">Alege orașul</option>
+          <option value="">Alege localitatea</option>
           {orase.map((o) => (
             <option key={o.slug} value={o.slug}>
               {o.nume}
