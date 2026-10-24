@@ -17,6 +17,10 @@ import { aplicaRecomandare } from "@/lib/atribuire";
 import { aplicaFiltru } from "@/lib/moderare";
 import { stocareConfigurata } from "@/lib/stocare";
 import { completeazaCoordonate } from "@/lib/geocodare";
+import { ipClient, noteaza, permis, sterge } from "@/lib/limita";
+
+const MIN15 = 15 * 60_000;
+const ORA = 60 * 60_000;
 
 export type Stare = { eroare?: string; valori?: Record<string, string> } | undefined;
 
@@ -47,6 +51,10 @@ export async function inregistrare(_: Stare, f: FormData): Promise<Stare> {
   if (!/^0\d{9}$/.test(telefon)) return esec("Telefonul trebuie să aibă 10 cifre și să înceapă cu 0.", f);
   if (parola.length < 8) return esec("Parola trebuie să aibă cel puțin 8 caractere.", f);
   if (!getOras(judet, oras)) return esec("Alege județul și orașul.", f);
+  // Cel mult 5 conturi noi pe oră de la aceeași adresă.
+  const ip = await ipClient();
+  if (!permis(`inreg:${ip}`, 5, ORA)) return esec("Prea multe conturi create de la această conexiune. Încearcă peste o oră.", f);
+  noteaza(`inreg:${ip}`);
 
   try {
     const u = await db.utilizator.create({
@@ -80,12 +88,22 @@ export async function inregistrare(_: Stare, f: FormData): Promise<Stare> {
 
 export async function autentificare(_: Stare, f: FormData): Promise<Stare> {
   const email = text(f, "email").toLowerCase();
+  // Contra ghicirii parolei: 10 încercări greșite la 15 minute pe cont și 30 pe adresă.
+  const ip = await ipClient();
+  if (!permis(`login:${email}`, 10, MIN15) || !permis(`login-ip:${ip}`, 30, MIN15))
+    return esec("Prea multe încercări greșite. Așteaptă 15 minute sau folosește „Ai uitat parola?”.", f);
   const u = await db.utilizator.findUnique({ where: { email } });
   const ok = u?.parolaHash && (await bcrypt.compare(String(f.get("parola") ?? ""), u.parolaHash));
-  if (!u || !ok) return esec("Email sau parolă greșită.", f);
+  if (!u || !ok) {
+    noteaza(`login:${email}`);
+    noteaza(`login-ip:${ip}`);
+    return esec("Email sau parolă greșită.", f);
+  }
+  sterge(`login:${email}`);
   await deschideSesiune(u.id);
   const inapoi = text(f, "inapoi");
-  redirect(inapoi.startsWith("/") && !inapoi.startsWith("//") ? inapoi : "/cont");
+  // Doar adrese din site: „//site.ro” și „/\site.ro” ar duce în altă parte.
+  redirect(/^\/(?![\/\\])/.test(inapoi) ? inapoi : "/cont");
 }
 
 export async function deconectare() {

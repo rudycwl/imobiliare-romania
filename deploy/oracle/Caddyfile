@@ -2,6 +2,16 @@
 # 158-180-27-245.sslip.io = adresa serverului fără DNS (pentru configurare și test înainte de mutarea domeniului).
 cheiamea.ro, nou.cheiamea.ro, 158-180-27-245.sslip.io {
 	encode zstd gzip
+	# Antete de securitate pentru toate paginile.
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), payment=(), geolocation=(self)"
+		-Server
+		-X-Powered-By
+	}
 	# Pozele anunțurilor, salvate pe disc de aplicație (POZE_DIR).
 	handle_path /poze/* {
 		root * /var/lib/cheiamea-poze
@@ -21,6 +31,8 @@ cheiamea.ro, nou.cheiamea.ro, 158-180-27-245.sslip.io {
 		file_server
 	}
 	handle /configurare* {
+		# Codul din adresă nu trebuie să plece spre alte site-uri.
+		header Referrer-Policy "no-referrer"
 		reverse_proxy 127.0.0.1:3001
 	}
 	handle {

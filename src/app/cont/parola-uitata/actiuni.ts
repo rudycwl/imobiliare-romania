@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { deschideSesiune } from "@/lib/auth";
 import { adresaSite, trimiteEmail } from "@/lib/email";
+import { ipClient, noteaza, permis } from "@/lib/limita";
 
 export type StareParola = { eroare?: string; trimis?: boolean } | undefined;
 
@@ -16,6 +17,9 @@ const hash = (token: string) => createHash("sha256").update(token).digest("hex")
 export async function cereResetare(_: StareParola, f: FormData): Promise<StareParola> {
   const email = String(f.get("email") ?? "").trim().toLowerCase();
   if (!/^\S+@\S+\.\S+$/.test(email)) return { eroare: "Adresa de email nu e validă." };
+  const ip = await ipClient();
+  if (!permis(`resetare:${ip}`, 10, 60 * 60_000)) return { eroare: "Prea multe cereri de la această conexiune. Încearcă peste o oră." };
+  noteaza(`resetare:${ip}`);
   const u = await db.utilizator.findUnique({ where: { email } });
   if (u && !u.stersLa) {
     // Cel mult 3 linkuri pe oră pentru un cont, ca formularul să nu poată fi folosit pentru a umple o căsuță de email.
