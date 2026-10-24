@@ -194,6 +194,8 @@ export async function retrageAnunt(id: number, proprietarId: string) {
   return r.count > 0;
 }
 
+const MIN_MEDIE = 5;
+
 /** Statistici pentru paginile de oraș/județ: număr de anunțuri și prețuri medii (apartamente). */
 export async function statisticiZona(judet: string, oras?: string) {
   const zona = { judet, oras: oras || undefined, ...activ() };
@@ -208,8 +210,9 @@ export async function statisticiZona(judet: string, oras?: string) {
     vanzare,
     inchiriere,
     // Media ponderată: total preț / total suprafață, ca un apartament foarte mare să nu strice media.
-    pretMp: apVanzare._count && s.suprafata ? Math.round((s.pret ?? 0) / s.suprafata) : null,
-    chirieMedie: apChirie._count ? Math.round(apChirie._avg.pret ?? 0) : null,
+    // Din 1–2 anunțuri o „medie” ar induce în eroare, deci o arătăm doar de la MIN_MEDIE anunțuri.
+    pretMp: apVanzare._count >= MIN_MEDIE && s.suprafata ? Math.round((s.pret ?? 0) / s.suprafata) : null,
+    chirieMedie: apChirie._count >= MIN_MEDIE ? Math.round(apChirie._avg.pret ?? 0) : null,
   };
 }
 

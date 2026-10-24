@@ -30,7 +30,15 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const a = await getAnunt((await params).id);
   // Anunțurile expirate rămân accesibile prin link, dar nu mai apar în Google.
-  return { title: a?.titlu ?? "Anunț inexistent", description: a?.descriere, robots: a && (a.expiraLa <= new Date() || a.moderare !== "ok") ? { index: false } : undefined };
+  if (!a) return { title: "Anunț inexistent" };
+  const url = `${SITE}/anunt/${a.id}`;
+  const description = a.descriere.replace(/\s+/g, " ").trim().slice(0, 160) || `${a.titlu}, ${formatPret(a)}`;
+  return {
+    title: a.titlu,
+    description,
+    alternates: { canonical: url },
+    robots: a.expiraLa <= new Date() || a.moderare !== "ok" ? { index: false } : undefined,
+  };
 }
 
 export default async function AnuntPage({ params }: Props) {
@@ -107,6 +115,23 @@ export default async function AnuntPage({ params }: Props) {
           <Raporteaza id={a.id} />
         </div>
       </div>
+      {a.expiraLa > new Date() && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "RealEstateListing",
+              name: a.titlu,
+              url: `${SITE}/anunt/${a.id}`,
+              datePosted: a.publicatLa.toISOString(),
+              image: poze.map((p) => new URL(urlPublic(p.cheie), SITE).toString()),
+              offers: { "@type": "Offer", price: a.pret, priceCurrency: "EUR", availability: "https://schema.org/InStock" },
+              contentLocation: { "@type": "Place", name: `${a.zona}, ${o.nume}, ${j.nume}` },
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
+      )}
       {a.lat != null && a.lng != null && (
         <section className="loc-anunt">
           <div className="titlu-cu-actiune">
