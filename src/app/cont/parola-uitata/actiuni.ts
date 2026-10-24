@@ -52,6 +52,8 @@ export async function seteazaParola(_: StareParola, f: FormData): Promise<StareP
   if (!r || r.expiraLa < new Date()) return { eroare: "Linkul a expirat sau a fost deja folosit. Cere unul nou." };
   await db.$transaction([
     db.utilizator.update({ where: { id: r.utilizatorId }, data: { parolaHash: await bcrypt.hash(parola, 10) } }),
+    // Linkul a venit pe email, deci adresa e a lui.
+    db.utilizator.updateMany({ where: { id: r.utilizatorId, emailConfirmatLa: null }, data: { emailConfirmatLa: new Date(), confirmareHash: null } }),
     // Linkurile rămase și sesiunile deschise pe alte dispozitive nu mai sunt valabile.
     db.resetareParola.deleteMany({ where: { utilizatorId: r.utilizatorId } }),
     db.sesiune.deleteMany({ where: { utilizatorId: r.utilizatorId } }),

@@ -35,5 +35,10 @@ export async function utilizatorCurent() {
   if (!token) return null;
   const s = await db.sesiune.findUnique({ where: { id: hash(token) }, include: { utilizator: true } });
   if (!s || s.expiraLa < new Date()) return null;
-  return { ...laUtilizator(s.utilizator), email: s.utilizator.email, gratuitPanaLa: s.utilizator.gratuitPanaLa };
+  return {
+    ...laUtilizator(s.utilizator),
+    email: s.utilizator.email,
+    emailConfirmat: !!s.utilizator.emailConfirmatLa,
+    gratuitPanaLa: s.utilizator.gratuitPanaLa,
+  };
 }

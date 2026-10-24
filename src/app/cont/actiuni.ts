@@ -18,6 +18,7 @@ import { aplicaFiltru } from "@/lib/moderare";
 import { stocareConfigurata } from "@/lib/stocare";
 import { completeazaCoordonate } from "@/lib/geocodare";
 import { ipClient, noteaza, permis, sterge } from "@/lib/limita";
+import { trimiteConfirmare } from "@/lib/confirmare";
 
 const MIN15 = 15 * 60_000;
 const ORA = 60 * 60_000;
@@ -72,6 +73,7 @@ export async function inregistrare(_: Stare, f: FormData): Promise<Stare> {
       },
     });
     await deschideSesiune(u.id);
+    after(() => trimiteConfirmare(u.id));
     await aplicaRecomandare(u.id, tip);
     if (tip === "agentie") {
       await aplicaOfertaFondator(u.id, text(f, "cod"));
@@ -104,6 +106,16 @@ export async function autentificare(_: Stare, f: FormData): Promise<Stare> {
   const inapoi = text(f, "inapoi");
   // Doar adrese din site: „//site.ro” și „/\site.ro” ar duce în altă parte.
   redirect(/^\/(?![\/\\])/.test(inapoi) ? inapoi : "/cont");
+}
+
+/** Butonul „Trimite din nou” de pe pagina contului: cel mult 3 emailuri pe oră. */
+export async function retrimiteConfirmare() {
+  const u = await utilizatorCurent();
+  if (!u) redirect("/cont/autentificare");
+  if (!permis(`confirmare:${u.id}`, 3, ORA)) redirect("/cont?confirmare=limita");
+  noteaza(`confirmare:${u.id}`);
+  const ok = await trimiteConfirmare(u.id);
+  redirect(`/cont?confirmare=${ok ? "trimis" : "netrimis"}`);
 }
 
 export async function deconectare() {
