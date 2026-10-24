@@ -115,13 +115,15 @@ export async function puneZoho(f: FormData) {
   const selector = String(f.get("selector") ?? "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   if (!verificare && !dkim) gata("Nu găsesc în text nici codul „zoho-verification=…”, nici cheia „v=DKIM1; …”. Copiază din Zoho tot rândul.", false);
   if (dkim && !selector) gata("Pentru cheia DKIM scrie și selectorul (numele lui din Zoho, de ex. zmail).", false);
+  // Centrul de date al contului Zoho (se vede în adresa din browser: zoho.eu sau zoho.com).
+  const dc = f.get("dc") === "com" ? "com" : "eu";
   const d = domeniu();
   const randuri = [
     ...(verificare ? [{ type: "TXT", hostname: d, value: verificare }] : []),
-    { type: "MX", hostname: d, value: "mx.zoho.eu", priority: 10 },
-    { type: "MX", hostname: d, value: "mx2.zoho.eu", priority: 20 },
-    { type: "MX", hostname: d, value: "mx3.zoho.eu", priority: 50 },
-    { type: "TXT", hostname: d, value: "v=spf1 include:zohomail.eu ~all" },
+    { type: "MX", hostname: d, value: `mx.zoho.${dc}`, priority: 10 },
+    { type: "MX", hostname: d, value: `mx2.zoho.${dc}`, priority: 20 },
+    { type: "MX", hostname: d, value: `mx3.zoho.${dc}`, priority: 50 },
+    { type: "TXT", hostname: d, value: `v=spf1 include:zohomail.${dc} ~all` },
     ...(dkim ? [{ type: "TXT", hostname: `${selector}._domainkey.${d}`, value: dkim }] : []),
   ];
   let rez;

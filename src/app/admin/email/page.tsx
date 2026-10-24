@@ -114,7 +114,12 @@ export default async function EmailPage({ searchParams }: { searchParams: Promis
             </p>
             <textarea name="zoho" rows={4} style={{ width: "100%" }} placeholder="zoho-verification=zb…" />
             <p className="small">
-              Selector DKIM (doar pentru cheia DKIM): <input name="selector" defaultValue="zmail" style={{ width: 120 }} />
+              Contul Zoho e pe{" "}
+              <select name="dc" defaultValue="eu">
+                <option value="eu">zoho.eu (Europa)</option>
+                <option value="com">zoho.com</option>
+              </select>{" "}
+              · Selector DKIM (doar pentru cheia DKIM): <input name="selector" defaultValue="zmail" style={{ width: 120 }} />
             </p>
             <button type="submit">Pune rândurile Zoho în Netlify DNS</button>
           </form>
