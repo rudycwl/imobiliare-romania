@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { deschideSesiune, inchideSesiune, utilizatorCurent } from "@/lib/auth";
 import { getOras } from "@/lib/geo";
 import { stergeObiect } from "@/lib/stocare";
+import { LUNGIME, preaLung } from "@/lib/lungimi";
 
 export type StareSetari = { eroare?: string; ok?: string } | undefined;
 
@@ -33,6 +34,8 @@ export async function salveazaDate(_: StareSetari, f: FormData): Promise<StareSe
   const judet = text(f, "judet");
   const oras = text(f, "oras");
   if (nume.length < 2) return { eroare: "Completează numele." };
+  const lung = preaLung([["Numele", nume, LUNGIME.nume], ["Persoana de contact", contact, LUNGIME.nume]]);
+  if (lung) return { eroare: lung };
   if (!/^0\d{9}$/.test(telefon)) return { eroare: "Telefonul trebuie să aibă 10 cifre și să înceapă cu 0." };
   if (!getOras(judet, oras)) return { eroare: "Alege județul și orașul." };
   await db.utilizator.update({ where: { id: u.id }, data: { nume, contact, telefon, judet, oras } });
@@ -46,6 +49,7 @@ export async function schimbaParola(_: StareSetari, f: FormData): Promise<StareS
   const noua = String(f.get("noua") ?? "");
   if (!(await parolaCorecta(u.id, String(f.get("actuala") ?? "")))) return { eroare: "Parola actuală nu e corectă." };
   if (noua.length < 8) return { eroare: "Parola nouă trebuie să aibă cel puțin 8 caractere." };
+  if (noua.length > LUNGIME.parola) return { eroare: `Parola nouă poate avea cel mult ${LUNGIME.parola} de caractere.` };
   if (noua !== String(f.get("repetare") ?? "")) return { eroare: "Cele două parole noi nu sunt la fel." };
   await db.utilizator.update({ where: { id: u.id }, data: { parolaHash: await bcrypt.hash(noua, 10) } });
   // Celelalte dispozitive conectate trebuie să se autentifice din nou, cu parola nouă.

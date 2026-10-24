@@ -19,12 +19,12 @@ export function FormularDate({ d }: { d: DateCont }) {
     <form className="formular" action={actiune}>
       <label>
         {juridic ? (d.tip === "agentie" ? "Denumire agenție" : "Denumire firmă") : "Nume și prenume"}
-        <input name="nume" defaultValue={d.nume} required autoComplete={juridic ? "organization" : "name"} />
+        <input name="nume" defaultValue={d.nume} required maxLength={120} autoComplete={juridic ? "organization" : "name"} />
       </label>
       {juridic && (
         <label>
           Persoană de contact
-          <input name="contact" defaultValue={d.contact ?? ""} autoComplete="name" />
+          <input name="contact" defaultValue={d.contact ?? ""} maxLength={120} autoComplete="name" />
         </label>
       )}
       <label>

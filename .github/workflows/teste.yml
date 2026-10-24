@@ -1,0 +1,22 @@
+# La fiecare PR și la fiecare publicare pe main: verificarea tipurilor TypeScript și testele automate.
+# Dacă eșuează, PR-ul arată un X roșu și nu trebuie publicat până nu e reparat.
+name: Teste
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test

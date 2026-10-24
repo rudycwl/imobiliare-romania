@@ -2,7 +2,7 @@ import { TIPURI, TIPURI_UTILIZATOR, TRANZACTII } from "./etichete";
 import { getJudet, getOras } from "./geo";
 
 /** Filtrele care se păstrează într-o căutare salvată (sortarea nu contează). */
-const CHEI = ["judet", "oras", "tip", "tranzactie", "pretMin", "pretMax", "camere", "oferit", "q"] as const;
+const CHEI = ["judet", "oras", "tip", "tranzactie", "pretMin", "pretMax", "camere", "supMin", "supMax", "poze", "oferit", "q"] as const;
 export type FiltreSalvate = Partial<Record<(typeof CHEI)[number], string>>;
 
 export function curataFiltre(f: Record<string, unknown>): FiltreSalvate {
@@ -13,6 +13,7 @@ export function curataFiltre(f: Record<string, unknown>): FiltreSalvate {
   }
   if (r.judet && !getJudet(r.judet)) delete r.judet;
   if (r.oras && !(r.judet && getOras(r.judet, r.oras))) delete r.oras;
+  if (r.poze !== "1") delete r.poze;
   return r;
 }
 
@@ -28,6 +29,8 @@ export function descriereCautare(f: FiltreSalvate) {
     loc,
     f.camere && (f.camere === "1" ? "minim 1 cameră" : `minim ${f.camere} camere`),
     pret,
+    f.supMin && f.supMax ? `${nr(f.supMin)}–${nr(f.supMax)} m²` : f.supMin ? `minim ${nr(f.supMin)} m²` : f.supMax ? `maxim ${nr(f.supMax)} m²` : "",
+    f.poze && "cu poze",
     f.oferit && TIPURI_UTILIZATOR[f.oferit as keyof typeof TIPURI_UTILIZATOR],
     f.q && `„${f.q}”`,
   ]

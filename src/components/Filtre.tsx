@@ -36,6 +36,8 @@ export function Filtre({ valori, action, cuJudet = false }: { valori: F; action:
       </select>
       <input name="pretMin" type="number" min={0} placeholder="Preț min €" defaultValue={valori.pretMin} />
       <input name="pretMax" type="number" min={0} placeholder="Preț max €" defaultValue={valori.pretMax} />
+      <input name="supMin" type="number" min={0} placeholder="Min m²" defaultValue={valori.supMin} />
+      <input name="supMax" type="number" min={0} placeholder="Max m²" defaultValue={valori.supMax} />
       <select name="camere" defaultValue={valori.camere ?? ""}>
         <option value="">Camere</option>
         {[1, 2, 3, 4].map((c) => (
@@ -56,7 +58,11 @@ export function Filtre({ valori, action, cuJudet = false }: { valori: F; action:
         <option value="">Cele mai noi</option>
         <option value="pret-asc">Preț crescător</option>
         <option value="pret-desc">Preț descrescător</option>
+        <option value="suprafata-desc">Suprafață mare</option>
       </select>
+      <label className="bifa-filtru">
+        <input type="checkbox" name="poze" value="1" defaultChecked={valori.poze === "1"} /> Doar cu poze
+      </label>
       <button type="submit">Caută</button>
     </form>
   );

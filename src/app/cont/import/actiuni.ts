@@ -13,6 +13,7 @@ const MAX_FISIER = 3 * 1024 * 1024;
 export async function importa(_: StareImport, f: FormData): Promise<StareImport> {
   const u = await utilizatorCurent();
   if (!u || u.tip !== "agentie") return { eroare: "Importul în masă e disponibil doar pentru conturile de agenție." };
+  if (!u.emailConfirmat) return { eroare: "Confirmă întâi adresa de email a contului (linkul din emailul primit la înscriere). Din „Contul meu” îl poți cere din nou." };
   const fisier = f.get("fisier");
   if (!(fisier instanceof File) || !fisier.size) return { eroare: "Alege fișierul CSV." };
   if (fisier.size > MAX_FISIER) return { eroare: "Fișierul e mai mare de 3 MB. Împarte-l în mai multe fișiere." };

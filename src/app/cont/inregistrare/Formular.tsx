@@ -40,7 +40,7 @@ export function FormularInregistrare({ tipInitial, tipuri, cod }: { tipInitial: 
         <>
           <label>
             Denumire {tip === "agentie" ? "agenție" : "firmă"}
-            <input name="denumire" defaultValue={v?.denumire} required autoComplete="organization" />
+            <input name="denumire" defaultValue={v?.denumire} required maxLength={120} autoComplete="organization" />
           </label>
           <label>
             CUI
@@ -50,11 +50,11 @@ export function FormularInregistrare({ tipInitial, tipuri, cod }: { tipInitial: 
       )}
       <label>
         {juridic ? "Persoană de contact" : "Nume și prenume"}
-        <input name="nume" defaultValue={v?.nume} required autoComplete="name" />
+        <input name="nume" defaultValue={v?.nume} required maxLength={120} autoComplete="name" />
       </label>
       <label>
         Email
-        <input name="email" defaultValue={v?.email} type="email" required autoComplete="email" />
+        <input name="email" defaultValue={v?.email} type="email" required maxLength={200} autoComplete="email" />
       </label>
       <label>
         Telefon

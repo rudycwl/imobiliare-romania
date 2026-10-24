@@ -19,6 +19,8 @@ a { color: var(--accent); text-decoration: none; }
 .filtre input, .filtre select, button { padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--fg); font: inherit; }
 .filtre input[name="q"] { flex: 1 1 220px; }
 .filtre input[type="number"] { width: 120px; }
+.filtre .bifa-filtru { display: inline-flex; align-items: center; gap: 6px; padding: 0 4px; white-space: nowrap; }
+.filtre .bifa-filtru input { width: auto; padding: 0; }
 button { background: var(--portocaliu); color: #0b2545; border: none; cursor: pointer; font-weight: 700; }
 button:disabled { opacity: 0.6; cursor: not-allowed; }
 .judete { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px 16px; }
