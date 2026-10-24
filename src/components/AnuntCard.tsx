@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { AnuntCuProprietar } from "@/lib/anunturi";
-import { formatPret, TIPURI, TIPURI_UTILIZATOR } from "@/lib/etichete";
+import { formatPret, textAnunturi, TIPURI, TIPURI_UTILIZATOR } from "@/lib/etichete";
 import { getJudet, getOras } from "@/lib/geo";
 import { Favorit } from "./Favorit";
 
@@ -33,7 +33,7 @@ export function ListaAnunturi({ anunturi, total }: { anunturi: AnuntCuProprietar
   return (
     <>
       <p className="muted">
-        {n} anunțuri găsite{n > anunturi.length ? `, primele ${anunturi.length} afișate` : ""}
+        {textAnunturi(n, n === 1 ? "găsit" : "găsite")}{n > anunturi.length ? `, primele ${anunturi.length} afișate` : ""}
       </p>
       <div className="grid">
         {anunturi.map((a) => (

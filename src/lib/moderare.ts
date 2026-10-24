@@ -1,6 +1,8 @@
 import { createHash } from "crypto";
 import { db } from "@/lib/db";
 import type { MotivRaportare } from "@/lib/moderare-etichete";
+import { adresaSite, trimiteEmail } from "@/lib/email";
+import { emailuriAdmin } from "@/lib/fondatori";
 
 export { MOTIVE_RAPORTARE, type MotivRaportare } from "@/lib/moderare-etichete";
 
@@ -50,11 +52,15 @@ export async function aplicaFiltru(id: number, titlu: string, descriere: string)
   return motiv;
 }
 
-export const amprenta = (ip: string, browser: string) => createHash("sha256").update(`${ip}|${browser}`).digest("hex");
+/**
+ * Amprenta celui care raportează: doar adresa IP (cea pusă de Caddy, vezi ipClient). Browserul nu intră în calcul,
+ * altfel aceeași persoană ar putea raporta de 3 ori schimbând doar browserul și ar scoate singură anunțul.
+ */
+export const amprenta = (ip: string) => createHash("sha256").update(`raport|${ip}`).digest("hex");
 
-/** Salvează o raportare; la PRAG_RAPORTARI raportări nerezolvate anunțul iese de pe site. */
+/** Salvează o raportare; la PRAG_RAPORTARI raportări nerezolvate anunțul iese de pe site și adminii primesc email. */
 export async function raporteaza(anuntId: number, motiv: MotivRaportare, detalii: string | null, amp: string) {
-  const a = await db.anunt.findUnique({ where: { id: anuntId }, select: { moderare: true } });
+  const a = await db.anunt.findUnique({ where: { id: anuntId }, select: { moderare: true, titlu: true } });
   if (!a) return false;
   await db.raportare.upsert({
     where: { anuntId_amprenta: { anuntId, amprenta: amp } },
@@ -62,9 +68,25 @@ export async function raporteaza(anuntId: number, motiv: MotivRaportare, detalii
     update: {},
   });
   const n = await db.raportare.count({ where: { anuntId, rezolvat: false } });
-  if (n >= PRAG_RAPORTARI && a.moderare === "ok")
+  if (n >= PRAG_RAPORTARI && a.moderare === "ok") {
     await db.anunt.update({ where: { id: anuntId }, data: { moderare: "verificare", motivModerare: `${n} raportări de la vizitatori` } });
+    await anuntaAdminii(anuntId, a.titlu, n);
+  }
   return true;
+}
+
+/** Un anunț ascuns de raportări trebuie verificat repede: dacă raportările sunt false, proprietarul pierde vizite. */
+async function anuntaAdminii(anuntId: number, titlu: string, n: number) {
+  for (const catre of emailuriAdmin())
+    await trimiteEmail({
+      catre,
+      subiect: `Anunț ascuns după ${n} raportări: #${anuntId}`,
+      paragrafe: [
+        `Anunțul #${anuntId} („${titlu}”) a primit ${n} raportări de la vizitatori diferiți și nu mai apare pe site.`,
+        "Verifică-l în pagina de moderare: aprobă-l dacă raportările sunt false sau respinge-l dacă încalcă regulile.",
+      ],
+      buton: { text: "Deschide moderarea", link: `${adresaSite()}/admin/moderare` },
+    }).catch((e) => console.error("Email moderare:", e));
 }
 
 /** Anunțurile care așteaptă decizia administratorului: în verificare sau cu raportări nerezolvate. */

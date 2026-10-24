@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Vanzator } from "@/components/Vanzator";
 import { getJudet, getOras } from "@/lib/geo";
+import { textAnunturi } from "@/lib/etichete";
 import { getAgentii } from "@/lib/utilizatori";
 
 export const metadata: Metadata = { title: "Agenții imobiliare" };
@@ -22,7 +23,7 @@ export default async function AgentiiPage() {
           <div key={a.id} className="card card-body">
             <Vanzator u={a} />
             <p className="muted small">
-              {getOras(a.judet, a.oras)?.nume}, {getJudet(a.judet)?.nume} · {a.numarAnunturi} anunțuri
+              {getOras(a.judet, a.oras)?.nume}, {getJudet(a.judet)?.nume} · {textAnunturi(a.numarAnunturi)}
             </p>
           </div>
         ))}

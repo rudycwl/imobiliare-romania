@@ -4,7 +4,7 @@ import { CalculatorCredit } from "@/components/CalculatorCredit";
 import { LegislatieFile } from "@/components/LegislatieFile";
 import { cautaAnunturi, numarAnunturi, numarPeTip } from "@/lib/anunturi";
 import { ACTUALIZAT, BANDA, PUBLICURI, STIRE_TVA, STIRI } from "@/lib/continut";
-import { formatPret, TIPURI } from "@/lib/etichete";
+import { formatPret, textAnunturi, TIPURI } from "@/lib/etichete";
 import { getOras, JUDETE } from "@/lib/geo";
 
 // Regenerată cel mult o dată pe minut: pagina rămâne statică și rapidă.
@@ -32,7 +32,10 @@ const AVANTAJE = [
 export default async function Home() {
   const [{ anunturi }, numar, peTip] = await Promise.all([cautaAnunturi({}, 8), numarAnunturi(), numarPeTip()]);
   const [p1, p2] = anunturi;
-  const populare = [...JUDETE].sort((a, b) => (numar[b.slug] ?? 0) - (numar[a.slug] ?? 0)).slice(0, 8);
+  // Întâi județele cu anunțuri (cu numărul lor), apoi orașele mari, fără cifre: un „0” lângă „Populare” arată a site gol.
+  const MARI = ["bucuresti", "cluj", "timis", "iasi", "constanta", "brasov", "prahova", "bihor"];
+  const cuAnunturi = JUDETE.filter((j) => numar[j.slug]).sort((a, b) => numar[b.slug] - numar[a.slug]);
+  const populare = [...cuAnunturi, ...JUDETE.filter((j) => !numar[j.slug] && MARI.includes(j.slug)).sort((a, b) => MARI.indexOf(a.slug) - MARI.indexOf(b.slug))].slice(0, 8);
   return (
     <div className="acasa">
       <div className="banda" aria-label="Noutăți pe scurt">
@@ -72,7 +75,7 @@ export default async function Home() {
               <span className="ascuns">o casă nouă</span>
             </h1>
             <p className="erou-desc apare apare-3">
-              Anunțuri din fiecare județ, direct de la proprietari, firme și agenții. Vezi clar cine vinde.
+              Anunțuri din toată țara, direct de la proprietari, firme și agenții. Vezi clar cine vinde.
             </p>
             <form method="get" action="/cautare" className="cautare-mare apare apare-3" role="search">
               <fieldset className="comutator">
@@ -113,7 +116,7 @@ export default async function Home() {
               <span>Populare:</span>
               {populare.map((j) => (
                 <Link key={j.slug} href={`/${j.slug}`}>
-                  {j.nume} <span>{numar[j.slug] ?? 0}</span>
+                  {j.nume} {numar[j.slug] ? <span>{numar[j.slug]}</span> : null}
                 </Link>
               ))}
             </nav>
@@ -175,7 +178,7 @@ export default async function Home() {
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={ICON_TIP[k] ?? ICON_TIP.casa} /></svg>
                 </span>
                 <strong>{v}</strong>
-                <span className="muted">{peTip[k] ?? 0} anunțuri</span>
+                <span className="muted">{textAnunturi(peTip[k] ?? 0)}</span>
               </Link>
             ))}
           </div>

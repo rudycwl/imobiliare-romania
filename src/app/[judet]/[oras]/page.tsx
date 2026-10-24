@@ -9,6 +9,7 @@ import { ListaAnunturi } from "@/components/AnuntCard";
 import { SeoZona } from "@/components/SeoZona";
 import { cautaAnunturi, statisticiZona, type Filtre as F } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
+import { textAnunturi } from "@/lib/etichete";
 
 type Props = { params: Promise<{ judet: string; oras: string }>; searchParams: Promise<F> };
 
@@ -22,9 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const s = await statisticiZona(j.slug, o.slug);
   const pret = s.pretMp ? ` Preț mediu apartamente: ${new Intl.NumberFormat("ro-RO").format(s.pretMp)} €/m².` : "";
   const title = `Imobiliare ${o.nume}: apartamente și case de vânzare și închiriat`;
-  const description = `${s.vanzare + s.inchiriere} anunțuri imobiliare în ${o.nume}, județul ${j.nume}: ${s.vanzare} de vânzare, ${s.inchiriere} de închiriat.${pret} Anunțuri de la proprietari și agenții.`;
+  const description = `${textAnunturi(s.vanzare + s.inchiriere, "imobiliare")} în ${o.nume}, județul ${j.nume}: ${s.vanzare} la vânzare și ${s.inchiriere} la închiriere.${pret} Anunțuri de la proprietari și agenții.`;
   const url = `${SITE}/${j.slug}/${o.slug}`;
-  return { title, description, alternates: { canonical: url }, openGraph: { title, description, url } };
+  // Fără anunțuri pagina e goală: Google n-o indexează până apare primul anunț (vezi și sitemap.ts).
+  const gol = s.vanzare + s.inchiriere === 0;
+  return { title, description, alternates: { canonical: url }, openGraph: { title, description, url }, robots: gol ? { index: false } : undefined };
 }
 
 export default async function OrasPage({ params, searchParams }: Props) {

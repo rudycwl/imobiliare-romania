@@ -37,3 +37,10 @@ export function slugify(s: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
+
+/** „1 anunț”, „2 anunțuri”, „20 de anunțuri”: în română „de” apare de la 20 în sus (101–119 fără „de”). */
+export function textAnunturi(n: number, dupa = "") {
+  const rest = n % 100;
+  const cuvant = n === 1 ? "anunț" : n >= 20 && (rest === 0 || rest >= 20) ? "de anunțuri" : "anunțuri";
+  return `${new Intl.NumberFormat("ro-RO").format(n)} ${cuvant}${dupa ? " " + dupa : ""}`;
+}

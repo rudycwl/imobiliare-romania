@@ -62,9 +62,11 @@ export async function aplicaOfertaFondator(utilizatorId: string, cod: string | u
   return true;
 }
 
+/** Adresele din ADMIN_EMAILS (pagina /configurare). */
+export const emailuriAdmin = () => (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+
 export function esteAdmin(email: string | null | undefined) {
-  const admini = (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-  return !!email && admini.includes(email.toLowerCase());
+  return !!email && emailuriAdmin().includes(email.toLowerCase());
 }
 
 export const formatData = (d: Date) => new Intl.DateTimeFormat("ro-RO", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Bucharest" }).format(d);

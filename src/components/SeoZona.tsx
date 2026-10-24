@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { statisticiZona } from "@/lib/anunturi";
+import { textAnunturi } from "@/lib/etichete";
 
 type Stat = Awaited<ReturnType<typeof statisticiZona>>;
 const nr = (n: number) => new Intl.NumberFormat("ro-RO").format(n);
@@ -58,8 +59,8 @@ export function SeoZona({
   return (
     <section className="seo-zona">
       <div className="statistici">
-        <div><strong>{nr(s.vanzare)}</strong><span>de vânzare</span></div>
-        <div><strong>{nr(s.inchiriere)}</strong><span>de închiriat</span></div>
+        <div><strong>{nr(s.vanzare)}</strong><span>{textAnunturi(s.vanzare).replace(/^\S+ /, "")} de vânzare</span></div>
+        <div><strong>{nr(s.inchiriere)}</strong><span>{textAnunturi(s.inchiriere).replace(/^\S+ /, "")} de închiriat</span></div>
         {s.pretMp && <div><strong>{nr(s.pretMp)} €/m²</strong><span>preț mediu apartamente</span></div>}
         {s.chirieMedie && <div><strong>{nr(s.chirieMedie)} €</strong><span>chirie medie apartament</span></div>}
       </div>

@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Inter } from "next/font/google";
 import { FIRMA } from "@/lib/firma";
 import { Atribuire } from "@/components/Atribuire";
 import "./globals.css";
+
+// Fontul se descarcă la build și se servește de pe serverul nostru: vizitatorii nu mai trimit adresa IP la Google (GDPR).
+const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-inter" });
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro";
 
@@ -16,13 +20,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ro">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="ro" className={inter.variable}>
       <body>
         <Atribuire />
         <header className="header">
