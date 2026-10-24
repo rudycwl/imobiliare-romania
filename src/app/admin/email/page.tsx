@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { utilizatorCurent } from "@/lib/auth";
 import { esteAdmin } from "@/lib/fondatori";
 import { brevo, emailConfigurat, expeditor } from "@/lib/email";
-import { adaugaDomeniul, emailDeTest, leagaDomeniile, puneInNetlify, puneZoho, verificaDomeniul } from "./actiuni";
+import { adaugaDomeniul, emailDeTest, leagaDomeniile, puneImprovmx, puneInNetlify, puneZoho, verificaDomeniul } from "./actiuni";
 import { netlifyConfigurat } from "@/lib/netlify-dns";
 
 export const metadata: Metadata = { title: "Emailurile site-ului", robots: { index: false } };
@@ -106,7 +106,15 @@ export default async function EmailPage({ searchParams }: { searchParams: Promis
 
       {netlifyConfigurat() && (
         <>
-          <h2 style={{ marginTop: 32 }}>Căsuțele de email (Zoho): contact@, agentii@</h2>
+          <h2 style={{ marginTop: 32 }}>Mailurile pentru contact@ și agentii@ (redirecționate în Gmail-ul firmei)</h2>
+          <form action={puneImprovmx}>
+            <p className="muted small">
+              ImprovMX primește mailurile trimise la contact@ și agentii@ și le trimite în Gmail-ul firmei. Butonul pune rândurile MX și SPF.
+            </p>
+            <button type="submit">Pune rândurile ImprovMX în Netlify DNS</button>
+          </form>
+
+          <h2 style={{ marginTop: 32 }}>Sau: căsuțe Zoho pentru contact@ și agentii@</h2>
           <form action={puneZoho}>
             <p className="muted small">
               Lipește aici ce îți arată Zoho: întâi rândul cu „zoho-verification=…”, iar mai târziu cheia DKIM („v=DKIM1; …”).

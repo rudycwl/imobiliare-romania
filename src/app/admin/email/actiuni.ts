@@ -136,3 +136,25 @@ export async function puneZoho(f: FormData) {
   const sarite = rez.sarite.length ? ` Sărite: ${rez.sarite.join(", ")}.` : "";
   gata(`${pusi}${sarite} Acum, în Zoho, apasă „Verify” (poate dura câteva minute până vede rândurile).`, true);
 }
+
+/**
+ * Varianta fără Zoho: ImprovMX (gratuit) primește mailurile pentru contact@ și agentii@ și le trimite în Gmail-ul firmei,
+ * iar răspunsurile pleacă din Gmail ca agentii@ prin Brevo (SMTP). Pune MX-urile ImprovMX și un SPF care le acoperă pe amândouă.
+ */
+export async function puneImprovmx() {
+  await admin();
+  const d = domeniu();
+  let rez;
+  try {
+    rez = await adaugaRanduri(d, [
+      { type: "MX", hostname: d, value: "mx1.improvmx.com", priority: 10 },
+      { type: "MX", hostname: d, value: "mx2.improvmx.com", priority: 20 },
+      { type: "TXT", hostname: d, value: "v=spf1 include:spf.improvmx.com include:spf.brevo.com ~all" },
+    ]);
+  } catch (e) {
+    gata(`Netlify a refuzat: ${e instanceof Error ? e.message : e}. Verifică NETLIFY_TOKEN în /configurare.`, false);
+  }
+  const pusi = rez.adaugate.length ? `Am pus în Netlify: ${rez.adaugate.join(", ")}.` : "Rândurile erau deja în Netlify.";
+  const sarite = rez.sarite.length ? ` Sărite: ${rez.sarite.join(", ")}.` : "";
+  gata(`${pusi}${sarite} Acum, în ImprovMX, apasă „Check again” (poate dura câteva minute).`, true);
+}
