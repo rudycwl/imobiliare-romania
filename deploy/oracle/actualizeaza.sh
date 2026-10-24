@@ -8,10 +8,14 @@ LOG=$BAZA/ultimul-build.log
 export HOME=/root
 exec 9>/run/cheiamea-actualizare.lock
 flock -n 9 || exit 0
+date -Is > $BAZA/verificat
+# Prima comandă care eșuează rămâne scrisă aici; /configurare/stare o arată.
+trap 'echo "$(date -Is) linia $LINENO: $BASH_COMMAND" > $BAZA/ultima-eroare' ERR
+trap '[ $? = 0 ] && rm -f $BAZA/ultima-eroare' EXIT
 
 stare() { printf '{"stare":"%s","versiune":"%s","cand":"%s"}\n' "$1" "$2" "$(date -Is)" > $BAZA/stare.json; }
 
-git -C "$SURSA" fetch -q origin main
+timeout 120 git -C "$SURSA" fetch -q origin main
 git -C "$SURSA" reset -q --hard origin/main
 SHA=$(git -C "$SURSA" rev-parse --short=12 HEAD)
 bash "$SURSA/deploy/oracle/copiaza-fisiere.sh"
