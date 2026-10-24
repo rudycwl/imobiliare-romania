@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { utilizatorCurent } from "@/lib/auth";
 import { esteAdmin } from "@/lib/fondatori";
 import { brevo, emailConfigurat, expeditor } from "@/lib/email";
-import { adaugaDomeniul, emailDeTest, leagaDomeniile, puneInNetlify, verificaDomeniul } from "./actiuni";
+import { adaugaDomeniul, emailDeTest, leagaDomeniile, puneInNetlify, puneZoho, verificaDomeniul } from "./actiuni";
 import { netlifyConfigurat } from "@/lib/netlify-dns";
 
 export const metadata: Metadata = { title: "Emailurile site-ului", robots: { index: false } };
@@ -103,6 +103,28 @@ export default async function EmailPage({ searchParams }: { searchParams: Promis
       <form action={emailDeTest} style={{ marginTop: 16 }}>
         <button type="submit" className="secundar">Trimite-mi un email de test</button>
       </form>
+
+      {netlifyConfigurat() && (
+        <>
+          <h2 style={{ marginTop: 32 }}>Căsuțele de email (Zoho): contact@, agentii@</h2>
+          <form action={puneZoho}>
+            <p className="muted small">
+              Lipește aici ce îți arată Zoho: întâi rândul cu „zoho-verification=…”, iar mai târziu cheia DKIM („v=DKIM1; …”).
+              MX-urile și SPF-ul le pun singur.
+            </p>
+            <textarea name="zoho" rows={4} style={{ width: "100%" }} placeholder="zoho-verification=zb…" />
+            <p className="small">
+              Contul Zoho e pe{" "}
+              <select name="dc" defaultValue="eu">
+                <option value="eu">zoho.eu (Europa)</option>
+                <option value="com">zoho.com</option>
+              </select>{" "}
+              · Selector DKIM (doar pentru cheia DKIM): <input name="selector" defaultValue="zmail" style={{ width: 120 }} />
+            </p>
+            <button type="submit">Pune rândurile Zoho în Netlify DNS</button>
+          </form>
+        </>
+      )}
     </>
   );
 }

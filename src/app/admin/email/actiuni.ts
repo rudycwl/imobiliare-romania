@@ -102,3 +102,37 @@ export async function leagaDomeniile() {
   const sarite = [...a.sarite, ...b.sarite];
   gata(`${adaugate.length ? `Adăugate: ${adaugate.join(", ")}.` : "Rândurile erau deja puse."}${sarite.length ? ` Sărite: ${sarite.join(", ")}.` : ""}`, true);
 }
+
+/**
+ * Căsuțele de email (contact@, agentii@) stau la Zoho Mail (centrul de date UE). Pune în Netlify DNS:
+ * codul de verificare Zoho, MX-urile, SPF-ul și, când e dat, cheia DKIM. Toate vin din textul lipit din Zoho.
+ */
+export async function puneZoho(f: FormData) {
+  await admin();
+  const text = String(f.get("zoho") ?? "");
+  const verificare = text.match(/zoho-verification=[\w.-]+/)?.[0];
+  const dkim = text.match(/v=DKIM1;[^"\n\r]+/)?.[0]?.trim();
+  const selector = String(f.get("selector") ?? "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  if (!verificare && !dkim) gata("Nu găsesc în text nici codul „zoho-verification=…”, nici cheia „v=DKIM1; …”. Copiază din Zoho tot rândul.", false);
+  if (dkim && !selector) gata("Pentru cheia DKIM scrie și selectorul (numele lui din Zoho, de ex. zmail).", false);
+  // Centrul de date al contului Zoho (se vede în adresa din browser: zoho.eu sau zoho.com).
+  const dc = f.get("dc") === "com" ? "com" : "eu";
+  const d = domeniu();
+  const randuri = [
+    ...(verificare ? [{ type: "TXT", hostname: d, value: verificare }] : []),
+    { type: "MX", hostname: d, value: `mx.zoho.${dc}`, priority: 10 },
+    { type: "MX", hostname: d, value: `mx2.zoho.${dc}`, priority: 20 },
+    { type: "MX", hostname: d, value: `mx3.zoho.${dc}`, priority: 50 },
+    { type: "TXT", hostname: d, value: `v=spf1 include:zohomail.${dc} ~all` },
+    ...(dkim ? [{ type: "TXT", hostname: `${selector}._domainkey.${d}`, value: dkim }] : []),
+  ];
+  let rez;
+  try {
+    rez = await adaugaRanduri(d, randuri);
+  } catch (e) {
+    gata(`Netlify a refuzat: ${e instanceof Error ? e.message : e}. Verifică NETLIFY_TOKEN în /configurare.`, false);
+  }
+  const pusi = rez.adaugate.length ? `Am pus în Netlify: ${rez.adaugate.join(", ")}.` : "Rândurile erau deja în Netlify.";
+  const sarite = rez.sarite.length ? ` Sărite: ${rez.sarite.join(", ")}.` : "";
+  gata(`${pusi}${sarite} Acum, în Zoho, apasă „Verify” (poate dura câteva minute până vede rândurile).`, true);
+}
