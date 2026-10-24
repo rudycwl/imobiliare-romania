@@ -17,6 +17,10 @@ model Utilizator {
   /// Persoana de contact, doar pentru firme și agenții.
   contact              String?
   email                String?           @unique
+  /// Când a apăsat linkul din emailul de confirmare (null = neconfirmat).
+  emailConfirmatLa     DateTime?
+  /// Hash-ul linkului de confirmare trimis ultima dată.
+  confirmareHash       String?           @unique
   parolaHash           String?
   telefon              String
   judet                String

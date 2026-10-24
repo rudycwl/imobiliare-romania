@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import { readFileSync, writeFileSync, renameSync, existsSync } from "node:fs";
 import { timingSafeEqual } from "node:crypto";
 import { execFile, execFileSync } from "node:child_process";
-import { contR2, stareServicii, verificaServiciile } from "./servicii.mjs";
+import { contR2, pazesteSite, stareServicii, verificaServiciile } from "./servicii.mjs";
 
 const ENV = "/etc/cheiamea/env.json";
 const COD = readFileSync("/etc/cheiamea/cod", "utf8").trim();
@@ -76,6 +76,8 @@ const starePublica = () => ({
 const verifica = () => verificaServiciile(citesteEnv()).catch((e) => console.error("Servicii:", e));
 setTimeout(verifica, 15_000);
 setInterval(verifica, 10 * 60_000);
+// Paza site-ului: un email adminilor dacă nu răspunde 5 minute la rând.
+setInterval(() => pazesteSite(citesteEnv()).catch((e) => console.error("Paza:", e)), 60_000);
 // Paza: dacă timerul de actualizare se oprește, pornim noi verificarea lui main (flock-ul din script evită dublurile).
 setInterval(() => execFile("systemctl", ["start", "--no-block", "cheiamea-actualizare.service"], () => {}), 3 * 60_000);
 const TEXT_STARE = {

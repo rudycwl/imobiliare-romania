@@ -7,7 +7,7 @@ import { cautaAnunturi } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
 import { formatData } from "@/lib/fondatori";
 import { db } from "@/lib/db";
-import { prelungeste, retrage } from "./actiuni";
+import { prelungeste, retrage, retrimiteConfirmare } from "./actiuni";
 import { CadruCont } from "./CadruCont";
 import { formatPret } from "@/lib/etichete";
 import { credite } from "@/lib/abonamente";
@@ -49,8 +49,16 @@ function EtichetePromovare({ a, acum }: { a: { evidentiatPanaLa: Date | null; to
   return e.length ? <span className="promo-activa"> · {e.join(" · ")}</span> : null;
 }
 
-export default async function ContPage({ searchParams }: { searchParams: Promise<{ eroare?: string; fila?: string }> }) {
-  const { eroare, fila: filaCeruta } = await searchParams;
+const MESAJ_CONFIRMARE: Record<string, [string, string]> = {
+  ok: ["succes", "Mulțumim, adresa de email e confirmată."],
+  expirat: ["eroare", "Linkul de confirmare a expirat sau a fost deja folosit. Cere unul nou mai jos."],
+  trimis: ["succes", "Ți-am trimis din nou emailul de confirmare. Uită-te și în Spam."],
+  netrimis: ["eroare", "Nu am putut trimite emailul acum. Încearcă mai târziu sau scrie-ne la contact@cheiamea.ro."],
+  limita: ["eroare", "Ți-am trimis deja 3 emailuri în ultima oră. Încearcă din nou mai târziu."],
+};
+
+export default async function ContPage({ searchParams }: { searchParams: Promise<{ eroare?: string; fila?: string; confirmare?: string }> }) {
+  const { eroare, fila: filaCeruta, confirmare } = await searchParams;
   const u = await utilizatorCurent();
   if (!u) redirect("/cont/autentificare");
   const [{ anunturi }, rec, cr] = await Promise.all([
@@ -75,6 +83,13 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
     <CadruCont u={u}>
       <h1 id="anunturile-mele">Anunțurile mele</h1>
       <Vanzator u={u} />
+      {confirmare && MESAJ_CONFIRMARE[confirmare] && <p className={MESAJ_CONFIRMARE[confirmare][0]}>{MESAJ_CONFIRMARE[confirmare][1]}</p>}
+      {!u.emailConfirmat && u.email && (
+        <form action={retrimiteConfirmare} className="abonament-stare">
+          Confirmă adresa {u.email}: apasă linkul din emailul primit la înscriere (uită-te și în Spam).{" "}
+          <button type="submit" className="secundar">Trimite din nou</button>
+        </form>
+      )}
       <p className="muted small">
         {u.email} · {u.telefon} · {getOras(u.judet, u.oras)?.nume}, {getJudet(u.judet)?.nume}
         {u.contact && ` · contact: ${u.contact}`} · <Link href="/cont/setari">Modifică</Link>

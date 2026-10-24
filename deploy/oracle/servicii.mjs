@@ -111,14 +111,59 @@ async function r2(env) {
   return { stare: "chei-refuzate", mesaj: (r.text.match(/<Message>([^<]*)/)?.[1] ?? mesaj(r)).slice(0, 200) };
 }
 
+// ---------- paza site-ului ----------
+// La fiecare minut cerem pagina de start; după 5 minute la rând fără răspuns, adminii primesc un email
+// (și încă unul când site-ul revine). systemd repornește singur aplicația dacă se oprește.
+
+const PRAG = 5;
+let paza = { ok: true, esecuri: 0, cazutLa: null, alertat: false, ultimaEroare: null };
+
+async function anuntaAdminii(env, subiect, text) {
+  const admini = String(env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim()).filter(Boolean);
+  if (!env.BREVO_API_KEY || !admini.length) return false;
+  const r = await brevo(env, "POST", "/smtp/email", {
+    sender: { name: "CheiaMea", email: (env.EMAIL_EXPEDITOR || "noreply@cheiamea.ro").trim() },
+    to: admini.map((email) => ({ email })),
+    subject: subiect,
+    textContent: text,
+  });
+  return r.ok;
+}
+
+const ora = (d) => new Date(d).toLocaleString("ro-RO", { timeZone: "Europe/Bucharest" });
+
+export async function pazesteSite(env) {
+  const r = await cerere("http://127.0.0.1:3000/", { antete: { accept: "text/html" } });
+  if (r.ok) {
+    if (paza.alertat) {
+      await anuntaAdminii(env, "CheiaMea: site-ul merge din nou", `Bună,\n\nSite-ul cheiamea.ro răspunde din nou (${ora(Date.now())}). Nu răspundea de la ${ora(paza.cazutLa)}.\n\nNu trebuie să faci nimic.`);
+    }
+    paza = { ok: true, esecuri: 0, cazutLa: null, alertat: false, ultimaEroare: null };
+    return;
+  }
+  paza.esecuri++;
+  paza.cazutLa ??= new Date().toISOString();
+  paza.ultimaEroare = r.status ? `HTTP ${r.status}` : mesaj(r);
+  paza.ok = false;
+  if (paza.esecuri >= PRAG && !paza.alertat) {
+    paza.alertat = await anuntaAdminii(
+      env,
+      "CheiaMea: site-ul nu răspunde",
+      `Bună,\n\nSite-ul cheiamea.ro nu răspunde de la ${ora(paza.cazutLa)} (${paza.ultimaEroare}). Serverul încearcă singur să-l repornească.\n\nScrie-i lui Claude în proiectul CheiaMea: „site-ul nu merge”. Când revine, primești alt email.`,
+    );
+  }
+}
+
+export const starePaza = () => paza;
+
 // ---------- ciclul ----------
 
 let ultima = { verificat: null };
 
 export async function verificaServiciile(env) {
   const [e, r] = await Promise.all([email(env).catch((x) => ({ stare: "eroare", mesaj: String(x) })), r2(env).catch((x) => ({ stare: "eroare", mesaj: String(x) }))]);
-  ultima = { verificat: new Date().toISOString(), email: e, r2: r, netlifyToken: !!env.NETLIFY_TOKEN };
+  ultima = { verificat: new Date().toISOString(), email: e, r2: r, netlifyToken: !!env.NETLIFY_TOKEN, adminiAnuntati: !!env.ADMIN_EMAILS };
   return ultima;
 }
 
-export const stareServicii = () => ultima;
+export const stareServicii = () => ({ ...ultima, site: paza });
