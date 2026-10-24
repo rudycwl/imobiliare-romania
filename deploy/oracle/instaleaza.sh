@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Pregătește o mașină virtuală Ubuntu (Oracle Cloud Always Free) pentru CheiaMea.
 # Rulează o singură dată, ca root, din cloud-init:  bash instaleaza.sh <cod-configurare>
-# După instalare, variabilele (DATABASE_URL, chei) se completează în https://nou.cheiamea.ro/configurare?cod=...
+# După instalare, variabilele (DATABASE_URL, chei) se completează în https://nou.cheiamea.ro/configurare (cu codul de mai jos)
 set -euxo pipefail
 COD="${1:?lipsește codul de configurare}"
 REPO=https://github.com/rudycwl/imobiliare-romania.git

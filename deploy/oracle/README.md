@@ -19,7 +19,7 @@ runcmd:
 Apoi:
 1. În rețeaua instanței (Security List) se permit porturile TCP 80 și 443 din 0.0.0.0/0.
 2. În Netlify DNS: record A `nou` → IP-ul public al instanței.
-3. Variabilele se completează în `https://nou.cheiamea.ro/configurare?cod=COD-CONFIGURARE`.
+3. Variabilele se completează în `https://nou.cheiamea.ro/configurare` (se cere codul o dată, apoi îl ține minte browserul 12 ore).
 4. Când site-ul merge pe `nou.cheiamea.ro`, recordul A pentru `cheiamea.ro` se mută pe același IP
    (și `www`, `cheiamea.com`, `www.cheiamea.com`).
 
