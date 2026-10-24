@@ -7,6 +7,7 @@ import { getJudet, getOras } from "./geo";
 import { JUDETE } from "@/modules/judete";
 import { anunturiActive, creeazaAnunt, limitaAnunturi, type AnuntNou } from "./anunturi";
 import { aplicaFiltru } from "./moderare";
+import { LUNGIME } from "./lungimi";
 import { adaugaPoza, cheieNoua, MAX_POZE } from "./poze";
 import { salveazaLocal, stocareLocala } from "./stocare";
 
@@ -72,7 +73,7 @@ const numar = (v: string) => Number(v.replace(/[\s.€]/g, "").replace(",", ".")
 function citesteRand(r: Record<string, string>): { eroare: string } | { date: AnuntNou; poze: string[] } {
   const tip = gasesteCheie(TIPURI, r.tip ?? "");
   const tranzactie = gasesteCheie(TRANZACTII, r.tranzactie ?? "");
-  const titlu = (r.titlu ?? "").trim().slice(0, 150);
+  const titlu = (r.titlu ?? "").trim().slice(0, LUNGIME.titlu);
   const pret = numar(r.pret ?? "");
   const suprafata = numar(r.suprafata ?? "");
   const loc = gasesteLoc(r.judet ?? "", r.oras ?? "");
@@ -84,7 +85,7 @@ function citesteRand(r: Record<string, string>): { eroare: string } | { date: An
   return {
     date: {
       titlu,
-      descriere: (r.descriere ?? "").trim().slice(0, 8000),
+      descriere: (r.descriere ?? "").trim().slice(0, LUNGIME.descriere),
       tip,
       tranzactie,
       pret: Math.round(pret),
@@ -92,7 +93,7 @@ function citesteRand(r: Record<string, string>): { eroare: string } | { date: An
       camere: Math.round(numar(r.camere ?? "")) || null,
       judet: loc.judet,
       oras: loc.oras,
-      zona: (r.zona ?? "").trim().slice(0, 80) || "Centru",
+      zona: (r.zona ?? "").trim().slice(0, LUNGIME.zona) || "Centru",
     },
     poze: (r.poze ?? "").split(/[\s|]+/).filter((u) => /^https:\/\//i.test(u)).slice(0, MAX_POZE),
   };

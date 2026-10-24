@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { LUNGIME, preaLung } from "@/lib/lungimi";
 import { utilizatorCurent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getJudet, getOras } from "@/lib/geo";
@@ -25,6 +26,8 @@ export async function platesteActiune(_: { eroare?: string } | undefined, f: For
   const adresa = text(f, "adresa");
   const telefon = text(f, "telefon");
   if (nume.length < 3 || adresa.length < 5 || telefon.length < 6) return { eroare: "Completează numele, adresa și telefonul." };
+  const lung = preaLung([["Numele", nume, LUNGIME.nume], ["Adresa", adresa, LUNGIME.adresa], ["Telefonul", telefon, 20], ["Nr. Registrul Comerțului", text(f, "regCom"), LUNGIME.regCom], ["Codul poștal", text(f, "codPostal"), 6]]);
+  if (lung) return { eroare: lung };
 
   const u = await db.utilizator.findUniqueOrThrow({ where: { id: sesiune.id } });
   const firma = u.tip !== "persoana-fizica";

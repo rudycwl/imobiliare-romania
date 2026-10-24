@@ -19,6 +19,7 @@ import { stocareConfigurata } from "@/lib/stocare";
 import { completeazaCoordonate } from "@/lib/geocodare";
 import { ipClient, noteaza, permis, sterge } from "@/lib/limita";
 import { trimiteConfirmare } from "@/lib/confirmare";
+import { LUNGIME, preaLung } from "@/lib/lungimi";
 
 const MIN15 = 15 * 60_000;
 const ORA = 60 * 60_000;
@@ -47,6 +48,8 @@ export async function inregistrare(_: Stare, f: FormData): Promise<Stare> {
   const oras = text(f, "oras");
 
   if (!denumire || !persoana) return esec("Completează numele.", f);
+  const lung = preaLung([["Numele", persoana, LUNGIME.nume], ["Denumirea", denumire, LUNGIME.nume], ["Emailul", email, LUNGIME.email], ["Parola", parola, LUNGIME.parola]]);
+  if (lung) return esec(lung, f);
   if (juridic && !/^(RO)?\d{2,10}$/.test(cui!)) return esec("CUI invalid (ex. RO12345678).", f);
   if (!/^\S+@\S+\.\S+$/.test(email)) return esec("Adresa de email nu e validă.", f);
   if (!/^0\d{9}$/.test(telefon)) return esec("Telefonul trebuie să aibă 10 cifre și să înceapă cu 0.", f);
@@ -142,22 +145,31 @@ function citesteAnunt(f: FormData): { eroare: string } | { date: AnuntNou } {
   const judet = text(f, "judet");
   const oras = text(f, "oras");
 
+  const descriere = text(f, "descriere");
+  const zona = text(f, "zona");
+  const camere = Number(f.get("camere")) || null;
+
   if (!(tip in TIPURI) || !(tranzactie in TRANZACTII)) return { eroare: "Alege tipul proprietății și tranzacția." };
   if (titlu.length < 10) return { eroare: "Titlul trebuie să aibă cel puțin 10 caractere." };
+  const lung = preaLung([["Titlul", titlu, LUNGIME.titlu], ["Descrierea", descriere, LUNGIME.descriere], ["Zona", zona, LUNGIME.zona]]);
+  if (lung) return { eroare: lung };
   if (!(pret > 0) || !(suprafata > 0)) return { eroare: "Prețul și suprafața trebuie să fie pozitive." };
+  // Valori care nu pot fi reale (și ar strica sortarea și mediile de preț).
+  if (pret > 100_000_000 || suprafata > 10_000_000) return { eroare: "Verifică prețul și suprafața: valoarea e prea mare." };
+  if (camere != null && (!Number.isInteger(camere) || camere < 1 || camere > 100)) return { eroare: "Numărul de camere trebuie să fie între 1 și 100." };
   if (!getOras(judet, oras)) return { eroare: "Alege județul și orașul." };
   return {
     date: {
       titlu,
-      descriere: text(f, "descriere"),
+      descriere,
       tip: tip as keyof typeof TIPURI,
       tranzactie: tranzactie as keyof typeof TRANZACTII,
       pret: Math.round(pret),
       suprafata: Math.round(suprafata),
-      camere: Number(f.get("camere")) || null,
+      camere,
       judet,
       oras,
-      zona: text(f, "zona") || "Centru",
+      zona: zona || "Centru",
     },
   };
 }
@@ -165,6 +177,8 @@ function citesteAnunt(f: FormData): { eroare: string } | { date: AnuntNou } {
 export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   const u = await utilizatorCurent();
   if (!u) redirect("/cont/autentificare");
+  // Doar conturile cu email confirmat publică: oprește anunțurile puse de pe adrese inventate.
+  if (!u.emailConfirmat) return esec(MESAJ_EMAIL, f);
   const r = citesteAnunt(f);
   if ("eroare" in r) return esec(r.eroare, f);
   if (!(await poatePublica(u))) return esec(MESAJ_LIMITA, f);
@@ -193,6 +207,7 @@ export async function editeazaAnunt(_: Stare, f: FormData): Promise<Stare> {
   redirect(`/anunt/${id}`);
 }
 
+const MESAJ_EMAIL = "Confirmă întâi adresa de email: apasă linkul din emailul primit la înscriere (uită-te și în Spam). Din „Contul meu” îl poți cere din nou.";
 const MESAJ_LIMITA = `Ai deja ${ANUNTURI_GRATUITE} anunțuri active, cât permite publicarea gratuită. Retrage un anunț vândut sau închiriat din „Contul meu” și apoi publică-l pe cel nou.`;
 
 async function proprietarSiId(f: FormData) {

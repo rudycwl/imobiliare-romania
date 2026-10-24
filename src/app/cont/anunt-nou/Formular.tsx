@@ -125,7 +125,7 @@ export function FormularCampuri({
       <Localitate judetInitial={v?.judet ?? judet} orasInitial={v?.oras ?? oras} />
       <label>
         Zonă / cartier
-        <input name="zona" defaultValue={v?.zona} placeholder="ex. Centru" />
+        <input name="zona" defaultValue={v?.zona} maxLength={80} placeholder="ex. Centru" />
       </label>
       <AlegePunct initial={v.lat && v.lng ? { lat: Number(v.lat), lng: Number(v.lng) } : null} />
       <label>

@@ -18,6 +18,11 @@ export type Filtre = {
   pretMin?: string;
   pretMax?: string;
   camere?: string;
+  /** Suprafața utilă, în m². */
+  supMin?: string;
+  supMax?: string;
+  /** "1" = doar anunțurile cu poze. */
+  poze?: string;
   /** Tipul de vânzător: persoana-fizica | firma | agentie */
   oferit?: string;
   /** Id-ul proprietarului (ex. pagina unei agenții). */
@@ -54,6 +59,8 @@ function unde(f: Filtre): Prisma.AnuntWhereInput {
   const pretMin = Number(f.pretMin) || undefined;
   const pretMax = Number(f.pretMax) || undefined;
   const camere = Number(f.camere) || undefined;
+  const supMin = Number(f.supMin) || undefined;
+  const supMax = Number(f.supMax) || undefined;
   return {
     ...(f.toate ? {} : activ()),
     judet: f.judet || undefined,
@@ -63,6 +70,8 @@ function unde(f: Filtre): Prisma.AnuntWhereInput {
     tranzactie: f.tranzactie && f.tranzactie in TRANZACTII ? f.tranzactie : undefined,
     pret: pretMin || pretMax ? { gte: pretMin, lte: pretMax } : undefined,
     camere: camere ? { gte: camere } : undefined,
+    suprafata: supMin || supMax ? { gte: supMin, lte: supMax } : undefined,
+    poze: f.poze === "1" ? { some: {} } : undefined,
     proprietarId: f.proprietar || undefined,
     proprietar: f.oferit ? { tip: f.oferit } : undefined,
     OR: q
@@ -80,9 +89,13 @@ function unde(f: Filtre): Prisma.AnuntWhereInput {
 export async function cautaAnunturi(f: Filtre, limita = LIMITA) {
   await ruleazaReactualizari();
   const where = unde(f);
-  const implicit = f.sort !== "pret-asc" && f.sort !== "pret-desc";
-  const orderBy: Prisma.AnuntOrderByWithRelationInput[] =
-    f.sort === "pret-asc" ? [{ pret: "asc" }] : f.sort === "pret-desc" ? [{ pret: "desc" }] : [{ ordine: "desc" }, { id: "desc" }];
+  const ordini: Record<string, Prisma.AnuntOrderByWithRelationInput[]> = {
+    "pret-asc": [{ pret: "asc" }, { id: "desc" }],
+    "pret-desc": [{ pret: "desc" }, { id: "desc" }],
+    "suprafata-desc": [{ suprafata: "desc" }, { id: "desc" }],
+  };
+  const implicit = !(f.sort && f.sort in ordini);
+  const orderBy = implicit ? [{ ordine: "desc" as const }, { id: "desc" as const }] : ordini[f.sort!];
   const acum = new Date();
   const promo: Prisma.AnuntWhereInput | null =
     !implicit || f.toate ? null : f.oras ? { topPanaLa: { gt: acum } } : f.judet ? { primaPaginaPanaLa: { gt: acum } } : null;

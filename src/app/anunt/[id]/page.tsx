@@ -108,7 +108,7 @@ export default async function AnuntPage({ params }: Props) {
           <p>{a.descriere}</p>
           <Vanzator u={u} />
           <div className="actiuni-anunt">
-            <ButonTelefon id={a.id} telefon={u.telefon} />
+            <ButonTelefon id={a.id} />
             <Favorit id={a.id} mare />
           </div>
           <Distribuie url={`${SITE}/anunt/${a.id}`} text={`${a.titlu} – ${formatPret(a)} pe CheiaMea`} />

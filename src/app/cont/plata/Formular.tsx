@@ -14,7 +14,7 @@ export function FormularPlata({ cerere, firma, valori }: { cerere: string; firma
       <h2>Date de facturare</h2>
       <label>
         {firma ? "Persoana de contact" : "Nume și prenume"}
-        <input name="nume" defaultValue={valori.nume} required minLength={3} />
+        <input name="nume" defaultValue={valori.nume} required minLength={3} maxLength={120} />
       </label>
       {firma && (
         <>
@@ -27,7 +27,7 @@ export function FormularPlata({ cerere, firma, valori }: { cerere: string; firma
       )}
       <label>
         Adresa (stradă, număr, bloc, apartament)
-        <input name="adresa" defaultValue={valori.adresa} required minLength={5} />
+        <input name="adresa" defaultValue={valori.adresa} required minLength={5} maxLength={200} />
       </label>
       <label>Localitatea<input value={valori.localitate} readOnly /></label>
       <label>Cod poștal (opțional)<input name="codPostal" inputMode="numeric" maxLength={6} /></label>
