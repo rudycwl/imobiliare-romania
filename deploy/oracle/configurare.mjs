@@ -1,13 +1,15 @@
 // Pagina /configurare: aici se pun variabilele secrete (DATABASE_URL, chei) direct pe server, nu în chat.
 // Protejată de codul din /etc/cheiamea/cod. Rulează ca root doar pe 127.0.0.1:3001, în spatele Caddy (HTTPS).
+// Codul se scrie o dată într-un formular și apoi ține minte un cookie: nu mai stă în adresa paginii (istoric, capturi, linkuri).
 import { createServer } from "node:http";
 import { readFileSync, writeFileSync, renameSync, existsSync } from "node:fs";
-import { timingSafeEqual } from "node:crypto";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import { execFile, execFileSync } from "node:child_process";
 import { contR2, pazesteSite, stareServicii, verificaServiciile } from "./servicii.mjs";
 
 const ENV = "/etc/cheiamea/env.json";
-const COD = readFileSync("/etc/cheiamea/cod", "utf8").trim();
+const FISIER_COD = "/etc/cheiamea/cod";
+let COD = readFileSync(FISIER_COD, "utf8").trim();
 
 // secret: valoarea nu se mai afișează după salvare. Ordinea e cea din formular.
 const CAMPURI = [
@@ -61,6 +63,40 @@ const codBun = (c) => {
   const a = Buffer.from(String(c ?? "")), b = Buffer.from(COD);
   return a.length === b.length && timingSafeEqual(a, b);
 };
+
+// Sesiuni ținute în memorie (se pierd la repornire: atunci se scrie codul din nou).
+const SESIUNE_MS = 12 * 60 * 60_000;
+const sesiuni = new Map(); // token -> expiră la
+const COOKIE = "cm_cfg";
+function sesiuneNoua() {
+  const t = randomBytes(32).toString("base64url");
+  sesiuni.set(t, Date.now() + SESIUNE_MS);
+  return `${COOKIE}=${t}; Path=/configurare; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESIUNE_MS / 1000}`;
+}
+const cookieIesire = `${COOKIE}=; Path=/configurare; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
+function tokenDin(req) {
+  const m = (req.headers.cookie ?? "").match(new RegExp(`(?:^|;\\s*)${COOKIE}=([\\w-]+)`));
+  return m?.[1] ?? null;
+}
+function autentificat(req) {
+  const t = tokenDin(req), exp = t && sesiuni.get(t);
+  if (!exp) return false;
+  if (exp < Date.now()) { sesiuni.delete(t); return false; }
+  return true;
+}
+setInterval(() => { const acum = Date.now(); for (const [t, e] of sesiuni) if (e < acum) sesiuni.delete(t); }, 60 * 60_000);
+
+// Încercări greșite: cel mult 10 pe oră de la aceeași adresă. Caddy înlocuiește X-Forwarded-For cu adresa reală.
+const gresite = new Map(); // ip -> [momente]
+const ipDin = (req) => String(req.headers["x-forwarded-for"] ?? "").split(",").pop().trim() || req.socket.remoteAddress;
+function blocat(ip) {
+  const acum = Date.now(), l = (gresite.get(ip) ?? []).filter((t) => t > acum - 60 * 60_000);
+  gresite.set(ip, l);
+  return l.length >= 10;
+}
+const notaGresit = (ip) => gresite.set(ip, [...(gresite.get(ip) ?? []), Date.now()]);
+// POST-urile vin doar din pagina noastră (pe lângă SameSite=Strict).
+const dinPagina = (req) => !req.headers.origin || /^https:\/\/([\w-]+\.)*(cheiamea\.ro|sslip\.io)$/.test(req.headers.origin);
 const citeste = (f) => { try { return readFileSync(f, "utf8").trim(); } catch { return null; } };
 const stare = () => {
   try { return JSON.parse(readFileSync("/opt/cheiamea/stare.json", "utf8")); } catch { return { stare: "necunoscut" }; }
@@ -113,34 +149,73 @@ ${mesaj ? `<p class="ok">${esc(mesaj)}</p>` : ""}
 <p class="stare"><b>Stare:</b> ${esc(TEXT_STARE[s.stare] ?? s.stare)} ${s.versiune ? `(versiunea ${esc(s.versiune)})` : ""}</p>
 <pre>${esc(JSON.stringify(stareServicii(), null, 2))}</pre>
 <form method="post" action="/configurare">
-<input type="hidden" name="cod" value="${esc(COD)}">
 ${campuri}
+<h2>Codul acestei pagini</h2>
+<label><b>Cod nou</b><input name="cod_nou" type="text" class="secret" value="" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore><small>Opțional. Cel puțin 12 caractere. Lasă gol ca să rămână codul de acum. Notează-l înainte să salvezi.</small></label>
 <p><button>Salvează și pornește site-ul</button></p>
 </form>
+<form method="post" action="/configurare/iesire"><p><button style="background:#888">Ieși</button></p></form>
 ${jurnal ? `<h2>Jurnal build</h2><pre>${esc(jurnal)}</pre>` : ""}
 </html>`;
 }
 
-function trimite(res, cod, corp, tip = "text/html; charset=utf-8") {
-  res.writeHead(cod, { "Content-Type": tip, "Cache-Control": "no-store", "X-Robots-Tag": "noindex" });
+const intrare = (mesaj = "") => `<!doctype html><html lang="ro"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configurare CheiaMea</title>
+<style>body{font:16px system-ui,sans-serif;max-width:420px;margin:48px auto;padding:0 16px;color:#1b2a41}input{display:block;width:100%;box-sizing:border-box;padding:10px;margin:8px 0 16px;font:inherit}
+button{background:#f28c28;color:#fff;border:0;padding:12px 24px;font-size:17px;border-radius:6px;cursor:pointer}.err{background:#fdecea;padding:12px;border-radius:6px}</style>
+<h1>Configurare CheiaMea</h1>
+${mesaj ? `<p class="err">${esc(mesaj)}</p>` : ""}
+<form method="post" action="/configurare/intra"><label>Codul paginii<input name="cod" type="password" autocomplete="current-password" autofocus></label>
+<button>Intră</button></form></html>`;
+
+function trimite(res, cod, corp, tip = "text/html; charset=utf-8", antete = {}) {
+  res.writeHead(cod, { "Content-Type": tip, "Cache-Control": "no-store", "X-Robots-Tag": "noindex", ...antete });
   res.end(corp);
+}
+const redirect = (res, unde, antete = {}) => { res.writeHead(303, { Location: unde, "Cache-Control": "no-store", ...antete }); res.end(); };
+function citesteCorp(req, gata) {
+  let corp = "";
+  req.on("data", (b) => { corp += b; if (corp.length > 200_000) req.destroy(); });
+  req.on("end", () => gata(new URLSearchParams(corp)));
 }
 
 createServer((req, res) => {
   const url = new URL(req.url, "http://localhost");
   if (url.pathname === "/configurare/stare") return trimite(res, 200, JSON.stringify(starePublica()), "application/json");
+  const ip = ipDin(req);
+
+  // Linkurile vechi /configurare?cod=… încă merg o dată, dar codul e scos imediat din adresă.
+  if (url.pathname === "/configurare" && req.method === "GET" && url.searchParams.has("cod")) {
+    if (blocat(ip)) return trimite(res, 429, intrare("Prea multe încercări greșite. Încearcă peste o oră."));
+    if (!codBun(url.searchParams.get("cod"))) { notaGresit(ip); return setTimeout(() => redirect(res, "/configurare"), 1000); }
+    return redirect(res, "/configurare", { "Set-Cookie": sesiuneNoua() });
+  }
+  if (url.pathname === "/configurare/intra" && req.method === "POST") {
+    if (!dinPagina(req)) return trimite(res, 403, "");
+    if (blocat(ip)) return trimite(res, 429, intrare("Prea multe încercări greșite. Încearcă peste o oră."));
+    return citesteCorp(req, (f) => {
+      if (!codBun(f.get("cod"))) { notaGresit(ip); return setTimeout(() => trimite(res, 403, intrare("Cod greșit.")), 1000); }
+      redirect(res, "/configurare", { "Set-Cookie": sesiuneNoua() });
+    });
+  }
+  if (url.pathname === "/configurare/iesire" && req.method === "POST") {
+    const t = tokenDin(req);
+    if (t) sesiuni.delete(t);
+    return redirect(res, "/configurare", { "Set-Cookie": cookieIesire });
+  }
   if (url.pathname !== "/configurare") return trimite(res, 404, "Nu există.");
+  if (!autentificat(req)) return trimite(res, req.method === "GET" ? 200 : 403, intrare(req.method === "GET" ? "" : "Sesiunea a expirat. Scrie codul din nou."));
 
   if (req.method === "GET") {
-    if (!codBun(url.searchParams.get("cod"))) return setTimeout(() => trimite(res, 403, "Cod greșit."), 1000);
-    return trimite(res, 200, pagina(citesteEnv(), url.searchParams.get("salvat") ? "Am salvat. Site-ul se construiește acum." : ""));
+    const m = url.searchParams.get("salvat");
+    const mesaj = m === "cod" ? "Am salvat, inclusiv codul nou. Site-ul se construiește acum."
+      : m === "scurt" ? "Am salvat cheile, dar codul nou NU: trebuie cel puțin 12 caractere. Codul vechi rămâne."
+      : m ? "Am salvat. Site-ul se construiește acum." : "";
+    return trimite(res, 200, pagina(citesteEnv(), mesaj));
   }
   if (req.method !== "POST") return trimite(res, 405, "");
-  let corp = "";
-  req.on("data", (b) => { corp += b; if (corp.length > 200_000) req.destroy(); });
-  req.on("end", () => {
-    const f = new URLSearchParams(corp);
-    if (!codBun(f.get("cod"))) return setTimeout(() => trimite(res, 403, "Cod greșit."), 1000);
+  if (!dinPagina(req)) return trimite(res, 403, "");
+  citesteCorp(req, (f) => {
     const env = citesteEnv();
     for (const [k, v] of f) {
       if (!CHEI.has(k)) continue;
@@ -153,10 +228,21 @@ createServer((req, res) => {
       else if (!camp.secret) delete env[k];
     }
     scrieEnv(env);
+    // Cod nou: îl scriem pe disc și închidem toate celelalte sesiuni.
+    const codNou = (f.get("cod_nou") ?? "").trim();
+    let rezultat = "1";
+    if (codNou && codNou.length < 12) rezultat = "scurt";
+    else if (codNou && codNou !== COD) {
+      rezultat = "cod";
+      writeFileSync(FISIER_COD + ".nou", codNou, { mode: 0o600 });
+      renameSync(FISIER_COD + ".nou", FISIER_COD);
+      COD = codNou;
+      const t = tokenDin(req);
+      for (const k of sesiuni.keys()) if (k !== t) sesiuni.delete(k);
+    }
     writeFileSync("/opt/cheiamea/forteaza", "");
     execFile("systemctl", ["start", "--no-block", "cheiamea-actualizare.service"], () => {});
     setTimeout(verifica, 3000);
-    res.writeHead(303, { Location: `/configurare?cod=${encodeURIComponent(COD)}&salvat=1` });
-    res.end();
+    redirect(res, `/configurare?salvat=${rezultat}`);
   });
 }).listen(3001, "127.0.0.1");

@@ -31,7 +31,7 @@ cheiamea.ro, nou.cheiamea.ro, 158-180-27-245.sslip.io {
 		file_server
 	}
 	handle /configurare* {
-		# Codul din adresă nu trebuie să plece spre alte site-uri.
+		# Linkurile vechi cu ?cod= nu trebuie să trimită codul spre alte site-uri.
 		header Referrer-Policy "no-referrer"
 		reverse_proxy 127.0.0.1:3001
 	}
