@@ -67,6 +67,47 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "25.10.2026",
   },
   {
+    judet: "brasov",
+    oras: "brasov",
+    nume: "Brașov",
+    an: 2026,
+    hotarare: "HCL nr. 1142 din 22.12.2025 privind impozitele și taxele locale pentru anul 2026, republicată după HCL nr. 120 din 06.03.2026",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale și anexe) ale persoanelor fizice", valoare: "0,1%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "0,5%" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,2% (+0,1% cotă adițională)" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,3% (+0,5% cotă adițională)" },
+    ],
+    bonificatie: "10% pentru plata integrală până la 31 martie (clădiri, teren, mașini)",
+    note: ["La clădirile nerezidențiale ale persoanelor fizice fără raport de evaluare depus la timp, cota este 2%."],
+    surse: [
+      { nume: "HCL nr. 1142/2025 republicată (Direcția Fiscală Brașov, dfbv.ro)", url: "https://dfbv.ro/wp-content/uploads/2026/03/hcl-1142-republicat_pt-site.pdf" },
+      { nume: "Lista hotărârilor privind impozitele (dfbv.ro)", url: "https://dfbv.ro/hcl-privind-impozitele-si-taxele/" },
+    ],
+    verificat: "25.10.2026",
+  },
+  {
+    judet: "timis",
+    oras: "timisoara",
+    nume: "Timișoara",
+    an: 2026,
+    hotarare: "HCLMT nr. 719/2025 (cotele de impozitare pentru 2026)",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale)", valoare: "0,1%" },
+      { ce: "Clădiri nerezidențiale", valoare: "1,3% (+16% cotă adițională)" },
+    ],
+    bonificatie: "Neconfirmată încă din documentele oficiale; întreabă la Direcția Fiscală Timișoara",
+    note: [
+      "Exemplul oficial al primăriei: un apartament cu 55 m² utili în zona C plătește circa 474 lei pe an (55 × 1,4 × 2.677 lei × 2,3 × 0,1%).",
+      "Hotărârea completă nu se poate deschide direct de pe site-ul primăriei; cotele sunt luate din fișa de calcul publicată de Primăria Timișoara.",
+    ],
+    surse: [
+      { nume: "Calcul impozite 2026, Primăria Timișoara (PDF)", url: "https://assets.primariatm.ro/bcef49ee-bfc6-4213-9605-7364716de03d/calcul%20impozite%202026-%20pt_site%281%29.pdf" },
+      { nume: "HCL nr. 719/2025 (primariatm.ro)", url: "https://www.primariatm.ro/hcl/2025/719" },
+    ],
+    verificat: "25.10.2026",
+  },
+  {
     judet: "constanta",
     oras: "constanta",
     nume: "Constanța",

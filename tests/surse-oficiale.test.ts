@@ -5,7 +5,7 @@ import { PUBLICURI, STIRE_TVA, STIRI } from "@/lib/continut";
 import { ORASE_IMPOZITE, REGULI_NATIONALE, caleImpozite, impoziteOras } from "@/lib/impozite-locale";
 
 // Regula casei: legislația vine doar din surse oficiale, nu din presă.
-const OFICIALE = ["legislatie.just.ro", "static.anaf.ro", "monitoruloficial.ro", "mfinante.gov.ro", "primaria-iasi.ro", "primariaclujnapoca.ro", "doc.pmb.ro", "mol.oradea.ro", "ploiesti.ro", "sibiu.ro", "spit-ct.ro"];
+const OFICIALE = ["legislatie.just.ro", "static.anaf.ro", "monitoruloficial.ro", "mfinante.gov.ro", "primaria-iasi.ro", "primariaclujnapoca.ro", "doc.pmb.ro", "mol.oradea.ro", "ploiesti.ro", "sibiu.ro", "spit-ct.ro", "dfbv.ro", "primariatm.ro"];
 const oficial = (url: string) => OFICIALE.some((d) => new URL(url).hostname.endsWith(d));
 
 test("toate linkurile din legislație duc la surse oficiale", () => {
