@@ -153,6 +153,21 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "25.10.2026",
   },
   {
+    judet: "bacau",
+    oras: "bacau",
+    nume: "Bacău",
+    an: 2026,
+    hotarare: "HCL nr. 553 din 19.12.2025 și HCL nr. 592 din 23.12.2025 (impozitele pentru 2026); cota la locuințe păstrată prin HCL nr. 554 din 19.12.2025",
+    cote: [{ ce: "Locuințe (clădiri rezidențiale) ale persoanelor fizice", valoare: "0,1%" }],
+    bonificatie: "Neconfirmată încă din documentele oficiale; întreabă la Direcția Venituri Locale Bacău",
+    note: [
+      "Cota de 0,1% a rămas la fel ca în 2025. Impozitul crește totuși, pentru că valoarea impozabilă pe m² a crescut prin lege.",
+      "Exemplul oficial al primăriei: un apartament cu 50 m² utili în zona A plătește 468 lei în 2026 (70 m² × 2.677 lei × 2,5 × 0,1%).",
+    ],
+    surse: [{ nume: "Calcul taxe locale 2026, Direcția Venituri Locale Bacău", url: "https://taxe.municipiulbacau.ro/calcul-taxe-locale-2026/" }],
+    verificat: "25.10.2026",
+  },
+  {
     judet: "bihor",
     oras: "oradea",
     nume: "Oradea",
