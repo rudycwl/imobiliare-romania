@@ -366,6 +366,23 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "25.10.2026",
   },
   {
+    judet: "vrancea",
+    oras: "focsani",
+    nume: "Focșani",
+    an: 2026,
+    hotarare: "HCL nr. 474 din 29.12.2025 privind stabilirea impozitelor și taxelor locale aplicabile în anul fiscal 2026",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale) și anexe ale persoanelor fizice", valoare: "0,1%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "1,3%" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,2% (+50% cotă adițională)" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,3%" },
+    ],
+    bonificatie: "10% pentru persoanele fizice (5% pentru firme), la plata întregului an până la 31 martie",
+    note: [],
+    surse: [{ nume: "HCL nr. 474/2025 (focsani.info, PDF)", url: "https://www.focsani.info/fisiere/userfiles/proiecte%20act%20noirmativ/HOTARARE_ITL_2026.pdf" }],
+    verificat: "25.10.2026",
+  },
+  {
     judet: "dambovita",
     oras: "targoviste",
     nume: "Târgoviște",
