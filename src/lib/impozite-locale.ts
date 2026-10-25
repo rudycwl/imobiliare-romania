@@ -312,6 +312,26 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "25.10.2026",
   },
   {
+    judet: "galati",
+    oras: "galati",
+    nume: "Galați",
+    an: 2026,
+    hotarare: "HCL nr. 416 din 31.07.2025 privind indexarea impozitelor și taxelor locale începând cu anul 2026, modificată prin HCL nr. 655/2025 și HCL nr. 670 din 29.12.2025",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale) și anexe ale persoanelor fizice", valoare: "0,09%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "1,3%" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,2%" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,3%" },
+    ],
+    bonificatie: "10% pentru persoanele fizice (3% pentru firme, la clădiri), la plata întregului an până la 31 martie",
+    note: ["Cota pentru clădirile nerezidențiale ale persoanelor fizice a fost mărită de la 0,6% la 1,3% prin HCL nr. 670/2025."],
+    surse: [
+      { nume: "HCL nr. 416/2025 (primariagalati.ro, PDF)", url: "https://primariagalati.ro/dm_galati/hotarari.nsf/28FC94F90B77E50BC2258CDF00357EF3/$FILE/HCL_416.pdf" },
+      { nume: "HCL nr. 670/2025, modificarea (primariagalati.ro, PDF)", url: "https://primariagalati.ro/dm_galati/hotarari.nsf/727F15985566B8BBC2258D7900340AE4/$FILE/HCL_670.pdf" },
+    ],
+    verificat: "25.10.2026",
+  },
+  {
     judet: "dambovita",
     oras: "targoviste",
     nume: "Târgoviște",
