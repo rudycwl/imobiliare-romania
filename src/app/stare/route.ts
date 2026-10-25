@@ -7,9 +7,10 @@ export const dynamic = "force-dynamic";
 
 // Starea publică a site-ului, doar numere (fără date despre clienți), ca să poată fi verificată de la distanță.
 export async function GET() {
-  const [plati, platiFacturate] = await Promise.all([
+  const [plati, platiFacturate, facturiNeemise] = await Promise.all([
     db.comanda.count(),
     db.factura.count({ where: { plataRef: { not: null }, OR: [{ seria: { not: null } }, { stare: { in: ["emisa", "stornata"] } }] } }),
+    db.factura.count({ where: { seria: null } }),
   ]);
   const dir = process.env.COPII_DIR;
   const copii = dir ? (await readdir(dir).catch(() => [] as string[])).filter((x) => /^baza-\d{4}-\d{2}-\d{2}\.json\.gz$/.test(x)).sort() : [];
@@ -18,6 +19,7 @@ export async function GET() {
       generat: new Date().toISOString(),
       plati,
       platiFacturate,
+      facturiNeemise,
       curatarePlatiTest: ultimaCuratare(),
       ultimaCopieBaza: copii.at(-1)?.slice(5, 15) ?? null,
     },
