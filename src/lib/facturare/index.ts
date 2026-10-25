@@ -2,7 +2,7 @@ import "server-only";
 import type { Factura, Utilizator } from "@prisma/client";
 import { db } from "../db";
 import { getJudet, getOras } from "../geo";
-import { emiteFacturaOblio, eFacturaOblio, oblioConfigurat, stornoOblio, type ClientOblio, type ProdusOblio } from "./oblio";
+import { emiteFacturaOblio, eFacturaOblio, oblioConfigurat, stareEFacturaOblio, stornoOblio, type ClientOblio, type ProdusOblio } from "./oblio";
 
 // Facturarea plăților de pe site (promovări, abonamente agenții).
 // Fluxul: plata confirmată de Netopia → emiteFactura() → Oblio dă seria/numărul,
@@ -159,10 +159,23 @@ export async function verificaEFactura(id: number) {
   const f = await db.factura.findUniqueOrThrow({ where: { id } });
   if (!f.seria || !f.numar) return f;
   try {
-    const cod = await eFacturaOblio(f.seria, f.numar);
+    // Întâi citim starea reală; trimitem doar dacă Oblio spune că nu e în SPV.
+    const stare = await stareEFacturaOblio(f.seria, f.numar);
+    const cod = stare === null || stare === -1 ? await eFacturaOblio(f.seria, f.numar) : stare;
     return db.factura.update({ where: { id }, data: { eFactura: STARI_EFACTURA[cod] ?? "in-prelucrare", eroare: null } });
   } catch (e) {
     return db.factura.update({ where: { id }, data: { eroare: mesaj(e) } });
+  }
+}
+
+/** Doar citește din Oblio starea facturilor rămase „în prelucrare” (nu trimite nimic în SPV). */
+export async function actualizeazaStariEFactura() {
+  if (!oblioConfigurat()) return;
+  const facturi = await db.factura.findMany({ where: { seria: { not: null }, eFactura: "in-prelucrare" } });
+  for (const f of facturi) {
+    const cod = await stareEFacturaOblio(f.seria!, f.numar!).catch(() => null);
+    if (cod !== null && STARI_EFACTURA[cod] && STARI_EFACTURA[cod] !== f.eFactura)
+      await db.factura.update({ where: { id: f.id }, data: { eFactura: STARI_EFACTURA[cod] } });
   }
 }
 

@@ -25,11 +25,13 @@ async function obtineToken() {
   return token.valoare;
 }
 
-async function cerere<T>(metoda: "POST" | "PUT", cale: string, corp: Record<string, unknown>): Promise<T> {
-  const r = await fetch(`${API}${cale}`, {
+async function cerere<T>(metoda: "GET" | "POST" | "PUT", cale: string, corp: Record<string, unknown>): Promise<T> {
+  const date = { cif: process.env.FACTURARE_CIF, ...corp };
+  const url = metoda === "GET" ? `${API}${cale}?${new URLSearchParams(Object.entries(date).map(([k, v]) => [k, String(v ?? "")]))}` : `${API}${cale}`;
+  const r = await fetch(url, {
     method: metoda,
     headers: { Authorization: `Bearer ${await obtineToken()}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ cif: process.env.FACTURARE_CIF, ...corp }),
+    body: metoda === "GET" ? undefined : JSON.stringify(date),
     cache: "no-store",
   });
   const j = (await r.json().catch(() => ({}))) as { status?: number; statusMessage?: string; data?: T };
@@ -93,4 +95,11 @@ export function stornoOblio(f: { client: ClientOblio; seriesName: string; number
 export async function eFacturaOblio(seriesName: string, number: string) {
   const d = await cerere<{ code?: number | string }>("POST", "/docs/einvoice", { seriesName, number });
   return Number(d?.code ?? 0);
+}
+
+/** Doar citește starea din SPV (fără să trimită nimic): -1 netrimisă, 0 în prelucrare, 1 trimisă, 2 erori; null dacă Oblio nu știe. */
+export async function stareEFacturaOblio(seriesName: string, number: string) {
+  const d = await cerere<{ einvoiceStatus?: { code?: number | string } }[]>("GET", "/docs/invoice/list", { seriesName, number, withEinvoiceStatus: 1 });
+  const cod = d?.[0]?.einvoiceStatus?.code;
+  return cod === undefined || cod === null ? null : Number(cod);
 }

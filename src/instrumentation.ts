@@ -5,6 +5,9 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
   const { curataPlatiTest } = await import("./lib/curatare-teste");
   await curataPlatiTest();
+  // Starea e-Factura se citește doar din Oblio (nu se trimite nimic), ca /admin/facturi să nu rămână pe „în prelucrare”.
+  const { actualizeazaStariEFactura } = await import("./lib/facturare");
+  void actualizeazaStariEFactura().catch((e) => console.error("Starea e-Factura:", e));
 }
 
 // Next.js apelează onRequestError pentru orice eroare din pagini, acțiuni și rute API: adminii primesc un email.
