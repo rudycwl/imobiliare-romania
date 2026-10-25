@@ -7,7 +7,7 @@ import { db } from "./db";
 const PLATA_REALA = "CMMVL3DHFL34FE54";
 const PANA_LA = new Date("2026-10-24T00:00:00+03:00");
 
-type Rezultat = { cand: string; legare?: string; sterse: number; pastrateCuFactura: number } | { cand: string; eroare: string };
+type Rezultat = { cand: string; legare?: string; sterse: number; neemiseSterse?: number; pastrateCuFactura: number } | { cand: string; eroare: string };
 // Pe globalThis: instrumentarea și rutele au module separate, iar /stare trebuie să vadă rezultatul.
 const g = globalThis as { __curatarePlati?: Rezultat };
 export const ultimaCuratare = () => g.__curatarePlati ?? null;
@@ -55,7 +55,12 @@ export async function curataPlatiTest() {
         db.factura.deleteMany({ where: { plataRef: { in: deSters }, seria: null } }),
         db.comanda.deleteMany({ where: { id: { in: deSters } } }),
       ]);
-    g.__curatarePlati = { cand: new Date().toISOString(), legare, sterse: deSters.length, pastrateCuFactura: facturate.length };
+    // Facturi neemise (fără serie) din perioada de test care nu mai stau pe nicio plată existentă.
+    const comenzi = (await db.comanda.findMany({ select: { id: true } })).map((c) => c.id);
+    const { count: neemiseSterse } = await db.factura.deleteMany({
+      where: { tip: "factura", seria: null, stare: { in: ["in-asteptare", "eroare"] }, creatLa: { lt: PANA_LA }, OR: [{ plataRef: null }, { plataRef: { notIn: comenzi } }] },
+    });
+    g.__curatarePlati = { cand: new Date().toISOString(), legare, sterse: deSters.length, neemiseSterse, pastrateCuFactura: facturate.length };
     if (deSters.length) console.log(`Plăți de test șterse: ${deSters.length}`);
   } catch (e) {
     g.__curatarePlati = { cand: new Date().toISOString(), eroare: e instanceof Error ? e.message.trim().slice(0, 200) : String(e) };
