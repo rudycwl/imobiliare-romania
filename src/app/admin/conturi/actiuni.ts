@@ -29,3 +29,19 @@ export async function stergeComplet(_: StareStergere, f: FormData): Promise<Star
   revalidatePath("/", "layout");
   return { ok: `Contul ${email} a fost șters complet, cu ${poze.length} poze.` };
 }
+
+/** Șterge definitiv un anunț, cu pozele lui (ex. anunțuri de test). Contul proprietarului rămâne. */
+export async function stergeAnunt(_: StareStergere, f: FormData): Promise<StareStergere> {
+  const admin = await utilizatorCurent();
+  if (!esteAdmin(admin?.email)) return { eroare: "Doar administratorul poate șterge anunțuri." };
+  const id = Number(String(f.get("id") ?? "").replace(/\D/g, ""));
+  if (!Number.isInteger(id) || id <= 0) return { eroare: "Scrie numărul anunțului (ex. 12, din linkul cheiamea.ro/anunt/12)." };
+  if (Number(String(f.get("confirmare") ?? "").replace(/\D/g, "")) !== id) return { eroare: "Scrie din nou numărul anunțului, ca să confirmi." };
+  const a = await db.anunt.findUnique({ where: { id }, select: { titlu: true, poze: { select: { cheie: true } } } });
+  if (!a) return { eroare: `Nu există anunțul #${id}.` };
+  await Promise.all(a.poze.map((p) => stergeObiect(p.cheie).catch((e) => console.error("Poză", e))));
+  // Pozele, statisticile și favoritele anunțului se șterg odată cu el (onDelete: Cascade).
+  await db.anunt.delete({ where: { id } });
+  revalidatePath("/", "layout");
+  return { ok: `Anunțul #${id} („${a.titlu}”) a fost șters, cu ${a.poze.length} poze.` };
+}
