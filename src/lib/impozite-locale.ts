@@ -67,6 +67,31 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "25.10.2026",
   },
   {
+    judet: "constanta",
+    oras: "constanta",
+    nume: "Constanța",
+    an: 2026,
+    hotarare: "HCL nr. 462 din 23.12.2025 privind stabilirea impozitelor și taxelor la nivelul municipiului Constanța în anul 2026 (anexa nr. 1)",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale și anexe) ale persoanelor fizice", valoare: "0,11%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "1,3% (+30,8% cotă adițională)" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,2%" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,3% (+30,8% cotă adițională)" },
+    ],
+    bonificatie: "10% pentru persoanele fizice (5% pentru firme), la plata întregului an până la 31 martie",
+    note: [
+      "Bonificația se dă doar dacă plătești până la 31 martie toate obligațiile către bugetul local pe întregul an.",
+      "Prin HCL nr. 65/2026 s-au aplicat reducerile pentru clădirile vechi (15% la 50–100 de ani, 25% peste 100 de ani) și pentru persoanele cu handicap. Modificările ulterioare (HCL nr. 135/2026 și 264/2026) nu schimbă impozitul pe clădiri.",
+      "Impozitul se plătește la Serviciul Public de Impozite și Taxe Constanța (SPIT).",
+    ],
+    surse: [
+      { nume: "HCL nr. 462/2025 și anexele (spit-ct.ro)", url: "https://www.spit-ct.ro/hotarare/hcl-nr-462_23-12-2025-privind-stabilirea-impozitelor-si-taxelor-la-nivelul-municipiului-constanta-in-anul-2026/" },
+      { nume: "Anexa nr. 1: impozitul pe clădiri (PDF)", url: "https://www.spit-ct.ro/wp-content/uploads/documente/hotarari-consiliu-local/2026/01/HCL-nr.-462_23.12.2025-privind-stabilirea-impozitelor-si-taxelor-la-nivelul-municipiului-Constanta-in-anul-2026/Anexa-nr.-1-Impozitul_taxa-pe-cladiri.pdf" },
+      { nume: "HCL nr. 65/2026 (reduceri)", url: "https://www.spit-ct.ro/wp-content/uploads/documente/hotarari-consiliu-local/2026/03/H.C.L.-nr.-65_06.03.2026-privind-reducerea-cotelor-aditionale-la-impozitele-si-taxele-locale-si-acordarea-unor-facilitati-fiscale-pentru-anul-2026/H.C.L.-nr.-65_06.03.2026-privind-reducerea-cotelor-aditionale-la-impozitele-si-taxele-locale-si-acordarea-unor-facilitati-fiscale-pentru-anul-2026.pdf" },
+    ],
+    verificat: "25.10.2026",
+  },
+  {
     judet: "bihor",
     oras: "oradea",
     nume: "Oradea",
