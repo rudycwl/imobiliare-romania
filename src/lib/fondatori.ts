@@ -2,6 +2,7 @@ import "server-only";
 import { randomInt } from "crypto";
 import type { Prisma } from "@prisma/client";
 import { db } from "./db";
+import { adresaSite, trimiteEmail } from "./email";
 
 /** Oferta „Agenție Fondatoare”: primele 100 de agenții înscrise până la 31.12.2026. */
 export const LOCURI_FONDATOARE = 100;
@@ -70,3 +71,18 @@ export function esteAdmin(email: string | null | undefined) {
 }
 
 export const formatData = (d: Date) => new Intl.DateTimeFormat("ro-RO", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Bucharest" }).format(d);
+
+/** Fiecare agenție nouă e un client posibil: adminii află imediat cine s-a înscris și dacă a prins oferta. */
+export async function anuntaAgentieNoua(a: { nume: string; contact: string | null; email: string; telefon: string; slug: string }, fondator: boolean) {
+  for (const catre of emailuriAdmin())
+    await trimiteEmail({
+      catre,
+      subiect: `Agenție nouă înscrisă: ${a.nume}`,
+      paragrafe: [
+        `Agenția „${a.nume}” și-a făcut cont pe CheiaMea.`,
+        `Persoană de contact: ${a.contact ?? "-"} · ${a.email} · ${a.telefon}`,
+        fondator ? `A primit oferta „Agenție Fondatoare” (${LUNI_GRATUITE} luni gratuit, apoi 50% reducere).` : "Nu a primit oferta „Agenție Fondatoare” (locurile s-au terminat sau termenul a trecut).",
+      ],
+      buton: { text: "Vezi pagina agenției", link: `${adresaSite()}/agentii/${a.slug}` },
+    }).catch((e) => console.error("Email agenție nouă:", e));
+}
