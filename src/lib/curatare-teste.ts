@@ -7,7 +7,7 @@ import { db } from "./db";
 const PLATA_REALA = "CMMVL3DHFL34FE54";
 const PANA_LA = new Date("2026-10-24T00:00:00+03:00");
 
-type Rezultat = { cand: string; sterse: number; pastrateCuFactura: number } | { cand: string; eroare: string };
+type Rezultat = { cand: string; legare?: string; sterse: number; pastrateCuFactura: number } | { cand: string; eroare: string };
 // Pe globalThis: instrumentarea și rutele au module separate, iar /stare trebuie să vadă rezultatul.
 const g = globalThis as { __curatarePlati?: Rezultat };
 export const ultimaCuratare = () => g.__curatarePlati ?? null;
@@ -17,20 +17,27 @@ export const ultimaCuratare = () => g.__curatarePlati ?? null;
  * două sunt identice (aceeași sumă, același produs, același client). O mutăm pe plata reală (aprobat de Rudy pe 25.10);
  * în Oblio nu se schimbă nimic. Apoi plata de test rămâne fără factură și se șterge mai jos.
  */
-async function leagaFacturaDePlataReala() {
+async function leagaFacturaDePlataReala(): Promise<string> {
   const reala = await db.comanda.findUnique({ where: { id: PLATA_REALA } });
-  if (!reala || (await db.factura.findFirst({ where: { plataRef: PLATA_REALA } }))) return;
-  const f = await db.factura.findFirst({ where: { seria: "CHM", numar: { in: ["0001", "1"] }, tip: "factura" } });
-  if (!f?.plataRef || f.plataRef === PLATA_REALA) return;
-  const test = await db.comanda.findUnique({ where: { id: f.plataRef } });
-  if (!test || test.creatLa >= PANA_LA || test.sumaBani !== reala.sumaBani || test.produs !== reala.produs || test.utilizatorId !== reala.utilizatorId) return;
+  if (!reala) return "fara-plata-reala";
+  if (await db.factura.findFirst({ where: { plataRef: PLATA_REALA } })) return "deja-legata";
+  // Factura emisă (are serie de la Oblio) care stă pe o altă plată din 23.10, cu aceeași sumă.
+  const emise = await db.factura.findMany({ where: { tip: "factura", seria: { not: null }, plataRef: { not: null, notIn: [PLATA_REALA] } } });
+  const candidate = [];
+  for (const f of emise) {
+    const test = await db.comanda.findUnique({ where: { id: f.plataRef! } });
+    if (test && test.creatLa < PANA_LA && test.sumaBani === reala.sumaBani && f.totalBani === reala.sumaBani) candidate.push({ f, test });
+  }
+  if (candidate.length !== 1) return `candidate-${candidate.length}-din-${emise.length}`;
+  const { f, test } = candidate[0];
   await db.factura.update({ where: { id: f.id }, data: { plataRef: PLATA_REALA } });
-  console.log(`Factura CHM0001 legată de plata reală (era pe ${test.id}).`);
+  console.log(`Factura ${f.seria} ${f.numar} legată de plata reală (era pe ${test.id}).`);
+  return "legata";
 }
 
 export async function curataPlatiTest() {
   try {
-    await leagaFacturaDePlataReala();
+    const legare = await leagaFacturaDePlataReala();
     const vechi = await db.comanda.findMany({ where: { creatLa: { lt: PANA_LA }, id: { not: PLATA_REALA } }, select: { id: true } });
     const ids = vechi.map((c) => c.id);
     const facturate = await db.factura.findMany({
@@ -43,7 +50,7 @@ export async function curataPlatiTest() {
         db.factura.deleteMany({ where: { plataRef: { in: deSters }, seria: null } }),
         db.comanda.deleteMany({ where: { id: { in: deSters } } }),
       ]);
-    g.__curatarePlati = { cand: new Date().toISOString(), sterse: deSters.length, pastrateCuFactura: facturate.length };
+    g.__curatarePlati = { cand: new Date().toISOString(), legare, sterse: deSters.length, pastrateCuFactura: facturate.length };
     if (deSters.length) console.log(`Plăți de test șterse: ${deSters.length}`);
   } catch (e) {
     g.__curatarePlati = { cand: new Date().toISOString(), eroare: e instanceof Error ? e.message.trim().slice(0, 200) : String(e) };
