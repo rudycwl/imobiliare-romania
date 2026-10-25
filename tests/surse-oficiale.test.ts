@@ -5,7 +5,7 @@ import { PUBLICURI, STIRE_TVA, STIRI, STIRI_PIATA } from "@/lib/continut";
 import { ORASE_IMPOZITE, REGULI_NATIONALE, caleImpozite, impoziteOras } from "@/lib/impozite-locale";
 
 // Regula casei: legislația vine doar din surse oficiale, nu din presă.
-const OFICIALE = ["legislatie.just.ro", "static.anaf.ro", "monitoruloficial.ro", "mfinante.gov.ro", "primaria-iasi.ro", "primariaclujnapoca.ro", "doc.pmb.ro", "mol.oradea.ro", "ploiesti.ro", "sibiu.ro", "spit-ct.ro", "dfbv.ro", "primariatm.ro", "primariacraiova.ro", "municipiulbacau.ro", "primariapn.ro", "primariaslatina.ro", "pmtgv.ro", "primariacalarasi.ro", "primariabistrita.ro", "miercureaciuc.ro", "primariasv.ro", "tirgumures.ro", "primariagalati.ro", "zalausj.ro", "primariatulcea.ro", "focsani.info"];
+const OFICIALE = ["legislatie.just.ro", "static.anaf.ro", "monitoruloficial.ro", "mfinante.gov.ro", "primaria-iasi.ro", "primariaclujnapoca.ro", "doc.pmb.ro", "mol.oradea.ro", "ploiesti.ro", "sibiu.ro", "spit-ct.ro", "dfbv.ro", "primariatm.ro", "primariacraiova.ro", "municipiulbacau.ro", "primariapn.ro", "primariaslatina.ro", "pmtgv.ro", "primariacalarasi.ro", "primariabistrita.ro", "miercureaciuc.ro", "primariasv.ro", "tirgumures.ro", "primariagalati.ro", "zalausj.ro", "primariatulcea.ro", "focsani.info", "primariasm.ro"];
 const oficial = (url: string) => OFICIALE.some((d) => new URL(url).hostname.endsWith(d));
 
 test("toate linkurile din legislație duc la surse oficiale", () => {

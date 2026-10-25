@@ -383,6 +383,26 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "25.10.2026",
   },
   {
+    judet: "satu-mare",
+    oras: "satu-mare",
+    nume: "Satu Mare",
+    an: 2026,
+    hotarare: "HCL nr. 98 din 24.04.2025 privind impozitele și taxele locale în anul 2026, cu anexele republicate prin HCL nr. 343 din 22.12.2025",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale) și anexe ale persoanelor fizice", valoare: "0,1184%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "0,7%" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,2%" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,3%" },
+    ],
+    bonificatie: "10% pentru persoanele fizice, la plata întregului an până la 31 martie (și pentru firme, în condițiile din hotărâre)",
+    note: ["Hotărârea a mai fost modificată prin HCL nr. 313/2025 și HCL nr. 56/2026; cotele pentru clădiri au rămas aceleași."],
+    surse: [
+      { nume: "HCL nr. 98/2025 (primariasm.ro)", url: "https://www.primariasm.ro/hotararea-nr-9824042025" },
+      { nume: "HCL nr. 343/2025, anexele 1-5 (primariasm.ro, DOC)", url: "https://www.primariasm.ro/storage/hotarari/2025/343/anexe-1-5-la-hcl-343.doc" },
+    ],
+    verificat: "25.10.2026",
+  },
+  {
     judet: "dambovita",
     oras: "targoviste",
     nume: "Târgoviște",
