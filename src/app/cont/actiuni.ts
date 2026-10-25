@@ -12,7 +12,7 @@ import { creeazaAnunt, editeaza, poatePublica, prelungesteAnunt, retrageAnunt, t
 import { ANUNTURI_GRATUITE } from "@/lib/tarife";
 import { esteTipUtilizator, slugify, TIPURI, TRANZACTII } from "@/lib/etichete";
 import { getOras } from "@/lib/geo";
-import { aplicaOfertaFondator } from "@/lib/fondatori";
+import { anuntaAgentieNoua, aplicaOfertaFondator } from "@/lib/fondatori";
 import { aplicaRecomandare } from "@/lib/atribuire";
 import { aplicaFiltru } from "@/lib/moderare";
 import { stocareConfigurata } from "@/lib/stocare";
@@ -79,7 +79,8 @@ export async function inregistrare(_: Stare, f: FormData): Promise<Stare> {
     after(() => trimiteConfirmare(u.id));
     await aplicaRecomandare(u.id, tip);
     if (tip === "agentie") {
-      await aplicaOfertaFondator(u.id, text(f, "cod"));
+      const fondator = await aplicaOfertaFondator(u.id, text(f, "cod"));
+      after(() => anuntaAgentieNoua({ ...u, email, telefon }, fondator));
       revalidatePath("/agentii");
       revalidatePath("/pentru-agentii");
     }
