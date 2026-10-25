@@ -28,13 +28,14 @@ export default async function PlatiPage({ searchParams }: { searchParams: Promis
     select: { plataRef: true, seria: true, numar: true, stare: true },
   });
   const factura = (id: string) => facturi.find((f) => f.plataRef === id && (f.seria || f.stare === "emisa" || f.stare === "stornata"));
+  // Bifate din oficiu doar plățile neîncasate; o plată încasată fără factură se bifează de mână, după verificare.
   const deTest = comenzi.filter((c) => !factura(c.id));
   return (
     <>
       <h1>Plăți</h1>
       {sterse !== undefined && <p className="succes">Gata: am șters {sterse} {sterse === "1" ? "plată" : "plăți"} de test.</p>}
       <p className="muted">
-        Toate plățile cu cardul (NETOPIA), cele mai noi primele. Cele fără factură emisă sunt bifate și se pot șterge (ex. testele).
+        Toate plățile cu cardul (NETOPIA), cele mai noi primele. Cele fără factură emisă se pot șterge (ex. testele); cele neplătite sunt bifate din oficiu, iar o plată „Plătită” se bifează doar după ce verifici că e test.
         Plățile facturate nu se pot șterge: factura se anulează prin stornare, din <Link href="/admin/facturi">Facturi</Link>.
       </p>
       {comenzi.length === 0 && <p className="succes">Nicio plată.</p>}
@@ -49,7 +50,7 @@ export default async function PlatiPage({ searchParams }: { searchParams: Promis
                 const f = factura(c.id);
                 return (
                   <tr key={c.id}>
-                    <td>{!f && <input type="checkbox" name="id" value={c.id} defaultChecked aria-label="Șterge" />}</td>
+                    <td>{!f && <input type="checkbox" name="id" value={c.id} defaultChecked={c.stare !== "platita"} aria-label="Șterge" />}</td>
                     <td>{cand(c.creatLa)}</td>
                     <td>{c.utilizator.nume}<div className="muted small">{c.utilizator.email}</div></td>
                     <td>{c.descriere}</td>
