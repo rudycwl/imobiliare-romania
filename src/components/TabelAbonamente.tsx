@@ -2,18 +2,14 @@ import Link from "next/link";
 import { utilizatorCurent } from "@/lib/auth";
 import { ABONAMENTE, LUNI_PLATITE_PE_AN, lei, pretLunar } from "@/lib/tarife";
 
-/** Prețurile abonamentelor le văd doar agențiile autentificate; restul (inclusiv un administrator logat cu cont de client) văd invitația. */
+/** Prețurile abonamentelor le văd doar agențiile autentificate; restul (inclusiv un administrator logat cu cont de client) văd doar invitația, fără prețuri sau oferte. */
 export async function TabelAbonamente() {
   const u = await utilizatorCurent();
   if (u?.tip !== "agentie")
     return (
       <div className="card card-body preturi-ascunse">
         <p>
-          <strong>🔒 Prețurile abonamentelor sunt vizibile doar agențiilor imobiliare înregistrate.</strong>
-        </p>
-        <p className="muted">
-          Patru abonamente, de la 25 de anunțuri active la nelimitat, cu credite lunare de promovare. Primele 100 de agenții
-          primesc 6 luni gratuit și apoi 50% reducere permanent.
+          <strong>🔒 Abonamentele și ofertele pentru agenții se văd doar în contul agenției, după înscriere.</strong>
         </p>
         <div className="actiuni">
           <Link href="/pentru-agentii/inregistrare" className="buton">Înscrie agenția gratuit</Link>

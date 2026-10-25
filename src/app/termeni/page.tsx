@@ -33,7 +33,7 @@ export default function TermeniPage() {
       <h2>4. Anunțurile</h2>
       <ul>
         <li>Persoanele fizice și firmele care nu sunt agenții publică gratuit până la {ANUNTURI_GRATUITE} anunțuri active. Fiecare anunț e valabil {ZILE_VALABILITATE} de zile și poate fi prelungit gratuit.</li>
-        <li>Agențiile publică în limita abonamentului ales. Prețurile sunt pe pagina <Link href="/preturi">Prețuri</Link>.</li>
+        <li>Agențiile publică în limita abonamentului ales. Prețurile abonamentelor se afișează agențiilor înregistrate, în contul lor.</li>
         <li>Anunțul trebuie să descrie un imobil real, disponibil, pe care ai dreptul să-l oferi (ca proprietar sau cu acordul proprietarului), cu preț și date corecte.</li>
         <li>Nu sunt permise anunțurile false, duplicate, înșelătoare, ilegale sau care încalcă drepturile altora (de exemplu fotografii sau texte copiate fără drept).</li>
         <li>Putem modifica, suspenda sau șterge orice anunț care nu respectă acești termeni și putem închide contul în caz de abateri repetate.</li>
@@ -50,8 +50,7 @@ export default function TermeniPage() {
         reîncarcă la fiecare 30 de zile cât abonamentul e activ și nu se reportează.
       </p>
       <p>
-        Oferta „Agenție Fondatoare” (primele 100 de agenții înscrise până la 31 decembrie 2026) include 6 luni gratuite și apoi 50% reducere din prețul de
-        listă, cât timp agenția rămâne abonată fără întrerupere.
+        Ofertele de lansare pentru agenții și condițiile lor se afișează agențiilor înregistrate, în contul lor.
       </p>
       <p>Anularea și rambursarea sunt descrise în <Link href="/anulare-rambursare">Politica de anulare și rambursare</Link>.</p>
 

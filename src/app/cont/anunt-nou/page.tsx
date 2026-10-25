@@ -38,7 +38,6 @@ export default async function AnuntNouPage() {
         </p>
         <p>
           Retrage din <Link href="/cont#anunturile-mele">contul tău</Link> un anunț vândut sau închiriat, apoi revino aici.
-          Dacă ești agenție imobiliară, vezi <Link href="/pentru-agentii#abonamente">abonamentele pentru agenții</Link>.
         </p>
       </div>
     );

@@ -1,11 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { TabelAbonamente } from "@/components/TabelAbonamente";
-import { ANUNTURI_GRATUITE, PROMOVARI, REDUCERE_PROMOVARI_ABONATI, ZILE_VALABILITATE, lei } from "@/lib/tarife";
+import { ANUNTURI_GRATUITE, PROMOVARI, ZILE_VALABILITATE, lei } from "@/lib/tarife";
 
 export const metadata: Metadata = {
   title: "Prețuri",
-  description: `Publicare gratuită pentru proprietari (până la ${ANUNTURI_GRATUITE} anunțuri), promovări de la 7 lei și abonamente pentru agenții imobiliare.`,
+  description: `Publicare gratuită pentru proprietari (până la ${ANUNTURI_GRATUITE} anunțuri), promovări de la 7 lei.`,
   alternates: { canonical: "/preturi" },
 };
 
@@ -44,12 +43,7 @@ export default function PreturiPage() {
           </tbody>
         </table>
       </div>
-      <p className="muted mic">Prețuri finale, fără TVA (Hugetech SRL nu este plătitoare de TVA). Agențiile abonate au {Math.round(REDUCERE_PROMOVARI_ABONATI * 100)}% reducere la promovări.</p>
-
-      <h2 id="agentii">Agenții imobiliare</h2>
-      <p>Abonament lunar cu pagină de agenție, logo pe anunțuri, statistici și credite lunare de promovare.</p>
-      <TabelAbonamente />
-      <p><Link href="/pentru-agentii" className="buton">Detalii pentru agenții</Link></p>
+      <p className="muted mic">Prețuri finale, fără TVA (Hugetech SRL nu este plătitoare de TVA).</p>
     </>
   );
 }

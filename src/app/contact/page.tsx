@@ -14,7 +14,7 @@ export default function ContactPage() {
         {FIRMA.telefon && <> Telefon: <a href={`tel:${FIRMA.telefon.replace(/\s/g, "")}`}><strong>{FIRMA.telefon}</strong></a>.</>}
       </p>
       <p>
-        Agențiile imobiliare găsesc detalii despre abonamente pe pagina <Link href="/pentru-agentii">Pentru agenții</Link>.
+        Agențiile imobiliare au o zonă separată: <Link href="/pentru-agentii">Pentru agenții</Link>.
       </p>
       <h2>Date de identificare</h2>
       <ul>

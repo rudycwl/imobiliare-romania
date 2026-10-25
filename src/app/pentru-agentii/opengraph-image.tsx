@@ -5,5 +5,5 @@ export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export default function Image() {
-  return imagineOg({ eticheta: "Agenție Fondatoare", titlu: "6 luni gratuit pentru primele 100 de agenții", subtitlu: "Apoi 50% reducere permanent. Ofertă valabilă până la 31.12.2026." });
+  return imagineOg({ eticheta: "Pentru agenții", titlu: "Zona CheiaMea pentru agenții imobiliare", subtitlu: "Cont de agenție, profil public și anunțuri în toată țara." });
 }
