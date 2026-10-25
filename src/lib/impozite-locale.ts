@@ -258,6 +258,23 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "25.10.2026",
   },
   {
+    judet: "harghita",
+    oras: "miercurea-ciuc",
+    nume: "Miercurea Ciuc",
+    an: 2026,
+    hotarare: "HCL nr. 354/2025 privind stabilirea impozitelor și taxelor locale, precum și a taxelor speciale în municipiul Miercurea Ciuc pe anul 2026",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale) și anexe ale persoanelor fizice", valoare: "0,1%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "1,2%" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,2%" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,2%" },
+    ],
+    bonificatie: "10% pentru plata integrală până la 31 martie (persoane fizice și firme)",
+    note: ["Cotele la locuințe (0,1%) și la clădiri nerezidențiale ale persoanelor fizice (1,2%) au rămas la fel ca în 2025."],
+    surse: [{ nume: "HCL nr. 354/2025 (miercureaciuc.ro, PDF)", url: "https://miercureaciuc.ro/files/documents/Hot%20nr%20354%20stab%20impozite%20si%20taxe%202026.pdf" }],
+    verificat: "25.10.2026",
+  },
+  {
     judet: "dambovita",
     oras: "targoviste",
     nume: "Târgoviște",
