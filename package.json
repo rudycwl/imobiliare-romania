@@ -11,7 +11,7 @@
     "db:seed": "prisma db seed",
     "postinstall": "prisma generate",
     "vercel-build": "prisma migrate deploy && next build",
-    "test": "tsx --test tests/*.test.ts",
+    "test": "tsx --conditions=react-server --test tests/*.test.ts",
     "verifica": "tsc --noEmit && npm test"
   },
   "keywords": [],

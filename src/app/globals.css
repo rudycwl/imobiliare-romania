@@ -34,6 +34,8 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .card-body p { margin: 0; font-size: .85rem; }
 .pret { font-weight: 700; color: var(--accent); }
 .pret.mare { font-size: 1.6rem; margin-bottom: 12px; }
+.pret-lei { color: var(--muted); font-size: .85rem; }
+.pret.mare + .pret-lei { margin: -8px 0 12px; font-size: .95rem; }
 .anunt { display: grid; grid-template-columns: 3fr 2fr; gap: 24px; }
 .anunt-img { height: 340px; border-radius: 12px; }
 .detalii { border-collapse: collapse; margin-bottom: 16px; }
@@ -564,3 +566,13 @@ a:hover .sageata { transform: translateX(4px); }
 .bara-pret { position: relative; display: flex; align-items: baseline; gap: 8px; padding: 2px 6px; min-width: 200px; }
 .bara-pret .bara { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: color-mix(in srgb, #f97316 18%, transparent); }
 .bara-pret > :not(.bara) { position: relative; }
+
+/* Bannerul de cookie-uri, jos pe ecran până la o alegere. */
+.banner-cookie { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 1000; max-width: 760px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; background: var(--card); color: var(--fg); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; box-shadow: 0 10px 30px rgba(11, 37, 69, .18); }
+.banner-cookie p { flex: 1 1 320px; margin: 0; font-size: .92rem; }
+.butoane-cookie { display: flex; gap: 8px; flex-wrap: wrap; }
+.butoane-cookie button { padding: 10px 18px; border-radius: 10px; }
+.link-buton { background: none; border: 0; padding: 0; color: inherit; font: inherit; font-weight: 400; cursor: pointer; text-decoration: underline; }
+.footer .link-buton { color: #cbd5e1; text-align: left; }
+.footer .link-buton:hover { color: #fdba74; }
+@media (max-width: 760px) { .banner-cookie { left: 10px; right: 10px; bottom: calc(76px + env(safe-area-inset-bottom)); padding: 14px; } .butoane-cookie { width: 100%; } .butoane-cookie button { flex: 1; } }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { FIRMA } from "@/lib/firma";
-import { Atribuire } from "@/components/Atribuire";
+import { Atribuire, SetariCookie } from "@/components/Atribuire";
 import "./globals.css";
 
 // Fontul se descarcă la build și se servește de pe serverul nostru: vizitatorii nu mai trimit adresa IP la Google (GDPR).
@@ -57,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/legislatie">Legislație</Link>
               <Link href="/termeni">Termeni și condiții</Link>
               <Link href="/confidentialitate">Confidențialitate și cookie-uri</Link>
+              <SetariCookie />
               <Link href="/anulare-rambursare">Anulare și rambursare</Link>
               <Link href="/livrare">Livrare</Link>
               <Link href="/retragere">Retragere din contract</Link>

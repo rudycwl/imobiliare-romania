@@ -7,7 +7,8 @@ import { Distribuie } from "@/components/Distribuie";
 import { getAnunt } from "@/lib/anunturi";
 import { pozeAnunt } from "@/lib/poze";
 import { urlPublic } from "@/lib/stocare";
-import { formatPret, TIPURI, TRANZACTII } from "@/lib/etichete";
+import { formatLei, formatPret, TIPURI, TRANZACTII } from "@/lib/etichete";
+import { cursEuro } from "@/lib/curs";
 import { getJudet, getOras } from "@/lib/geo";
 import { Raporteaza } from "./Raporteaza";
 import { ActiuniProprietar } from "./ActiuniProprietar";
@@ -60,7 +61,7 @@ export default async function AnuntPage({ params }: Props) {
         </p>
       </div>
     );
-  const poze = await pozeAnunt(a.id);
+  const [poze, curs] = await Promise.all([pozeAnunt(a.id), cursEuro()]);
   return (
     <>
       <Breadcrumbs
@@ -95,6 +96,7 @@ export default async function AnuntPage({ params }: Props) {
         <div>
           <h1>{a.titlu}</h1>
           <div className="pret mare">{formatPret(a)}</div>
+          {curs && <div className="pret-lei" title={`La cursul de ${curs.toFixed(4)} lei pentru 1 €. Prețul de referință e cel în euro.`}>{formatLei(a, curs)}</div>}
           <table className="detalii">
             <tbody>
               <tr><th>Tranzacție</th><td>{TRANZACTII[a.tranzactie]}</td></tr>

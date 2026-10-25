@@ -65,12 +65,21 @@ export default function ConfidentialitatePage() {
         <li>copiile de siguranță ale bazei de date: 14 zile, apoi se suprascriu.</li>
       </ul>
 
-      <h2>Cookie-uri</h2>
-      <p>
-        Folosim doar cookie-uri proprii, necesare: <code>sesiune</code> (te ține autentificat), <code>cm_sursa</code> și <code>cm_ref</code> (rețin 30 de zile
-        sursa vizitei și linkul de recomandare, pentru programul de recomandări). Nu folosim cookie-uri de publicitate sau de la terți. Fontul
-        site-ului e servit de pe serverul nostru, nu de la Google.
-      </p>
+      <h2 id="cookie-uri">Cookie-uri</h2>
+      <p>Folosim doar cookie-uri proprii. Nu folosim cookie-uri de publicitate sau de la terți. Fontul site-ului e servit de pe serverul nostru, nu de la Google.</p>
+      <ul>
+        <li>
+          <code>sesiune</code> (necesar, 30 de zile): te ține autentificat în cont.
+        </li>
+        <li>
+          <code>cm_cookie</code> (necesar, 6 luni): ține minte alegerea ta din bannerul de cookie-uri.
+        </li>
+        <li>
+          <code>cm_sursa</code> și <code>cm_ref</code> (doar cu acordul tău, 30 de zile): de unde ai venit pe site și linkul de recomandare, pentru statistici și
+          programul de recomandări. Le punem numai după ce apeși „Accept” și le ștergem dacă alegi „Doar necesare”.
+        </li>
+      </ul>
+      <p>Îți poți schimba oricând alegerea din linkul „Setări cookie-uri” din subsolul paginii. Fără acord numărăm doar vizita, fără niciun cookie și fără date personale.</p>
 
       <h2>Drepturile tale</h2>
       <p>
