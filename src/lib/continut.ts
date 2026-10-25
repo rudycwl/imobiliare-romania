@@ -74,11 +74,28 @@ export const STIRI: Stire[] = [
 ];
 
 /** Știri despre piață: doar din presă de afaceri cunoscută, cu sursa datelor scrisă (decizia lui Rudy, 25.10.2026). */
-export const STIRI_PIATA: { titlu: string; sursa: string; url: string }[] = [
+/** Știri de piață, doar din presa aprobată de Rudy: Agerpres, G4Media, HotNews, Biziday, Profit.ro, Revista Biz. Cu dată și sursa datelor. */
+export const STIRI_PIATA: { data: string; titlu: string; text: string; sursa: string; url: string }[] = [
   {
-    titlu: "Piața de investiții imobiliare a revenit pe creștere",
-    sursa: "Revista Biz, date Cushman & Wakefield Echinox",
-    url: "https://www.revistabiz.ro/cushman-wakefield-echinox-piata-de-investitii-imobiliare-din-romania-a-revenit-pe-crestere/",
+    data: "13.10.2026",
+    titlu: "Cluj-Napoca rămâne cel mai scump oraș, Bucureștiul urcă pe locul 2",
+    text: "Prețul mediu cerut pe apartamente: Cluj-Napoca 3.316 €/m², București 2.312 €/m² (+9% într-un an), Brașov 2.309 €/m², Iași circa 2.000 €/m², Timișoara 1.984 €/m² (+8%). Sunt prețuri din anunțuri, nu din tranzacții.",
+    sursa: "Agerpres, date Imobiliare.ro",
+    url: "https://agerpres.ro/economic/2026/10/13/capitala-pe-locul-ii-in-topul-oraselor-cu-cele-mai-mari-preturi-la-apartamente-cluj-napoca-ramane-li--1602443",
+  },
+  {
+    data: "12.10.2026",
+    titlu: "Vânzările de locuințe au scăzut cu o treime în trimestrul 3",
+    text: "Între iulie și septembrie 2026 s-au vândut 30.523 de locuințe în toată țara, cu 32% mai puține decât anul trecut. Iulie a fost cea mai slabă lună din ultimii 10 ani, din cauza atacului informatic de la Cadastru. Timișoara este singurul oraș mare cu creștere (+6%).",
+    sursa: "Profit.ro, date ANCPI analizate de SVN Romania",
+    url: "https://www.profit.ro/povesti-cu-profit/real-estate-constructii/piata-imobiliara-s-a-prabusit-cel-mai-mic-numar-de-locuinte-vandute-din-ultimii-sase-ani-in-regiunea-bucuresti-ilfov-22818788",
+  },
+  {
+    data: "13.10.2026",
+    titlu: "Prețurile cerute pe apartamente, oraș cu oraș",
+    text: "Craiova 2.142 €/m², Sibiu 2.034 €/m² (+7%), Constanța circa 2.020 €/m² (+6%), Oradea 1.885 €/m² (+5%). La Brașov și Timișoara, apartamentele noi trec de 2.200–2.800 €/m².",
+    sursa: "HotNews, date Imobiliare.ro",
+    url: "https://hotnews.ro/imobiliare-un-metru-patrat-in-cluj-costa-cat-un-metru-si-jumatate-in-bucuresti-2374492",
   },
 ];
 

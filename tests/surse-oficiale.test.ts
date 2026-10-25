@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { JUDETE as judete } from "@/modules/judete";
-import { PUBLICURI, STIRE_TVA, STIRI } from "@/lib/continut";
+import { PUBLICURI, STIRE_TVA, STIRI, STIRI_PIATA } from "@/lib/continut";
 import { ORASE_IMPOZITE, REGULI_NATIONALE, caleImpozite, impoziteOras } from "@/lib/impozite-locale";
 
 // Regula casei: legislația vine doar din surse oficiale, nu din presă.
@@ -31,4 +31,14 @@ test("orașele cu impozite există în lista de județe și au căi unice", () =
   assert.equal(cai.size, ORASE_IMPOZITE.length);
   assert.equal(impoziteOras("bucuresti", "sector-3")?.nume, "București");
   assert.equal(impoziteOras("iasi", "pascani"), undefined);
+});
+
+// Știrile de piață: doar presa aprobată de Rudy (25.10.2026). BZI și Antena 3 sunt excluse.
+const PRESA = ["agerpres.ro", "g4media.ro", "hotnews.ro", "biziday.ro", "profit.ro", "revistabiz.ro"];
+
+test("știrile de piață vin doar din presa aprobată și au dată", () => {
+  for (const s of STIRI_PIATA) {
+    assert.ok(PRESA.some((d) => new URL(s.url).hostname.endsWith(d)), `sursă neaprobată: ${s.url}`);
+    assert.match(s.data, /^\d{2}\.\d{2}\.\d{4}$/);
+  }
 });
