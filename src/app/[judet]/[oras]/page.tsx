@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -10,6 +11,7 @@ import { SeoZona } from "@/components/SeoZona";
 import { cautaAnunturi, statisticiZona, type Filtre as F } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
 import { textAnunturi } from "@/lib/etichete";
+import { caleImpozite, impoziteOras } from "@/lib/impozite-locale";
 
 type Props = { params: Promise<{ judet: string; oras: string }>; searchParams: Promise<F> };
 
@@ -36,6 +38,7 @@ export default async function OrasPage({ params, searchParams }: Props) {
   const o = getOras(p.judet, p.oras);
   if (!j || !o) notFound();
   const sp = await searchParams;
+  const impozite = impoziteOras(j.slug, o.slug);
   const [{ anunturi, total }, s] = await Promise.all([cautaAnunturi({ ...sp, judet: j.slug, oras: o.slug }), statisticiZona(j.slug, o.slug)]);
   return (
     <>
@@ -47,6 +50,12 @@ export default async function OrasPage({ params, searchParams }: Props) {
       <Filtre valori={sp} action={`/${j.slug}/${o.slug}`} />
       <SalveazaCautarea filtre={curataFiltre({ ...sp, judet: j.slug, oras: o.slug })} />
       <ListaAnunturi anunturi={anunturi} total={total} />
+      {impozite && (
+        <p className="muted small">
+          Impozitul pe clădiri în {impozite.nume}, {impozite.an}: <strong>{impozite.cote[0].valoare}</strong> la locuințe.{" "}
+          <Link href={caleImpozite(impozite)}>Vezi cotele, termenele și hotărârea oficială →</Link>
+        </p>
+      )}
       <SeoZona
         loc={o.nume}
         s={s}

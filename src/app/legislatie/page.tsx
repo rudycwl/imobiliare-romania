@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ACTUALIZAT, PUBLICURI, STIRE_TVA } from "@/lib/continut";
+import { ACTUALIZAT, PUBLICURI, STIRE_TVA, STIRI } from "@/lib/continut";
 
 export const metadata: Metadata = {
   title: "Legislație imobiliară la zi",
-  description: "Reguli pe scurt pentru cumpărători, vânzători persoane fizice, firme și dezvoltatori: notar, impozit la vânzare, TVA, acte necesare.",
+  description: "Noutăți legislative din surse oficiale și reguli pe scurt pentru cumpărători, vânzători, firme și dezvoltatori: notar, impozit la vânzare, TVA, impozite locale.",
 };
 
 export default function Legislatie() {
@@ -13,15 +13,42 @@ export default function Legislatie() {
       <p className="supratitlu">Legislație la zi · actualizat {ACTUALIZAT}</p>
       <h1>Ce trebuie să știi când cumperi sau vinzi</h1>
       <p className="muted">
-        Informații generale, explicate pe scurt. Nu sunt consultanță juridică sau fiscală: pentru cazul tău, întreabă notarul sau contabilul.
+        Informații generale, explicate pe scurt, doar din surse oficiale (Monitorul Oficial, Portal Legislativ, ANAF, primării). Nu sunt consultanță
+        juridică sau fiscală: pentru cazul tău, întreabă notarul sau contabilul.
       </p>
 
       <nav className="cuprins-legi" aria-label="Cuprins">
+        <a href="#noutati">Noutăți legislative</a>
+        <Link href="/impozite-locale">Impozite locale pe orașe</Link>
         {PUBLICURI.map((p) => (
           <a key={p.id} href={`#${p.id}`}>{p.nume}</a>
         ))}
         <a href="#tva">TVA la locuințe noi</a>
       </nav>
+
+      <section id="noutati">
+        <h2>Noutăți legislative</h2>
+        <div className="reguli">
+          {STIRI.map((s) => (
+            <div key={s.titlu} className="regula">
+              <span className="stire-cat">{s.data} · {s.categorie}</span>
+              <h3>{s.titlu}</h3>
+              <p>{s.text}</p>
+              <p className="muted small">
+                {s.act}. <a href={s.sursa.url} target="_blank" rel="noopener noreferrer">{s.sursa.nume}</a>
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="impozite-locale">
+        <h2>Impozitul pe clădiri în orașul tău</h2>
+        <p>
+          Cota se stabilește de fiecare consiliu local. Am adunat cotele aprobate pentru 2026, cu link la hotărârea oficială.{" "}
+          <Link href="/impozite-locale">Vezi impozitele pe orașe →</Link>
+        </p>
+      </section>
 
       {PUBLICURI.map((p) => (
         <section key={p.id} id={p.id}>
@@ -32,6 +59,11 @@ export default function Legislatie() {
                 <span className="nr">{String(i + 1).padStart(2, "0")}</span>
                 <h3>{r.titlu}</h3>
                 <p>{r.text}</p>
+                {r.sursa && (
+                  <p className="muted small">
+                    Sursa: <a href={r.sursa.url} target="_blank" rel="noopener noreferrer">{r.sursa.nume}</a>
+                  </p>
+                )}
               </div>
             ))}
           </div>

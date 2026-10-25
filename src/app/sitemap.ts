@@ -4,6 +4,7 @@ import { getAgentii } from "@/lib/utilizatori";
 import { indiceOrase } from "@/lib/indice";
 import { activ } from "@/lib/anunturi";
 import { db } from "@/lib/db";
+import { ORASE_IMPOZITE, caleImpozite } from "@/lib/impozite-locale";
 
 const BAZA = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro";
 
@@ -24,6 +25,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BAZA}/pentru-agentii` },
     { url: `${BAZA}/preturi` },
     { url: `${BAZA}/legislatie` },
+    { url: `${BAZA}/impozite-locale` },
+    ...ORASE_IMPOZITE.map((o) => ({ url: `${BAZA}${caleImpozite(o)}` })),
     { url: `${BAZA}/harta` },
     { url: `${BAZA}/indice-preturi` },
     ...orase.map((o) => ({ url: `${BAZA}/indice-preturi/${o.judet}/${o.oras}` })),
