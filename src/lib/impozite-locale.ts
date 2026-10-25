@@ -108,6 +108,26 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "25.10.2026",
   },
   {
+    judet: "dolj",
+    oras: "craiova",
+    nume: "Craiova",
+    an: 2026,
+    hotarare: "HCL nr. 496 din 18.12.2025 privind stabilirea și aprobarea impozitelor și taxelor locale pentru anul 2026",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale și anexe) ale persoanelor fizice", valoare: "0,1%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "1,3%" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,2% (+50% cotă adițională)" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,3%" },
+    ],
+    bonificatie: "10% pentru plata integrală până la 31 martie (clădiri, teren, mașini)",
+    note: ["Cotele pentru locuințe au rămas la fel ca în 2025."],
+    surse: [
+      { nume: "HCL nr. 496/2025 (primariacraiova.ro)", url: "https://www.primariacraiova.ro/ro/info/695f66f69d9cc811193031.pdf" },
+      { nume: "Hotărâri de stabilire a taxelor și impozitelor (primariacraiova.ro)", url: "https://www.primariacraiova.ro/ro/a/382/hot%C4%83r%C3%A2ri-stabilire-taxe-%C5%9Fi-impozite" },
+    ],
+    verificat: "25.10.2026",
+  },
+  {
     judet: "constanta",
     oras: "constanta",
     nume: "Constanța",
