@@ -3,22 +3,33 @@ import { db } from "@/lib/db";
 import { ipClient, noteaza, permis } from "@/lib/limita";
 import { COOKIE_REF, COOKIE_SURSA, determinaSursa, DURATA_COOKIE } from "@/lib/atribuire";
 
-/** Înregistrează o vizită nouă (o dată pe sesiune) și reține sursa primei vizite, pentru statistici. */
+/**
+ * Înregistrează o vizită nouă (o dată pe sesiune, fără date personale). Cookie-urile cu sursa primei vizite și recomandarea
+ * se pun doar cu acordul din bannerul de cookie-uri (cm_cookie=da); `doarCookie` le pune după acord fără să numere din nou vizita,
+ * iar `stergeCookie` le șterge la „Doar necesare”.
+ */
 export async function POST(req: NextRequest) {
   // Fără conturi, deci limităm pe adresă: un robot nu poate umple baza de date cu vizite.
   const ip = await ipClient();
   if (!permis(`vizita:${ip}`, 60, 60 * 60_000)) return new NextResponse(null, { status: 429 });
   noteaza(`vizita:${ip}`);
-  let corp: { search?: string; referrer?: string; pagina?: string } = {};
+  let corp: { search?: string; referrer?: string; pagina?: string; doarCookie?: boolean; stergeCookie?: boolean } = {};
   try {
     corp = await req.json();
   } catch {
     return new NextResponse(null, { status: 400 });
   }
-  const s = determinaSursa(String(corp.search ?? "").slice(0, 500), String(corp.referrer ?? "").slice(0, 500), req.nextUrl.hostname);
-  await db.vizita.create({ data: { sursa: s.sursa, mediu: s.mediu, campanie: s.campanie, pagina: String(corp.pagina ?? "").slice(0, 200) || null } });
-
   const r = new NextResponse(null, { status: 204 });
+  if (corp.stergeCookie) {
+    r.cookies.delete(COOKIE_SURSA);
+    r.cookies.delete(COOKIE_REF);
+    return r;
+  }
+  const s = determinaSursa(String(corp.search ?? "").slice(0, 500), String(corp.referrer ?? "").slice(0, 500), req.nextUrl.hostname);
+  if (!corp.doarCookie)
+    await db.vizita.create({ data: { sursa: s.sursa, mediu: s.mediu, campanie: s.campanie, pagina: String(corp.pagina ?? "").slice(0, 200) || null } });
+
+  if (req.cookies.get("cm_cookie")?.value !== "da") return r;
   const optiuni = { maxAge: DURATA_COOKIE, httpOnly: true, sameSite: "lax" as const, secure: req.nextUrl.protocol === "https:", path: "/" };
   // Prima atingere contează: nu suprascriem sursa sau recomandarea deja salvate.
   if (!req.cookies.has(COOKIE_SURSA)) r.cookies.set(COOKIE_SURSA, s.sursa, optiuni);

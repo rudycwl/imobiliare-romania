@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { utilizatorCurent } from "@/lib/auth";
 import { anunturiFavorite } from "@/lib/anunturi";
 import { AnuntCard } from "@/components/AnuntCard";
+import { cursEuro } from "@/lib/curs";
 import { CadruCont } from "../CadruCont";
 
 export const metadata: Metadata = { title: "Favorite", robots: { index: false } };
@@ -11,7 +12,7 @@ export const metadata: Metadata = { title: "Favorite", robots: { index: false } 
 export default async function FavoritePage() {
   const u = await utilizatorCurent();
   if (!u) redirect("/cont/autentificare?inapoi=/cont/favorite");
-  const anunturi = await anunturiFavorite(u.id);
+  const [anunturi, curs] = await Promise.all([anunturiFavorite(u.id), cursEuro()]);
   const acum = new Date();
   // Un anunț oprit de moderare sau expirat rămâne în listă, dar separat, ca să știi de ce nu mai e pe site.
   const active = anunturi.filter((a) => a.expiraLa > acum && a.moderare === "ok");
@@ -23,7 +24,7 @@ export default async function FavoritePage() {
         <>
           <p className="muted">Ai salvat {anunturi.length === 1 ? "un anunț" : `${anunturi.length} anunțuri`}. Apasă pe inimă ca să scoți un anunț din listă.</p>
           <div className="grid">
-            {active.map((a) => <AnuntCard key={a.id} a={a} />)}
+            {active.map((a) => <AnuntCard key={a.id} a={a} curs={curs} />)}
           </div>
           {inactive.length > 0 && (
             <>

@@ -29,6 +29,15 @@ export function formatPret(a: Pick<Anunt, "pret" | "tranzactie">) {
   return a.tranzactie === "inchiriere" ? `${p} / lună` : p;
 }
 
+/** Ex. „≈ 2.250.000 lei” (rotunjit la mie, la închiriere la zece lei); gol fără curs. */
+export function formatLei(a: Pick<Anunt, "pret" | "tranzactie">, curs: number | null) {
+  if (!curs) return "";
+  const pas = a.tranzactie === "inchiriere" ? 10 : 1000;
+  const lei = Math.round((a.pret * curs) / pas) * pas;
+  const p = `≈ ${new Intl.NumberFormat("ro-RO").format(lei)} lei`;
+  return a.tranzactie === "inchiriere" ? `${p} / lună` : p;
+}
+
 export function slugify(s: string) {
   return s
     .normalize("NFD")

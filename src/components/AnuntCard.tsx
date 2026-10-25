@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { AnuntCuProprietar } from "@/lib/anunturi";
-import { formatPret, textAnunturi, TIPURI, TIPURI_UTILIZATOR } from "@/lib/etichete";
+import { formatLei, formatPret, textAnunturi, TIPURI, TIPURI_UTILIZATOR } from "@/lib/etichete";
+import { cursEuro } from "@/lib/curs";
 import { getJudet, getOras } from "@/lib/geo";
 import { Favorit } from "./Favorit";
 
-export function AnuntCard({ a }: { a: AnuntCuProprietar }) {
+export function AnuntCard({ a, curs = null }: { a: AnuntCuProprietar; curs?: number | null }) {
   const oras = getOras(a.judet, a.oras);
   const judet = getJudet(a.judet);
   const u = a.proprietar;
@@ -18,6 +19,7 @@ export function AnuntCard({ a }: { a: AnuntCuProprietar }) {
       <div className="card-body">
         {(a.promovat || a.evidentiat) && <span className="eticheta-promo">{a.promovat ? "Promovat" : "Evidențiat"}</span>}
         <div className="pret">{formatPret(a)}</div>
+        {curs && <div className="pret-lei">{formatLei(a, curs)}</div>}
         <h3>{a.titlu}</h3>
         <p className="muted">
           {oras?.nume}, {judet?.nume} · {a.suprafata} m²{a.camere ? ` · ${a.camere} cam.` : ""}
@@ -27,8 +29,9 @@ export function AnuntCard({ a }: { a: AnuntCuProprietar }) {
   );
 }
 
-export function ListaAnunturi({ anunturi, total }: { anunturi: AnuntCuProprietar[]; total?: number }) {
+export async function ListaAnunturi({ anunturi, total }: { anunturi: AnuntCuProprietar[]; total?: number }) {
   if (!anunturi.length) return <p className="muted">Niciun anunț nu corespunde filtrelor.</p>;
+  const curs = await cursEuro();
   const n = total ?? anunturi.length;
   return (
     <>
@@ -37,7 +40,7 @@ export function ListaAnunturi({ anunturi, total }: { anunturi: AnuntCuProprietar
       </p>
       <div className="grid">
         {anunturi.map((a) => (
-          <AnuntCard key={a.id} a={a} />
+          <AnuntCard key={a.id} a={a} curs={curs} />
         ))}
       </div>
     </>
