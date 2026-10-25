@@ -14,9 +14,10 @@ const cand = (d: Date) =>
   new Intl.DateTimeFormat("ro-RO", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Bucharest" }).format(d);
 const STARE: Record<string, string> = { noua: "Neplătită", platita: "✅ Plătită", respinsa: "Respinsă" };
 
-export default async function PlatiPage() {
+export default async function PlatiPage({ searchParams }: { searchParams: Promise<{ sterse?: string }> }) {
   const u = await utilizatorCurent();
   if (!esteAdmin(u?.email)) notFound();
+  const sterse = (await searchParams).sterse;
   const comenzi = await db.comanda.findMany({
     orderBy: { creatLa: "desc" },
     take: 300,
@@ -31,6 +32,7 @@ export default async function PlatiPage() {
   return (
     <>
       <h1>Plăți</h1>
+      {sterse !== undefined && <p className="succes">Gata: am șters {sterse} {sterse === "1" ? "plată" : "plăți"} de test.</p>}
       <p className="muted">
         Toate plățile cu cardul (NETOPIA), cele mai noi primele. Cele fără factură emisă sunt bifate și se pot șterge (ex. testele).
         Plățile facturate nu se pot șterge: factura se anulează prin stornare, din <Link href="/admin/facturi">Facturi</Link>.
@@ -61,8 +63,7 @@ export default async function PlatiPage() {
           </table>
           {deTest.length > 0 && (
             <p>
-              <label className="muted"><input type="checkbox" name="confirm" value="da" required /> sigur</label>{" "}
-              <button type="submit">Șterge plățile bifate</button>
+              <button type="submit">Șterge plățile bifate ({deTest.length})</button>
             </p>
           )}
         </form>
