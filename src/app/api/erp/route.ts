@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const de = p && !Number.isNaN(Date.parse(p)) ? new Date(p) : new Date(0);
   const acum = new Date();
 
-  const [comenzi, facturi, utilizatori, toateId, pePeTip, anunturiActive, anunturiVerificare, vizite30] = await Promise.all([
+  const [comenzi, facturi, utilizatori, toateId, idComenzi, idFacturi, pePeTip, anunturiActive, anunturiVerificare, vizite30] = await Promise.all([
     db.comanda.findMany({
       where: { OR: [{ creatLa: { gte: de } }, { platitaLa: { gte: de } }] },
       orderBy: { creatLa: "asc" },
@@ -43,6 +43,9 @@ export async function GET(req: NextRequest) {
     }),
     // Id-urile conturilor existente, ca ERP-ul să scoată conturile șterse de pe site.
     db.utilizator.findMany({ where: { stersLa: null }, select: { id: true } }),
+    // La fel pentru plăți și facturi (ex. plățile de test șterse din /admin/plati).
+    db.comanda.findMany({ select: { id: true } }),
+    db.factura.findMany({ select: { id: true } }),
     db.utilizator.groupBy({ by: ["tip"], where: { stersLa: null }, _count: { _all: true } }),
     db.anunt.count({ where: { moderare: "ok", expiraLa: { gt: acum } } }),
     db.anunt.count({ where: { moderare: "verificare" } }),
@@ -68,5 +71,7 @@ export async function GET(req: NextRequest) {
     })),
     utilizatori: utilizatori.map(({ _count, ...u }) => ({ ...u, anunturi: _count.anunturi })),
     idUtilizatori: toateId.map((u) => u.id),
+    idComenzi: idComenzi.map((c) => c.id),
+    idFacturi: idFacturi.map((f) => f.id),
   });
 }
