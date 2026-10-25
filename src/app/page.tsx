@@ -320,11 +320,6 @@ export default async function Home() {
             <p>Până la 3 anunțuri active, 60 de zile fiecare, cu până la 10 poze. Poți importa și anunțul tău de pe OLX.</p>
             <Link href="/cont/anunt-nou" className="buton-banner inchis">Adaugă anunț <span className="sageata">→</span></Link>
           </div>
-          <div className="chemare chemare-albastra ridica">
-            <h2>Ești agenție sau dezvoltator?</h2>
-            <p>Zonă separată pentru agenții, cu pagină proprie și abonamente fără comision.</p>
-            <Link href="/pentru-agentii" className="buton-banner alb">Vezi oferta <span className="sageata">→</span></Link>
-          </div>
         </section>
       </div>
     </div>

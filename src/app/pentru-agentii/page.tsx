@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Distribuie } from "@/components/Distribuie";
 import type { Metadata } from "next";
 import { TabelAbonamente } from "@/components/TabelAbonamente";
-import { formatData, getInvitatieValabila, locuriRamase, LOCURI_FONDATOARE, LUNI_GRATUITE } from "@/lib/fondatori";
+import { formatData, getInvitatieValabila } from "@/lib/fondatori";
 
 export const metadata: Metadata = {
   title: "Pentru agenții imobiliare",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 const AVANTAJE = [
   { icon: "🏢", titlu: "Profil public de agenție", text: "Pagina agenției tale, cu logo, date de contact și toate ofertele într-un singur loc." },
-  { icon: "📋", titlu: "Abonamente pentru orice agenție", text: "De la 25 la un număr nelimitat de anunțuri active, în orice județ și oraș din țară." },
+  { icon: "📋", titlu: "Totul în contul agenției", text: "Abonamentele, prețurile și facilitățile le vezi în contul agenției, după înscriere." },
   { icon: "🏷️", titlu: "Insignă „Agenție”", text: "Anunțurile tale apar marcate clar, iar clienții te găsesc la filtrul „Oferit de”." },
   { icon: "🇷🇴", titlu: "Acoperire națională", text: "Toate cele 41 de județe și Bucureștiul, organizate pe orașe." },
 ];
@@ -19,7 +19,7 @@ const AVANTAJE = [
 
 export default async function PentruAgentiiPage({ searchParams }: { searchParams: Promise<{ cod?: string }> }) {
   const { cod } = await searchParams;
-  const [ramase, invitatie] = await Promise.all([locuriRamase(), getInvitatieValabila(cod)]);
+  const invitatie = await getInvitatieValabila(cod);
   const inscriere = invitatie ? `/pentru-agentii/inregistrare?cod=${invitatie.cod}` : "/pentru-agentii/inregistrare";
   return (
     <>
@@ -29,32 +29,14 @@ export default async function PentruAgentiiPage({ searchParams }: { searchParams
         <p>Un cont dedicat agenției tale, separat de anunțurile persoanelor fizice.</p>
         {invitatie && (
           <p className="rezervat">
-            🎟️ Ai un loc de Agenție Fondatoare rezervat până la {formatData(invitatie.expiraLa)}.
-          </p>
-        )}
-        {ramase > 0 && (
-          <p className="contor">
-            Au mai rămas <strong>{ramase}</strong> din {LOCURI_FONDATOARE} de locuri de Agenție Fondatoare
+            🎟️ Ai o invitație valabilă până la {formatData(invitatie.expiraLa)}.
           </p>
         )}
         <div className="filtre">
-          <Link href={inscriere} className="buton buton-alb">{invitatie ? "Activează locul rezervat" : "Creează cont de agenție"}</Link>
+          <Link href={inscriere} className="buton buton-alb">{invitatie ? "Folosește invitația" : "Creează cont de agenție"}</Link>
           <Link href="/cont/autentificare" className="buton buton-contur">Am deja cont</Link>
         </div>
       </section>
-
-      {(ramase > 0 || invitatie) && (
-        <section className="oferta">
-          <h2>⭐ Oferta Agenție Fondatoare</h2>
-          <ul>
-            <li><strong>{LUNI_GRATUITE} luni gratuit</strong>, cu toate funcțiile pentru agenții.</li>
-            <li>Apoi <strong>50% reducere permanent</strong>, cât timp rămâi abonat.</li>
-            <li>Insigna <strong>„Agenție Fondatoare”</strong> pe profil și pe toate anunțurile.</li>
-            <li>Valabil pentru primele {LOCURI_FONDATOARE} de agenții înscrise, până la 31 decembrie 2026.</li>
-          </ul>
-          <Link href={inscriere} className="buton">Vreau locul meu</Link>
-        </section>
-      )}
 
       <h2>De ce CheiaMea</h2>
       <div className="grid">
@@ -67,11 +49,11 @@ export default async function PentruAgentiiPage({ searchParams }: { searchParams
         ))}
       </div>
 
-      <h2 id="abonamente">Abonamente</h2>
-      <TabelAbonamente />
-      <p className="muted">Vezi toate <Link href="/preturi">prețurile CheiaMea</Link>, inclusiv promovările.</p>
+      <div id="abonamente" style={{ marginTop: 24 }}>
+        <TabelAbonamente />
+      </div>
 
-      <Distribuie url="https://cheiamea.ro/pentru-agentii" text="CheiaMea: 6 luni gratuit pentru primele 100 de agenții imobiliare." />
+      <Distribuie url="https://cheiamea.ro/pentru-agentii" text="CheiaMea pentru agenții imobiliare: cont de agenție și anunțuri în toată țara." />
       <p className="muted" style={{ marginTop: 24 }}>
         Vezi și <Link href="/agentii">lista agențiilor de pe CheiaMea</Link>.
       </p>
