@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const de = p && !Number.isNaN(Date.parse(p)) ? new Date(p) : new Date(0);
   const acum = new Date();
 
-  const [comenzi, facturi, utilizatori, pePeTip, anunturiActive, anunturiVerificare, vizite30] = await Promise.all([
+  const [comenzi, facturi, utilizatori, toateId, pePeTip, anunturiActive, anunturiVerificare, vizite30] = await Promise.all([
     db.comanda.findMany({
       where: { OR: [{ creatLa: { gte: de } }, { platitaLa: { gte: de } }] },
       orderBy: { creatLa: "asc" },
@@ -34,14 +34,16 @@ export async function GET(req: NextRequest) {
     db.factura.findMany({ where: { OR: [{ creatLa: { gte: de } }, { emisaLa: { gte: de } }] }, orderBy: { creatLa: "asc" } }),
     // Conturile noi, plus toate agențiile (ca abonamentul și data expirării să fie mereu la zi în ERP).
     db.utilizator.findMany({
-      where: { OR: [{ creatLa: { gte: de } }, { tip: "agentie" }] },
+      where: { stersLa: null, OR: [{ creatLa: { gte: de } }, { tip: "agentie" }] },
       select: {
-        id: true, tip: true, nume: true, contact: true, email: true, telefon: true, judet: true, oras: true, cui: true, creatLa: true,
+        id: true, tip: true, nume: true, contact: true, email: true, emailConfirmatLa: true, telefon: true, judet: true, oras: true, cui: true, creatLa: true,
         fondator: true, gratuitPanaLa: true, abonament: true, abonamentPanaLa: true, plataAnuala: true, sursa: true,
         _count: { select: { anunturi: true } },
       },
     }),
-    db.utilizator.groupBy({ by: ["tip"], _count: { _all: true } }),
+    // Id-urile conturilor existente, ca ERP-ul să scoată conturile șterse de pe site.
+    db.utilizator.findMany({ where: { stersLa: null }, select: { id: true } }),
+    db.utilizator.groupBy({ by: ["tip"], where: { stersLa: null }, _count: { _all: true } }),
     db.anunt.count({ where: { moderare: "ok", expiraLa: { gt: acum } } }),
     db.anunt.count({ where: { moderare: "verificare" } }),
     db.vizita.count({ where: { creatLa: { gte: new Date(acum.getTime() - 30 * ZI) } } }),
@@ -65,5 +67,6 @@ export async function GET(req: NextRequest) {
       cumparator: f.cumparator,
     })),
     utilizatori: utilizatori.map(({ _count, ...u }) => ({ ...u, anunturi: _count.anunturi })),
+    idUtilizatori: toateId.map((u) => u.id),
   });
 }
