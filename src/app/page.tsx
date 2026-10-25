@@ -3,7 +3,7 @@ import { ListaAnunturi } from "@/components/AnuntCard";
 import { CalculatorCredit } from "@/components/CalculatorCredit";
 import { LegislatieFile } from "@/components/LegislatieFile";
 import { cautaAnunturi, numarAnunturi, numarPeTip } from "@/lib/anunturi";
-import { ACTUALIZAT, BANDA, PUBLICURI, STIRE_TVA, STIRI } from "@/lib/continut";
+import { ACTUALIZAT, BANDA, PUBLICURI, STIRE_TVA, STIRI, STIRI_PIATA } from "@/lib/continut";
 import { formatPret, textAnunturi, TIPURI } from "@/lib/etichete";
 import { getOras, JUDETE } from "@/lib/geo";
 
@@ -243,23 +243,35 @@ export default async function Home() {
           <div className="cap-sectiune">
             <div>
               <span className="supratitlu">Noutăți</span>
-              <h2 className="titlu-mare">Ce se întâmplă pe piață</h2>
+              <h2 className="titlu-mare">Legi noi și piața imobiliară</h2>
             </div>
           </div>
           <div className="stiri">
             <Link href="/legislatie#tva" className="stire-mare ridica">
               <span className="eticheta-stire">Legislație</span>
               <h3>{STIRE_TVA.titlu}</h3>
-              <p>Cota redusă de 9% s-a aplicat doar până la 31 iulie 2026. Vezi ce se aplică acum la locuințele noi.</p>
+              <p>Cota redusă de 9% s-a aplicat până la 30 septembrie 2026 (Legea 161/2026). Vezi ce se aplică acum la locuințele noi.</p>
               <span className="citeste">Citește explicația <span className="sageata">→</span></span>
             </Link>
-            {STIRI.map((s) => (
+            {STIRI.slice(1, 3).map((s) => (
+              <a key={s.titlu} href={s.sursa.url} target="_blank" rel="noopener noreferrer" className="stire ridica">
+                <span className="stire-cat">{s.data} · {s.categorie}</span>
+                <span className="stire-titlu">{s.titlu}</span>
+                <span className="muted small">{s.act}</span>
+              </a>
+            ))}
+            {STIRI_PIATA.map((s) => (
               <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer" className="stire ridica">
-                <span className="stire-cat">{s.categorie}</span>
+                <span className="stire-cat">Piață</span>
                 <span className="stire-titlu">{s.titlu}</span>
                 <span className="muted small">{s.sursa}</span>
               </a>
             ))}
+            <Link href="/impozite-locale" className="stire ridica">
+              <span className="stire-cat">Impozite locale</span>
+              <span className="stire-titlu">Impozitul pe clădiri în 2026, oraș cu oraș</span>
+              <span className="muted small">Din hotărârile consiliilor locale</span>
+            </Link>
           </div>
         </section>
 

@@ -31,6 +31,11 @@ export function LegislatieFile({ publicuri }: { publicuri: Public[] }) {
             <span className="nr">{String(i + 1).padStart(2, "0")}</span>
             <h3>{r.titlu}</h3>
             <p>{r.text}</p>
+            {r.sursa && (
+              <p className="muted small">
+                Sursa: <a href={r.sursa.url} target="_blank" rel="noopener noreferrer">{r.sursa.nume}</a>
+              </p>
+            )}
           </div>
         ))}
       </div>
