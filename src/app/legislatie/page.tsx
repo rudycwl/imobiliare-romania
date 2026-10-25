@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ACTUALIZAT, PUBLICURI, STIRE_TVA, STIRI } from "@/lib/continut";
+import { ACTUALIZAT, PUBLICURI, STIRE_TVA, STIRI, STIRI_PIATA } from "@/lib/continut";
 
 export const metadata: Metadata = {
   title: "Legislație imobiliară la zi",
@@ -19,6 +19,7 @@ export default function Legislatie() {
 
       <nav className="cuprins-legi" aria-label="Cuprins">
         <a href="#noutati">Noutăți legislative</a>
+        <a href="#piata">Piața imobiliară</a>
         <Link href="/impozite-locale">Impozite locale pe orașe</Link>
         {PUBLICURI.map((p) => (
           <a key={p.id} href={`#${p.id}`}>{p.nume}</a>
@@ -36,6 +37,23 @@ export default function Legislatie() {
               <p>{s.text}</p>
               <p className="muted small">
                 {s.act}. <a href={s.sursa.url} target="_blank" rel="noopener noreferrer">{s.sursa.nume}</a>
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="piata">
+        <h2>Piața imobiliară</h2>
+        <p className="muted small">Din presa economică, cu sursa datelor. Cifrele sunt ale publicațiilor și ale firmelor citate, nu ale CheiaMea.</p>
+        <div className="reguli">
+          {STIRI_PIATA.map((s) => (
+            <div key={s.url} className="regula">
+              <span className="stire-cat">{s.data} · Piață</span>
+              <h3>{s.titlu}</h3>
+              <p>{s.text}</p>
+              <p className="muted small">
+                Sursa: <a href={s.url} target="_blank" rel="noopener noreferrer">{s.sursa}</a>
               </p>
             </div>
           ))}

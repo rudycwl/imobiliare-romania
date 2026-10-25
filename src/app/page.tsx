@@ -260,9 +260,9 @@ export default async function Home() {
                 <span className="muted small">{s.act}</span>
               </a>
             ))}
-            {STIRI_PIATA.map((s) => (
+            {STIRI_PIATA.slice(0, 2).map((s) => (
               <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer" className="stire ridica">
-                <span className="stire-cat">Piață</span>
+                <span className="stire-cat">{s.data} · Piață</span>
                 <span className="stire-titlu">{s.titlu}</span>
                 <span className="muted small">{s.sursa}</span>
               </a>
