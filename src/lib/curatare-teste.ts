@@ -20,7 +20,9 @@ export const ultimaCuratare = () => g.__curatarePlati ?? null;
 async function leagaFacturaDePlataReala(): Promise<string> {
   const reala = await db.comanda.findUnique({ where: { id: PLATA_REALA } });
   if (!reala) return "fara-plata-reala";
-  if (await db.factura.findFirst({ where: { plataRef: PLATA_REALA } })) return "deja-legata";
+  // Pe plata reală a rămas o factură neemisă (fără serie, „în așteptare”); o ștergem când mutăm CHM0001 pe ea.
+  const peReala = await db.factura.findFirst({ where: { plataRef: PLATA_REALA } });
+  if (peReala?.seria) return "deja-legata";
   // Factura emisă (are serie de la Oblio) care stă pe o altă plată din 23.10, cu aceeași sumă.
   const emise = await db.factura.findMany({ where: { tip: "factura", seria: { not: null }, plataRef: { not: null, notIn: [PLATA_REALA] } } });
   const candidate = [];
@@ -30,9 +32,12 @@ async function leagaFacturaDePlataReala(): Promise<string> {
   }
   if (candidate.length !== 1) return `candidate-${candidate.length}-din-${emise.length}`;
   const { f, test } = candidate[0];
-  await db.factura.update({ where: { id: f.id }, data: { plataRef: PLATA_REALA } });
+  await db.$transaction([
+    ...(peReala ? [db.factura.delete({ where: { id: peReala.id } })] : []),
+    db.factura.update({ where: { id: f.id }, data: { plataRef: PLATA_REALA } }),
+  ]);
   console.log(`Factura ${f.seria} ${f.numar} legată de plata reală (era pe ${test.id}).`);
-  return "legata";
+  return peReala ? "legata-neemisa-stearsa" : "legata";
 }
 
 export async function curataPlatiTest() {
