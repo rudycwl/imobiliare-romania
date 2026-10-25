@@ -1,5 +1,12 @@
 import type { Instrumentation } from "next";
 
+// La pornire: șterge plățile de test rămase (vezi src/lib/curatare-teste.ts).
+export async function register() {
+  if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  const { curataPlatiTest } = await import("./lib/curatare-teste");
+  await curataPlatiTest();
+}
+
 // Next.js apelează onRequestError pentru orice eroare din pagini, acțiuni și rute API: adminii primesc un email.
 export const onRequestError: Instrumentation.onRequestError = async (err, request, context) => {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
