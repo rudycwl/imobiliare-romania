@@ -1,7 +1,6 @@
 "use server";
 
-import { notFound } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 import { utilizatorCurent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { esteAdmin } from "@/lib/fondatori";
@@ -11,9 +10,8 @@ import { esteAdmin } from "@/lib/fondatori";
 export async function stergePlati(f: FormData) {
   const u = await utilizatorCurent();
   if (!esteAdmin(u?.email)) notFound();
-  if (f.get("confirm") !== "da") return;
   const ids = f.getAll("id").map(String).filter(Boolean);
-  if (!ids.length) return;
+  if (!ids.length) redirect("/admin/plati?sterse=0");
   const facturate = await db.factura.findMany({
     where: { plataRef: { in: ids }, OR: [{ seria: { not: null } }, { stare: { in: ["emisa", "stornata"] } }] },
     select: { plataRef: true },
@@ -23,5 +21,5 @@ export async function stergePlati(f: FormData) {
     db.factura.deleteMany({ where: { plataRef: { in: deSters }, seria: null } }),
     db.comanda.deleteMany({ where: { id: { in: deSters } } }),
   ]);
-  revalidatePath("/admin/plati");
+  redirect(`/admin/plati?sterse=${deSters.length}`);
 }
