@@ -42,7 +42,7 @@ export default function ImpoziteLocale() {
           </tbody>
         </table>
       </div>
-      <p className="muted small">Adăugăm pe rând celelalte orașe, doar după ce verificăm hotărârea oficială a consiliului local.</p>
+      <p className="muted small">Adăugăm pe rând toate reședințele de județ, apoi celelalte orașe și comune, doar după ce verificăm hotărârea oficială a consiliului local. Până atunci, în orice localitate cota pentru locuințe e între 0,08% și 0,2%.</p>
 
       <h2>Reguli valabile în toată țara</h2>
       <div className="reguli">

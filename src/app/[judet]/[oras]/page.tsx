@@ -50,10 +50,16 @@ export default async function OrasPage({ params, searchParams }: Props) {
       <Filtre valori={sp} action={`/${j.slug}/${o.slug}`} />
       <SalveazaCautarea filtre={curataFiltre({ ...sp, judet: j.slug, oras: o.slug })} />
       <ListaAnunturi anunturi={anunturi} total={total} />
-      {impozite && (
+      {impozite ? (
         <p className="muted small">
           Impozitul pe clădiri în {impozite.nume}, {impozite.an}: <strong>{impozite.cote[0].valoare}</strong> la locuințe.{" "}
           <Link href={caleImpozite(impozite)}>Vezi cotele, termenele și hotărârea oficială →</Link>
+        </p>
+      ) : (
+        <p className="muted small">
+          Impozitul pe clădiri în {o.nume}: cota pentru locuințe e stabilită de consiliul local, între 0,08% și 0,2% (Codul fiscal). Încă nu am
+          verificat hotărârea primăriei {o.nume}.{" "}
+          <Link href="/impozite-locale">Regulile din toată țara →</Link>
         </p>
       )}
       <SeoZona
