@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { formatLei } from "@/lib/etichete";
 import { citesteCurs } from "@/lib/curs";
-import { deTrimis } from "@/lib/raport-erori";
+import { deTrimis, eroareIgnorata } from "@/lib/raport-erori";
 
 test("formatLei rotunjește la mie la vânzare și la zece lei la chirie", () => {
   assert.equal(formatLei({ pret: 90000, tranzactie: "vanzare" }, 5.0912), "≈ 458.000 lei");
@@ -23,4 +23,9 @@ test("aceeași eroare pleacă pe email cel mult o dată pe oră", () => {
   assert.equal(deTrimis("server|/x|boom", t + 10 * 60_000), false);
   assert.equal(deTrimis("server|/x|boom", t + 61 * 60_000), true);
   assert.equal(deTrimis("server|/y|alta", t + 61 * 60_000), true);
+});
+
+test("erorile de tip „Failed to find Server Action” nu se trimit pe email", () => {
+  assert.equal(eroareIgnorata("Failed to find Server Action. This request might be from an older or newer deployment."), true);
+  assert.equal(eroareIgnorata("Cannot read properties of undefined"), false);
 });
