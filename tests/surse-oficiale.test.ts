@@ -3,11 +3,9 @@ import assert from "node:assert/strict";
 import { JUDETE as judete } from "@/modules/judete";
 import { PUBLICURI, STIRE_TVA, STIRI, STIRI_PIATA } from "@/lib/continut";
 import { ORASE_IMPOZITE, REGULI_NATIONALE, caleImpozite, impoziteOras } from "@/lib/impozite-locale";
+import { oficial, presaAprobata } from "@/lib/surse";
 
 // Regula casei: legislația vine doar din surse oficiale, nu din presă.
-const OFICIALE = ["legislatie.just.ro", "static.anaf.ro", "monitoruloficial.ro", "mfinante.gov.ro", "primaria-iasi.ro", "primariaclujnapoca.ro", "doc.pmb.ro", "mol.oradea.ro", "ploiesti.ro", "sibiu.ro", "spit-ct.ro", "dfbv.ro", "primariatm.ro", "primariacraiova.ro", "municipiulbacau.ro", "primariapn.ro", "primariaslatina.ro", "pmtgv.ro", "primariacalarasi.ro", "primariabistrita.ro", "miercureaciuc.ro", "primariasv.ro", "tirgumures.ro", "primariagalati.ro", "zalausj.ro", "primariatulcea.ro", "focsani.info", "primariasm.ro"];
-const oficial = (url: string) => OFICIALE.some((d) => new URL(url).hostname.endsWith(d));
-
 test("toate linkurile din legislație duc la surse oficiale", () => {
   const linkuri = [
     ...STIRI.map((s) => s.sursa.url),
@@ -34,11 +32,17 @@ test("orașele cu impozite există în lista de județe și au căi unice", () =
 });
 
 // Știrile de piață: doar presa aprobată de Rudy (25.10.2026). BZI și Antena 3 sunt excluse.
-const PRESA = ["agerpres.ro", "g4media.ro", "hotnews.ro", "biziday.ro", "profit.ro", "revistabiz.ro"];
-
 test("știrile de piață vin doar din presa aprobată și au dată", () => {
   for (const s of STIRI_PIATA) {
-    assert.ok(PRESA.some((d) => new URL(s.url).hostname.endsWith(d)), `sursă neaprobată: ${s.url}`);
+    assert.ok(presaAprobata(s.url), `sursă neaprobată: ${s.url}`);
     assert.match(s.data, /^\d{2}\.\d{2}\.\d{4}$/);
   }
+});
+
+test("panoul refuză sursele neoficiale", () => {
+  assert.ok(oficial("https://www.primariaarad.ro/hcl.pdf"));
+  assert.ok(oficial("https://legislatie.just.ro/Public/DetaliiDocument/1"));
+  for (const u of ["https://www.bzi.ro/x", "https://www.antena3.ro/x", "javascript:alert(1)", "https://primaria.ro.evil.com/x", "nu e link"]) assert.ok(!oficial(u), u);
+  assert.ok(!presaAprobata("https://www.bzi.ro/x"));
+  assert.ok(presaAprobata("https://www.profit.ro/x"));
 });

@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ACTUALIZAT, PUBLICURI, STIRE_TVA, STIRI, STIRI_PIATA } from "@/lib/continut";
+import { PUBLICURI, STIRE_TVA } from "@/lib/continut";
+import { citesteActualizat, citesteStiri, citesteStiriPiata } from "@/lib/continut-db";
 
 export const metadata: Metadata = {
   title: "Legislație imobiliară la zi",
   description: "Noutăți legislative din surse oficiale și reguli pe scurt pentru cumpărători, vânzători, firme și dezvoltatori: notar, impozit la vânzare, TVA, impozite locale.",
 };
 
-export default function Legislatie() {
+export default async function Legislatie() {
+  const [STIRI, STIRI_PIATA, ACTUALIZAT] = await Promise.all([citesteStiri(), citesteStiriPiata(), citesteActualizat()]);
   return (
     <div className="legal pagina-legi">
       <p className="supratitlu">Legislație la zi · actualizat {ACTUALIZAT}</p>

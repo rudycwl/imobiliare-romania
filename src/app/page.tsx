@@ -3,7 +3,8 @@ import { ListaAnunturi } from "@/components/AnuntCard";
 import { CalculatorCredit } from "@/components/CalculatorCredit";
 import { LegislatieFile } from "@/components/LegislatieFile";
 import { cautaAnunturi, numarAnunturi, numarPeTip } from "@/lib/anunturi";
-import { ACTUALIZAT, PUBLICURI, STIRE_TVA, STIRI, STIRI_PIATA } from "@/lib/continut";
+import { PUBLICURI, STIRE_TVA } from "@/lib/continut";
+import { citesteActualizat, citesteStiri, citesteStiriPiata } from "@/lib/continut-db";
 import { formatPret, textAnunturi, TIPURI } from "@/lib/etichete";
 import { getOras, JUDETE } from "@/lib/geo";
 import { citesteTexte } from "@/lib/setari";
@@ -31,7 +32,15 @@ const AVANTAJE = [
 ];
 
 export default async function Home() {
-  const [{ anunturi }, numar, peTip, texte] = await Promise.all([cautaAnunturi({}, 8), numarAnunturi(), numarPeTip(), citesteTexte()]);
+  const [{ anunturi }, numar, peTip, texte, STIRI, STIRI_PIATA, ACTUALIZAT] = await Promise.all([
+    cautaAnunturi({}, 8),
+    numarAnunturi(),
+    numarPeTip(),
+    citesteTexte(),
+    citesteStiri(),
+    citesteStiriPiata(),
+    citesteActualizat(),
+  ]);
   const BANDA = texte.banda;
   const [p1, p2] = anunturi;
   // Întâi județele cu anunțuri (cu numărul lor), apoi orașele mari, fără cifre: un „0” lângă „Populare” arată a site gol.

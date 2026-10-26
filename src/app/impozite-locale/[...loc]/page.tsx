@@ -2,21 +2,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { ORASE_IMPOZITE, REGULI_NATIONALE, caleImpozite, type ImpoziteOras } from "@/lib/impozite-locale";
+import { REGULI_NATIONALE, caleImpozite } from "@/lib/impozite-locale";
+import { citesteImpozite, gasesteImpozite } from "@/lib/continut-db";
 
 type Props = { params: Promise<{ loc: string[] }> };
 
-function gaseste(loc: string[]): ImpoziteOras | undefined {
-  return ORASE_IMPOZITE.find((o) => caleImpozite(o) === `/impozite-locale/${loc.join("/")}`);
-}
+const gaseste = (loc: string[]) => gasesteImpozite(`/impozite-locale/${loc.join("/")}`);
 
-export function generateStaticParams() {
-  return ORASE_IMPOZITE.map((o) => ({ loc: o.oras ? [o.judet, o.oras] : [o.judet] }));
+// Un oraș ascuns din panou dă 404; dacă e arătat din nou, pagina se face la prima cerere.
+export async function generateStaticParams() {
+  return (await citesteImpozite()).map((o) => ({ loc: o.oras ? [o.judet, o.oras] : [o.judet] }));
 }
-export const dynamicParams = false;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const o = gaseste((await params).loc);
+  const o = await gaseste((await params).loc);
   if (!o) return { title: "Oraș inexistent" };
   const title = `Impozit clădiri ${o.nume} ${o.an}: cota ${o.cote[0].valoare}, termene și reduceri`;
   const description = `Impozitul pe apartament sau casă în ${o.nume} în ${o.an}: cota aprobată de consiliul local (${o.cote[0].valoare} la locuințe), bonificația, termenele de plată și reducerile, cu link la hotărârea oficială.`;
@@ -24,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ImpoziteOrasPage({ params }: Props) {
-  const o = gaseste((await params).loc);
+  const o = await gaseste((await params).loc);
   if (!o) notFound();
   const anunturi = o.oras ? `/${o.judet}/${o.oras}` : `/${o.judet}`;
   return (
