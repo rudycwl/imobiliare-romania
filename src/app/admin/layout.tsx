@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin } from "@/lib/fondatori";
+import { adminPanou } from "@/lib/panou";
 import { SECTIUNI } from "./sectiuni";
 
-/** Meniul panoului de control, pe toate paginile /admin. Îl vede doar un administrator (ADMIN_EMAILS). */
+/** Meniul panoului de control, pe toate paginile /admin. Îl vede doar un administrator (ADMIN_EMAILS) cu panoul deschis. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const u = await utilizatorCurent();
+  const u = await adminPanou();
   return (
     <>
-      {esteAdmin(u?.email) && (
+      {u && (
         <nav className="panou-meniu" aria-label="Panou de control">
           <Link href="/admin"><strong>Panou de control</strong></Link>
           {SECTIUNI.map((s) => (

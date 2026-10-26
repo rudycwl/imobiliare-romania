@@ -1,9 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
+import { cerePanou } from "@/lib/panou";
 import { db } from "@/lib/db";
-import { esteAdmin } from "@/lib/fondatori";
 import { stergePlati } from "./actiuni";
 
 export const metadata: Metadata = { title: "Plăți", robots: { index: false } };
@@ -15,8 +14,7 @@ const cand = (d: Date) =>
 const STARE: Record<string, string> = { noua: "Neplătită", platita: "✅ Plătită", respinsa: "Respinsă" };
 
 export default async function PlatiPage({ searchParams }: { searchParams: Promise<{ sterse?: string }> }) {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
   const sterse = (await searchParams).sterse;
   const comenzi = await db.comanda.findMany({
     orderBy: { creatLa: "desc" },

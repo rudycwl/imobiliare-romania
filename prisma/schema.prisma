@@ -155,6 +155,14 @@ model Vizita {
   mediu    String?
   campanie String?
   pagina   String?
+  /// Platforma, din User-Agent: Telefon | Tabletă | Calculator, sistemul (Android, iOS, Windows…) și browserul.
+  dispozitiv String?
+  sistem     String?
+  browser    String?
+  /// Localitatea aproximativă, din adresa IP (baza DB-IP Lite). Adresa IP nu se salvează.
+  oras       String?
+  regiune    String?
+  tara       String?
 
   @@index([creatLa, sursa])
 }

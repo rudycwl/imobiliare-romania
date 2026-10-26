@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
+import { utilizatorCurent } from "@/lib/auth";
+import { esteAdmin } from "@/lib/fondatori";
+import { localitate, platforma } from "@/lib/vizitator";
 import { ipClient, noteaza, permis } from "@/lib/limita";
 import { COOKIE_REF, COOKIE_SURSA, determinaSursa, DURATA_COOKIE } from "@/lib/atribuire";
 
@@ -26,8 +29,18 @@ export async function POST(req: NextRequest) {
     return r;
   }
   const s = determinaSursa(String(corp.search ?? "").slice(0, 500), String(corp.referrer ?? "").slice(0, 500), req.nextUrl.hostname);
-  if (!corp.doarCookie)
-    await db.vizita.create({ data: { sursa: s.sursa, mediu: s.mediu, campanie: s.campanie, pagina: String(corp.pagina ?? "").slice(0, 200) || null } });
+  // Vizitele administratorului (logat pe site) nu se numără: ar umfla cifrele din panou.
+  if (!corp.doarCookie && !esteAdmin((await utilizatorCurent())?.email))
+    await db.vizita.create({
+      data: {
+        sursa: s.sursa,
+        mediu: s.mediu,
+        campanie: s.campanie,
+        pagina: String(corp.pagina ?? "").slice(0, 200) || null,
+        ...platforma(req.headers.get("user-agent") ?? ""),
+        ...(await localitate(ip)),
+      },
+    });
 
   if (req.cookies.get("cm_cookie")?.value !== "da") return r;
   const optiuni = { maxAge: DURATA_COOKIE, httpOnly: true, sameSite: "lax" as const, secure: req.nextUrl.protocol === "https:", path: "/" };

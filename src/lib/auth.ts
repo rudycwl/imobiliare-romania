@@ -20,6 +20,7 @@ export async function deschideSesiune(utilizatorId: string) {
     path: "/",
     expires: expiraLa,
   });
+  return token;
 }
 
 export async function inchideSesiune() {

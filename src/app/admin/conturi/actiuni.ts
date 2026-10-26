@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { utilizatorCurent } from "@/lib/auth";
+import { cerePanou } from "@/lib/panou";
 import { esteAdmin } from "@/lib/fondatori";
 import { stergeObiect } from "@/lib/stocare";
 
@@ -13,8 +13,7 @@ export type StareStergere = { eroare?: string; ok?: string } | undefined;
  * Un cont cu facturi emise nu se șterge complet, pentru că legea contabilă cere păstrarea lor.
  */
 export async function stergeComplet(_: StareStergere, f: FormData): Promise<StareStergere> {
-  const admin = await utilizatorCurent();
-  if (!esteAdmin(admin?.email)) return { eroare: "Doar administratorul poate șterge conturi." };
+  const admin = await cerePanou();
   const email = String(f.get("email") ?? "").trim().toLowerCase();
   if (String(f.get("confirmare") ?? "").trim() !== email) return { eroare: "Scrie din nou emailul contului, exact, ca să confirmi." };
   const u = await db.utilizator.findUnique({ where: { email } });
@@ -32,8 +31,7 @@ export async function stergeComplet(_: StareStergere, f: FormData): Promise<Star
 
 /** Șterge definitiv un anunț, cu pozele lui (ex. anunțuri de test). Contul proprietarului rămâne. */
 export async function stergeAnunt(_: StareStergere, f: FormData): Promise<StareStergere> {
-  const admin = await utilizatorCurent();
-  if (!esteAdmin(admin?.email)) return { eroare: "Doar administratorul poate șterge anunțuri." };
+  const admin = await cerePanou();
   const id = Number(String(f.get("id") ?? "").replace(/\D/g, ""));
   if (!Number.isInteger(id) || id <= 0) return { eroare: "Scrie numărul anunțului (ex. 12, din linkul cheiamea.ro/anunt/12)." };
   if (Number(String(f.get("confirmare") ?? "").replace(/\D/g, "")) !== id) return { eroare: "Scrie din nou numărul anunțului, ca să confirmi." };

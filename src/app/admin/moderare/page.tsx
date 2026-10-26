@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin, formatData } from "@/lib/fondatori";
+import { cerePanou } from "@/lib/panou";
+import { formatData } from "@/lib/fondatori";
 import { deModerat, MOTIVE_RAPORTARE, type MotivRaportare } from "@/lib/moderare";
 import { formatPret } from "@/lib/etichete";
 import { aprobaAnunt, respingeAnunt } from "./actiuni";
@@ -11,8 +11,7 @@ export const metadata: Metadata = { title: "Moderare anunțuri", robots: { index
 export const dynamic = "force-dynamic";
 
 export default async function ModerarePage() {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
   const anunturi = await deModerat();
   return (
     <>

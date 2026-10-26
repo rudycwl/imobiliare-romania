@@ -2,8 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin } from "@/lib/fondatori";
+import { cerePanou } from "@/lib/panou";
 import { brevo, expeditor, trimiteEmail } from "@/lib/email";
 import { adaugaRanduri } from "@/lib/netlify-dns";
 
@@ -18,8 +17,7 @@ function gata(mesaj: string, ok: boolean): never {
 const eroareBrevo = (date: any) => `Brevo a refuzat: ${date?.message ?? date?.code ?? JSON.stringify(date)}`;
 
 async function admin() {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) throw new Error("Doar administratorul.");
+  const u = await cerePanou();
   return u!;
 }
 

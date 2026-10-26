@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
+import { cerePanou } from "@/lib/panou";
 import { db } from "@/lib/db";
-import { esteAdmin, formatData } from "@/lib/fondatori";
+import { formatData } from "@/lib/fondatori";
 
 export const metadata: Metadata = { title: "Cereri de retragere", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function RetrageriPage() {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
   const cereri = await db.cerereRetragere.findMany({ orderBy: { creatLa: "desc" }, take: 200 });
   return (
     <>

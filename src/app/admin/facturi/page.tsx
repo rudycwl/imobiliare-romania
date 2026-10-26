@@ -1,8 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin } from "@/lib/fondatori";
+import { cerePanou } from "@/lib/panou";
 import { cotaTva, listaFacturi, lunaCurenta, type Cumparator } from "@/lib/facturare";
 import { oblioConfigurat } from "@/lib/facturare/oblio";
 import { eFactura, reemite, storneaza } from "./actiuni";
@@ -33,8 +32,7 @@ function lunaAnterioara(luna: string) {
 }
 
 export default async function FacturiPage({ searchParams }: { searchParams: Promise<{ luna?: string }> }) {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
   const cerut = (await searchParams).luna ?? "";
   const luna = /^\d{4}-\d{2}$/.test(cerut) ? cerut : lunaCurenta();
   const facturi = await listaFacturi(luna);

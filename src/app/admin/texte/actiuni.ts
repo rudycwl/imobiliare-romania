@@ -2,15 +2,13 @@
 
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin } from "@/lib/fondatori";
+import { cerePanou } from "@/lib/panou";
 import { linkSigur, NR_BANDA, revinoLaImplicit, salveazaTexte, type ElementBanda } from "@/lib/setari";
 
 export type StareTexte = { ok?: string; eroare?: string } | undefined;
 
 async function admin() {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
 }
 
 const camp = (f: FormData, nume: string, max: number) => String(f.get(nume) ?? "").replace(/\s+/g, " ").trim().slice(0, max);

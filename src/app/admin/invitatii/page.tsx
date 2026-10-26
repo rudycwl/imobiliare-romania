@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin, formatData, listaInvitatii, locuriRamase } from "@/lib/fondatori";
+import { cerePanou } from "@/lib/panou";
+import { formatData, listaInvitatii, locuriRamase } from "@/lib/fondatori";
 import { genereazaInvitatie } from "./actiuni";
 
 export const metadata: Metadata = { title: "Invitații agenții", robots: { index: false } };
@@ -10,8 +10,7 @@ export const dynamic = "force-dynamic";
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro";
 
 export default async function InvitatiiPage() {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
   const [invitatii, ramase] = await Promise.all([listaInvitatii(), locuriRamase()]);
   const acum = new Date();
   return (

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin } from "@/lib/fondatori";
+import { cerePanou } from "@/lib/panou";
 import { brevo, emailConfigurat, expeditor } from "@/lib/email";
 import { adaugaDomeniul, emailDeTest, leagaDomeniile, puneImprovmx, puneInNetlify, puneZoho, verificaDomeniul } from "./actiuni";
 import { netlifyConfigurat } from "@/lib/netlify-dns";
@@ -21,8 +20,7 @@ function numeRand(host: string | undefined, domeniu: string) {
 
 export default async function EmailPage({ searchParams }: { searchParams: Promise<{ m?: string; ok?: string }> }) {
   const { m, ok } = await searchParams;
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
   const domeniu = expeditor().split("@")[1];
 
   if (!emailConfigurat())

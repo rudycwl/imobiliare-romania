@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin } from "@/lib/fondatori";
+import { cerePanou } from "@/lib/panou";
 import { citesteTexte, NR_BANDA } from "@/lib/setari";
 import { FormularTexte } from "./Formular";
 
@@ -9,8 +8,7 @@ export const metadata: Metadata = { title: "Texte site", robots: { index: false 
 export const dynamic = "force-dynamic";
 
 export default async function TextePage() {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
   return (
     <div className="ingust" style={{ maxWidth: 820 }}>
       <h1>Texte site</h1>
