@@ -4,6 +4,8 @@ import { utilizatorCurent } from "@/lib/auth";
 import { MAX_RANDURI } from "@/lib/import-masa";
 import { CadruCont } from "../CadruCont";
 import { FormularImport } from "./Formular";
+import { CheieApi } from "./CheieApi";
+import { areCheieApi } from "@/lib/api-agentii";
 
 export const metadata: Metadata = { title: "Import anunțuri", robots: { index: false } };
 
@@ -36,6 +38,14 @@ export default async function ImportPage() {
         potrivirea coloanelor. Dacă rulezi importul de două ori, anunțurile cu același titlu și preț nu se dublează. Folosește doar poze care îți aparțin.
       </p>
       <FormularImport />
+
+      <h2>Legătură automată prin API</h2>
+      <p>
+        Dacă agenția are un program (CRM) sau un site propriu, acesta poate trimite singur anunțurile pe CheiaMea, fără fișier: anunțurile noi apar
+        imediat, iar cele vândute se retrag automat. Generează cheia de mai jos și dă-o programatorului vostru, împreună cu{" "}
+        <a href="/pentru-agentii/api">instrucțiunile tehnice</a>.
+      </p>
+      <CheieApi areCheie={await areCheieApi(u.id)} />
     </CadruCont>
   );
 }
