@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin } from "@/lib/fondatori";
+import { cerePanou } from "@/lib/panou";
 import { FormularStergere, FormularStergereAnunt } from "./Formular";
 
 export const metadata: Metadata = { title: "Ștergere cont", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ConturiPage() {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
   return (
     <>
       <h1>Ștergere completă a unui cont</h1>

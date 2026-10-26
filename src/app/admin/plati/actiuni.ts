@@ -1,15 +1,13 @@
 "use server";
 
 import { notFound, redirect } from "next/navigation";
-import { utilizatorCurent } from "@/lib/auth";
+import { cerePanou } from "@/lib/panou";
 import { db } from "@/lib/db";
-import { esteAdmin } from "@/lib/fondatori";
 
 // Șterge plățile bifate (ex. testele NETOPIA). O plată cu factură emisă în Oblio nu se șterge niciodată:
 // factura rămâne în contabilitate și se anulează doar prin stornare, din /admin/facturi.
 export async function stergePlati(f: FormData) {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
   const ids = f.getAll("id").map(String).filter(Boolean);
   if (!ids.length) redirect("/admin/plati?sterse=0");
   const facturate = await db.factura.findMany({

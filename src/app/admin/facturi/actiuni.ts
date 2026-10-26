@@ -2,13 +2,11 @@
 
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { utilizatorCurent } from "@/lib/auth";
-import { esteAdmin } from "@/lib/fondatori";
+import { cerePanou } from "@/lib/panou";
 import { reemiteFactura, storneazaFactura, verificaEFactura } from "@/lib/facturare";
 
 async function doarAdmin() {
-  const u = await utilizatorCurent();
-  if (!esteAdmin(u?.email)) notFound();
+  const u = await cerePanou();
 }
 
 const id = (f: FormData) => Number(f.get("id"));

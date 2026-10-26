@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { utilizatorCurent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { esteAdmin } from "@/lib/fondatori";
-import { FormularAutentificare } from "../cont/autentificare/Formular";
+import { panouDeschis } from "@/lib/panou";
+import { iesiDinPanou } from "./actiuni";
+import { FormularPanou } from "./FormularPanou";
 import { SECTIUNI } from "./sectiuni";
 
 export const metadata: Metadata = { title: "Panou de control", robots: { index: false } };
@@ -15,16 +17,17 @@ const lei = (bani: number) => new Intl.NumberFormat("ro-RO", { style: "currency"
 
 export default async function PanouPage() {
   const u = await utilizatorCurent();
-  // Fără cont: formularul de intrare (email și parolă), care întoarce aici.
-  if (!u)
+  // Un cont obișnuit, logat pe site, nu află că pagina există.
+  if (u && !esteAdmin(u.email)) notFound();
+  // Emailul și parola se cer la fiecare intrare, chiar dacă administratorul e deja logat pe site.
+  if (!u || !(await panouDeschis()))
     return (
       <div className="ingust">
         <h1>Panou de control</h1>
-        <p className="muted">Intră cu emailul și parola contului de administrator.</p>
-        <FormularAutentificare inapoi="/admin" />
+        <p className="muted">Intră cu emailul și parola de administrator. Panoul se închide singur după 2 ore sau când închizi browserul.</p>
+        <FormularPanou />
       </div>
     );
-  if (!esteAdmin(u.email)) notFound();
 
   const acum = new Date();
   const zi = new Date(acum.getTime() - 86_400_000);
@@ -52,13 +55,18 @@ export default async function PanouPage() {
     { eticheta: "Plăți (30 de zile)", valoare: `${nr(platiLuna._count)} · ${lei(platiLuna._sum.sumaBani ?? 0)}`, href: "/admin/plati" },
     { eticheta: "Facturi neemise", valoare: nr(facturiNeemise), href: "/admin/facturi", atentie: facturiNeemise > 0 },
     { eticheta: "Cereri de retragere", valoare: nr(retrageri), href: "/admin/retrageri", atentie: retrageri > 0 },
-    { eticheta: "Vizite noi (24 de ore)", valoare: nr(vizite), href: "/admin/statistici" },
+    { eticheta: "Vizite (24 de ore, fără tine)", valoare: nr(vizite), href: "/admin/statistici" },
   ];
 
   return (
     <>
       <h1>Panou de control</h1>
-      <p className="muted">Bine ai venit, {u.nume}. Cifrele de mai jos sunt de acum.</p>
+      <p className="muted">
+        Bine ai venit, {u.nume}. Cifrele de mai jos sunt de acum.{" "}
+        <form action={iesiDinPanou} style={{ display: "inline" }}>
+          <button type="submit" className="small">Ieși din panou</button>
+        </form>
+      </p>
       <div className="panou-cifre">
         {cifre.map((c) => {
           const continut = (
