@@ -2,7 +2,7 @@
 // Se actualizează manual aici. Regula casei: doar surse oficiale (Monitorul Oficial, Portal Legislativ,
 // ANAF, Ministerul Finanțelor, hotărârile consiliilor locale), cu link și dată. Presa doar la știrile de piață.
 
-export const ACTUALIZAT = "25.10.2026";
+export const ACTUALIZAT = "26.10.2026";
 
 export type Sursa = { nume: string; url: string };
 /** O noutate legislativă: data actului, ce se schimbă pe scurt și unde se găsește textul oficial. */
@@ -76,6 +76,20 @@ export const STIRI: Stire[] = [
 /** Știri despre piață: doar din presă de afaceri cunoscută, cu sursa datelor scrisă (decizia lui Rudy, 25.10.2026). */
 /** Știri de piață, doar din presa aprobată de Rudy: Agerpres, G4Media, HotNews, Biziday, Profit.ro, Revista Biz. Cu dată și sursa datelor. */
 export const STIRI_PIATA: { data: string; titlu: string; text: string; sursa: string; url: string }[] = [
+  {
+    data: "16.10.2026",
+    titlu: "Cadastru: 108.437 de imobile vândute în trimestrul 3, cu 38% mai puține",
+    text: "Între iulie și septembrie 2026 s-au vândut în toată țara 108.437 de imobile (case, apartamente și terenuri), față de 174.706 în aceeași perioadă din 2025. Cele mai multe vânzări au fost în București (20.298), Timiș (7.517) și Ilfov (7.231), iar dintre reședințele de județ în Timișoara (3.456), Constanța (2.387) și Iași (1.999). Ipotecile au scăzut la 69.206, cu 26.582 mai puține decât anul trecut.",
+    sursa: "Agerpres, comunicat ANCPI",
+    url: "https://agerpres.ro/comunicate/2026/10/16/comunicat-de-presa---agentia-nationala-de-cadastru-si-publicitate-imobiliara--1603629",
+  },
+  {
+    data: "14.10.2026",
+    titlu: "Investițiile în clădiri comerciale au ajuns la 654 milioane de euro în 9 luni",
+    text: "În primele nouă luni din 2026, investițiile în imobile comerciale au depășit volumul din tot anul 2025. Bucureștiul a atras doar 29% (circa 190 milioane de euro), sub nivelul obișnuit de peste 50%, iar vestul țării 33%. Retailul a avut 61% din volum, birourile 33%, iar investitorii străini 83% din tranzacții.",
+    sursa: "Agerpres, analiză Crosspoint Real Estate",
+    url: "https://agerpres.ro/economic/2026/10/14/investitiile-imobiliare-comerciale-au-ajuns-la-654-milioane-de-euro-in-primele-noua-luni-din-2026-an--1602747",
+  },
   {
     data: "13.10.2026",
     titlu: "Cluj-Napoca rămâne cel mai scump oraș, Bucureștiul urcă pe locul 2",
