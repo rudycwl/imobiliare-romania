@@ -21,10 +21,20 @@ export function deTrimis(cheie: string, acum = Date.now()) {
   return true;
 }
 
+/**
+ * Erori care nu sunt defecte ale site-ului, deci nu merită email:
+ * „Failed to find Server Action” apare când cineva trimite un formular dintr-o pagină deschisă înainte de ultima actualizare
+ * sau când un robot de scanare trimite cereri POST false. Next.js respinge cererea, iar site-ul nu e afectat.
+ */
+export function eroareIgnorata(mesaj: string) {
+  return /^Failed to find Server Action/i.test(mesaj.trim());
+}
+
 export async function raporteazaEroare(e: Eroare) {
   // Adresa paginii fără parametri (pot conține date ale vizitatorului).
   const unde = e.unde.split("?")[0].slice(0, 300);
   console.error(`[eroare ${e.sursa}] ${unde}: ${e.mesaj}`);
+  if (eroareIgnorata(e.mesaj)) return;
   const cheie = process.env.BREVO_API_KEY?.trim();
   const catre = (process.env.ADMIN_EMAILS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   if (!cheie || !catre.length || !deTrimis(`${e.sursa}|${unde}|${e.mesaj.slice(0, 200)}`)) return;
