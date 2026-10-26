@@ -3,9 +3,10 @@ import { ListaAnunturi } from "@/components/AnuntCard";
 import { CalculatorCredit } from "@/components/CalculatorCredit";
 import { LegislatieFile } from "@/components/LegislatieFile";
 import { cautaAnunturi, numarAnunturi, numarPeTip } from "@/lib/anunturi";
-import { ACTUALIZAT, BANDA, PUBLICURI, STIRE_TVA, STIRI, STIRI_PIATA } from "@/lib/continut";
+import { ACTUALIZAT, PUBLICURI, STIRE_TVA, STIRI, STIRI_PIATA } from "@/lib/continut";
 import { formatPret, textAnunturi, TIPURI } from "@/lib/etichete";
 import { getOras, JUDETE } from "@/lib/geo";
+import { citesteTexte } from "@/lib/setari";
 
 // Regenerată cel mult o dată pe minut: pagina rămâne statică și rapidă.
 export const revalidate = 60;
@@ -30,7 +31,8 @@ const AVANTAJE = [
 ];
 
 export default async function Home() {
-  const [{ anunturi }, numar, peTip] = await Promise.all([cautaAnunturi({}, 8), numarAnunturi(), numarPeTip()]);
+  const [{ anunturi }, numar, peTip, texte] = await Promise.all([cautaAnunturi({}, 8), numarAnunturi(), numarPeTip(), citesteTexte()]);
+  const BANDA = texte.banda;
   const [p1, p2] = anunturi;
   // Întâi județele cu anunțuri (cu numărul lor), apoi orașele mari, fără cifre: un „0” lângă „Populare” arată a site gol.
   const MARI = ["bucuresti", "cluj", "timis", "iasi", "constanta", "brasov", "prahova", "bihor"];
@@ -38,16 +40,18 @@ export default async function Home() {
   const populare = [...cuAnunturi, ...JUDETE.filter((j) => !numar[j.slug] && MARI.includes(j.slug)).sort((a, b) => MARI.indexOf(a.slug) - MARI.indexOf(b.slug))].slice(0, 8);
   return (
     <div className="acasa">
-      <div className="banda" aria-label="Noutăți pe scurt">
-        <div className="banda-pista">
-          {[...BANDA, ...BANDA].map((b, i) => (
-            <Link key={i} href={b.href} aria-hidden={i >= BANDA.length} tabIndex={i >= BANDA.length ? -1 : undefined}>
-              <span className="banda-eticheta">{b.eticheta}</span>
-              {b.text}
-            </Link>
-          ))}
+      {BANDA.length > 0 && (
+        <div className="banda" aria-label="Noutăți pe scurt">
+          <div className="banda-pista">
+            {[...BANDA, ...BANDA].map((b, i) => (
+              <Link key={i} href={b.href} aria-hidden={i >= BANDA.length} tabIndex={i >= BANDA.length ? -1 : undefined}>
+                <span className="banda-eticheta">{b.eticheta}</span>
+                {b.text}
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <section className="erou">
         <svg className="erou-cerc" viewBox="0 0 200 200" aria-hidden="true">
@@ -60,7 +64,7 @@ export default async function Home() {
           <div className="erou-text">
             <p className="supratitlu apare">
               <span className="punct" aria-hidden="true" />
-              Anunțuri imobiliare din toată țara
+              {texte.erouSupratitlu}
             </p>
             <h1 className="apare apare-2">
               Cheia ta pentru
@@ -75,7 +79,7 @@ export default async function Home() {
               <span className="ascuns">o casă nouă</span>
             </h1>
             <p className="erou-desc apare apare-3">
-              Anunțuri din toată țara, direct de la proprietari, firme și agenții. Vezi clar cine vinde.
+              {texte.erouDescriere}
             </p>
             <form method="get" action="/cautare" className="cautare-mare apare apare-3" role="search">
               <fieldset className="comutator">

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Inter } from "next/font/google";
 import { FIRMA } from "@/lib/firma";
 import { Atribuire, SetariCookie } from "@/components/Atribuire";
+import { BaraAnunt } from "@/components/BaraAnunt";
 import "./globals.css";
 
 // Fontul se descarcă la build și se servește de pe serverul nostru: vizitatorii nu mai trimit adresa IP la Google (GDPR).
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ro" className={inter.variable}>
       <body>
         <Atribuire />
+        <BaraAnunt />
         <header className="header">
           <div className="container header-inner">
             <Link href="/" className="logo">

@@ -306,3 +306,10 @@ model ResetareParola {
 
   @@index([utilizatorId])
 }
+
+/// Textele editabile din panoul /admin/texte (bara de anunț, pagina de start). Lipsă = textul implicit din cod.
+model Setare {
+  cheie        String   @id
+  valoare      String
+  actualizatLa DateTime @updatedAt
+}
