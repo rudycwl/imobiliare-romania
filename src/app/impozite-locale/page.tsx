@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { ORASE_IMPOZITE, REGULI_NATIONALE, caleImpozite } from "@/lib/impozite-locale";
+import { REGULI_NATIONALE, caleImpozite } from "@/lib/impozite-locale";
+import { citesteImpozite } from "@/lib/continut-db";
 
 export const metadata: Metadata = {
   title: "Impozitul pe clădiri în 2026, oraș cu oraș",
@@ -9,7 +10,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/impozite-locale" },
 };
 
-export default function ImpoziteLocale() {
+export default async function ImpoziteLocale() {
+  const ORASE_IMPOZITE = await citesteImpozite();
   return (
     <div className="legal pagina-legi">
       <Breadcrumbs items={[{ href: "/legislatie", label: "Legislație" }, { label: "Impozite locale" }]} />

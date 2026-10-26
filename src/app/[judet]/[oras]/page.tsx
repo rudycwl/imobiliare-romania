@@ -11,7 +11,8 @@ import { SeoZona } from "@/components/SeoZona";
 import { cautaAnunturi, statisticiZona, type Filtre as F } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
 import { textAnunturi } from "@/lib/etichete";
-import { caleImpozite, impoziteOras } from "@/lib/impozite-locale";
+import { caleImpozite } from "@/lib/impozite-locale";
+import { impoziteOrasDb } from "@/lib/continut-db";
 
 type Props = { params: Promise<{ judet: string; oras: string }>; searchParams: Promise<F> };
 
@@ -38,7 +39,7 @@ export default async function OrasPage({ params, searchParams }: Props) {
   const o = getOras(p.judet, p.oras);
   if (!j || !o) notFound();
   const sp = await searchParams;
-  const impozite = impoziteOras(j.slug, o.slug);
+  const impozite = await impoziteOrasDb(j.slug, o.slug);
   const [{ anunturi, total }, s] = await Promise.all([cautaAnunturi({ ...sp, judet: j.slug, oras: o.slug }), statisticiZona(j.slug, o.slug)]);
   return (
     <>
