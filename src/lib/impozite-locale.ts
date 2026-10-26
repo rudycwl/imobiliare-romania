@@ -403,6 +403,29 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "25.10.2026",
   },
   {
+    judet: "covasna",
+    oras: "sfantu-gheorghe",
+    nume: "Sfântu Gheorghe",
+    an: 2026,
+    hotarare: "HCL nr. 557/2025 privind impozitele și taxele locale pentru anul 2026 (anexa nr. 1)",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale) ale persoanelor fizice", valoare: "0,08%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "0,9%" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,12%" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,3% (plus cotă adițională)" },
+    ],
+    bonificatie: "Neconfirmată încă din documentele oficiale (anexa nr. 1 nu o menționează); întreabă la Primăria Sfântu Gheorghe",
+    note: [
+      "Cota pentru locuințe este cea minimă permisă de Codul fiscal (0,08%).",
+      "Prin HCL nr. 75/2026 consiliul local a redus cotele adiționale stabilite inițial; cotele de bază pentru clădiri din anexa nr. 1 nu sunt modificate de anexa acestei hotărâri.",
+    ],
+    surse: [
+      { nume: "Anexa nr. 1 la HCL nr. 557/2025 (sfantugheorgheinfo.ro, PDF)", url: "https://sfantugheorgheinfo.ro/uploads/anexa-nr-1-la-hcl-impozite-si-taxe-2026-1767171901.pdf" },
+      { nume: "Anexa la HCL nr. 75/2026, criteriile pentru cotele adiționale (sfantugheorgheinfo.ro, PDF)", url: "https://www.sfantugheorgheinfo.ro/uploads/anexa-la-hcl-75-1773307546.pdf" },
+    ],
+    verificat: "26.10.2026",
+  },
+  {
     judet: "dambovita",
     oras: "targoviste",
     nume: "Târgoviște",
