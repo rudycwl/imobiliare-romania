@@ -21,6 +21,8 @@ model Utilizator {
   emailConfirmatLa     DateTime?
   /// Hash-ul linkului de confirmare trimis ultima dată.
   confirmareHash       String?           @unique
+  /// Hash-ul cheii API a agenției (importul automat din programul agenției); cheia se arată o singură dată.
+  apiCheieHash         String?           @unique
   parolaHash           String?
   telefon              String
   judet                String

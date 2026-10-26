@@ -18,7 +18,14 @@ export const MAX_RANDURI = 500;
 /** Pozele din import nu trec prin micșorarea din browser, deci acceptăm fișiere mai mari decât la încărcarea manuală. */
 const MAX_POZA_IMPORT = 6 * 1024 * 1024;
 
-export type RezultatImport = { importate: number; cuPoze: number; sarite: { rand: number; motiv: string }[]; oprit?: string };
+export type RezultatImport = {
+  importate: number;
+  cuPoze: number;
+  sarite: { rand: number; motiv: string }[];
+  oprit?: string;
+  /** Numărul anunțului creat pentru fiecare rând publicat (API-ul îl întoarce, ca programul agenției să-l poată retrage mai târziu). */
+  publicate?: { rand: number; id: number }[];
+};
 
 /** CSV cu „;” (Excel în română) sau „,”, cu ghilimele și rânduri noi în interiorul câmpurilor. */
 export function citesteCsv(text: string): string[][] {
@@ -130,7 +137,15 @@ export async function importaCsv(utilizatorId: string, text: string): Promise<Re
   const antet = (randuri.shift() ?? []).map((h) => slugify(h));
   if (!antet.includes("titlu") || !antet.includes("pret")) return { importate: 0, cuPoze: 0, sarite: [], oprit: "Prima linie a fișierului trebuie să conțină numele coloanelor (titlu, pret, …). Folosește modelul de mai sus." };
   if (randuri.length > MAX_RANDURI) return { importate: 0, cuPoze: 0, sarite: [], oprit: `Fișierul are ${randuri.length} anunțuri. Maximum ${MAX_RANDURI} odată: împarte-l în mai multe fișiere.` };
+  return importaRanduri(
+    utilizatorId,
+    randuri.map((valori) => Object.fromEntries(antet.map((h, j) => [h, valori[j] ?? ""]))),
+    2,
+  );
+}
 
+/** Rândurile au aceleași coloane ca fișierul model; primulRand e numărul afișat pentru primul (2 în CSV, după antet; 1 în API). */
+export async function importaRanduri(utilizatorId: string, randuri: Record<string, string>[], primulRand: number): Promise<RezultatImport> {
   const limita = await limitaAnunturi(utilizatorId);
   let locuri = limita === null ? Infinity : limita - (await anunturiActive(utilizatorId));
   // Anunțurile deja publicate (același titlu și preț) nu se dublează la un al doilea import.
@@ -138,10 +153,9 @@ export async function importaCsv(utilizatorId: string, text: string): Promise<Re
     (await db.anunt.findMany({ where: { proprietarId: utilizatorId }, select: { titlu: true, pret: true } })).map((a) => `${a.titlu}|${a.pret}`),
   );
 
-  const rez: RezultatImport = { importate: 0, cuPoze: 0, sarite: [] };
-  for (const [i, valori] of randuri.entries()) {
-    const nrRand = i + 2;
-    const r = Object.fromEntries(antet.map((h, j) => [h, valori[j] ?? ""]));
+  const rez: RezultatImport = { importate: 0, cuPoze: 0, sarite: [], publicate: [] };
+  for (const [i, r] of randuri.entries()) {
+    const nrRand = i + primulRand;
     const citit = citesteRand(r);
     if ("eroare" in citit) {
       rez.sarite.push({ rand: nrRand, motiv: citit.eroare });
@@ -160,6 +174,7 @@ export async function importaCsv(utilizatorId: string, text: string): Promise<Re
     existente.add(`${citit.date.titlu}|${citit.date.pret}`);
     locuri--;
     rez.importate++;
+    rez.publicate?.push({ rand: nrRand, id: a.id });
     if (stocareLocala() && citit.poze.length) {
       let puse = 0;
       for (const url of citit.poze) {
