@@ -464,6 +464,26 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     verificat: "27.10.2026",
   },
   {
+    judet: "botosani",
+    oras: "botosani",
+    nume: "Botoșani",
+    an: 2026,
+    hotarare: "HCL nr. 602 din 23.12.2025 pentru stabilirea impozitelor și taxelor locale în Municipiul Botoșani, pentru anul 2026",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale și anexe) ale persoanelor fizice", valoare: "0,1%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "1,3%" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,11%" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,365% (1,3% + cotă adițională de 5%)" },
+    ],
+    bonificatie: "10% pentru plata integrală cu anticipație, persoane fizice și firme (art. 2 din hotărâre)",
+    note: [
+      "Impozitul pe clădiri de până la 50 lei se plătește integral până la primul termen, fără bonificație.",
+      "Impozitul pe clădirile neîngrijite din intravilan se majorează cu 300% sau 400%, după punctajul din anexa nr. 5 (art. 7 din hotărâre).",
+    ],
+    surse: [{ nume: "HCL nr. 602/2025 (primariabt.ro, PDF)", url: "https://primariabt.ro/wp-content/uploads/formidable/9/602_25.pdf" }],
+    verificat: "27.10.2026",
+  },
+  {
     judet: "dambovita",
     oras: "targoviste",
     nume: "Târgoviște",
