@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { CalculatorImpozit } from "@/components/CalculatorImpozit";
+import { cotaDinText, rangImplicit } from "@/lib/calcul-impozit";
 import { REGULI_NATIONALE, caleImpozite } from "@/lib/impozite-locale";
 import { citesteImpozite, gasesteImpozite } from "@/lib/continut-db";
 
@@ -47,6 +49,14 @@ export default async function ImpoziteOrasPage({ params }: Props) {
           </tbody>
         </table>
       </div>
+
+      <h2 id="calculator">Calculează impozitul pe locuința ta</h2>
+      <CalculatorImpozit
+        oras={o.nume}
+        cota={cotaDinText(o.cote[0].valoare)}
+        rang={rangImplicit(o.judet, o.oras)}
+        bonificatie={/^\d/.test(o.bonificatie) ? cotaDinText(o.bonificatie) ?? 0 : 0}
+      />
 
       {o.note.length > 0 && (
         <>

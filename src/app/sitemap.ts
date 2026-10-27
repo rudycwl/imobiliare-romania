@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BAZA}/preturi` },
     { url: `${BAZA}/legislatie` },
     { url: `${BAZA}/impozite-locale` },
+    { url: `${BAZA}/calculatoare` },
     ...(await citesteImpozite()).map((o) => ({ url: `${BAZA}${caleImpozite(o)}` })),
     { url: `${BAZA}/harta` },
     { url: `${BAZA}/indice-preturi` },
