@@ -3,7 +3,7 @@ export const SECTIUNI = [
   { href: "/admin/texte", titlu: "Texte site", text: "Bara de anunț, pagina de start, banda cu noutăți." },
   { href: "/admin/continut", titlu: "Știri și impozite", text: "Ce a publicat motorul automat; ascunzi orice cu un clic." },
   { href: "/admin/moderare", titlu: "Moderare", text: "Anunțuri oprite de filtru și anunțuri raportate." },
-  { href: "/admin/conturi", titlu: "Conturi", text: "Caută un cont, șterge un cont sau un anunț." },
+  { href: "/admin/conturi", titlu: "Conturi", text: "Cine s-a înscris: nume, localitate, email. Ștergere cont sau anunț." },
   { href: "/admin/plati", titlu: "Plăți", text: "Plățile cu cardul prin NETOPIA." },
   { href: "/admin/facturi", titlu: "Facturi", text: "Facturile din Oblio și e-Factura." },
   { href: "/admin/invitatii", titlu: "Invitații agenții", text: "Coduri pentru agențiile invitate." },
