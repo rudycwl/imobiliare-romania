@@ -2,7 +2,7 @@
 // Se actualizează manual aici. Regula casei: doar surse oficiale (Monitorul Oficial, Portal Legislativ,
 // ANAF, Ministerul Finanțelor, hotărârile consiliilor locale), cu link și dată. Presa doar la știrile de piață.
 
-export const ACTUALIZAT = "26.10.2026";
+export const ACTUALIZAT = "27.10.2026";
 
 export type Sursa = { nume: string; url: string };
 /** O noutate legislativă: data actului, ce se schimbă pe scurt și unde se găsește textul oficial. */
@@ -76,6 +76,13 @@ export const STIRI: Stire[] = [
 /** Știri despre piață: doar din presă de afaceri cunoscută, cu sursa datelor scrisă (decizia lui Rudy, 25.10.2026). */
 /** Știri de piață, doar din presa aprobată de Rudy: Agerpres, G4Media, HotNews, Biziday, Profit.ro, Revista Biz. Cu dată și sursa datelor. */
 export const STIRI_PIATA: { data: string; titlu: string; text: string; sursa: string; url: string }[] = [
+  {
+    data: "23.10.2026",
+    titlu: "Peste 98.000 de locuințe vândute în 9 luni, cu 18% mai puține",
+    text: "În primele nouă luni din 2026 s-au vândut în toată țara peste 98.000 de locuințe, cu 17,8% mai puține decât anul trecut; în București peste 29.600 (−14,9%), iar Timișul a crescut cu 4,2%. În trimestrul 3, Brașovul a scăzut cel mai mult (−63,4%). Ipotecile pe locuințe au scăzut în trimestrul 3 cu 24,1%, la peste 18.300, dar au crescut ușor în Timiș (+1,6%) și Cluj (+2,5%).",
+    sursa: "Revista Biz, date ANCPI analizate de Storia",
+    url: "https://www.revistabiz.ro/blocajul-de-la-ancpi-a-dat-in-jos-piata-imobiliara/",
+  },
   {
     data: "16.10.2026",
     titlu: "Cadastru: 108.437 de imobile vândute în trimestrul 3, cu 38% mai puține",
