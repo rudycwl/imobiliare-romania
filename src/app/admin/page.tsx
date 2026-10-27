@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { esteAdmin } from "@/lib/fondatori";
 import { panouDeschis } from "@/lib/panou";
 import { iesiDinPanou } from "./actiuni";
+import { ListaConturi } from "./conturi/ListaConturi";
 import { FormularPanou } from "./FormularPanou";
 import { SECTIUNI } from "./sectiuni";
 
@@ -82,6 +83,9 @@ export default async function PanouPage() {
           );
         })}
       </div>
+      <h2>Ultimii înscriși</h2>
+      <ListaConturi limita={10} />
+      <p><Link href="/admin/conturi">Toate conturile, cu email și telefon</Link></p>
       <h2>Secțiuni</h2>
       <div className="panou-sectiuni">
         {SECTIUNI.map((s) => (
