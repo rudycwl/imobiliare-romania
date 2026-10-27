@@ -398,7 +398,7 @@ a:hover .sageata { transform: translateX(4px); }
 .pasi li strong { color: var(--fg); font-size: 1.1rem; }
 .pas-nr { width: 40px; height: 40px; border-radius: 999px; background: #0b2545; color: #fff; display: grid; place-items: center; font-weight: 800; margin-bottom: 6px; }
 
-.calculator { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: clamp(18px, 3vw, 28px); border-radius: 22px; background: var(--card); border: 1px solid var(--border); }
+.calculator { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 20px; padding: clamp(18px, 3vw, 28px); border-radius: 22px; background: var(--card); border: 1px solid var(--border); }
 .calculator-campuri { display: grid; gap: 16px; }
 .calculator-campuri label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: .92rem; }
 .calculator-campuri input[type="number"] { padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--fg); font: inherit; font-size: 1rem; }
@@ -591,3 +591,5 @@ a:hover .sageata { transform: translateX(4px); }
 .panou-meniu { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 12px 0; margin-bottom: 8px; border-bottom: 1px solid var(--border); font-size: .9rem; }
 .panou-banda { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 8px; }
 @media (max-width: 640px) { .panou-banda { grid-template-columns: 1fr; } }
+.calculator-campuri select { width: 100%; min-width: 0; max-width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--fg); font: inherit; font-size: 1rem; }
+.calculator-campuri label, .calculator-campuri input { min-width: 0; }

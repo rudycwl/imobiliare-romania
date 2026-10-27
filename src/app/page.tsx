@@ -296,6 +296,7 @@ export default async function Home() {
             </div>
           </div>
           <CalculatorCredit />
+          <p><Link href="/calculatoare#impozit">Calculează și impozitul pe locuință →</Link></p>
         </section>
 
         <section id="legi" className="legi">
