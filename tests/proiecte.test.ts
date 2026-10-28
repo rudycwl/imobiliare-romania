@@ -41,8 +41,8 @@ test("disponibile, pretMinim și textul numără doar unitățile libere", () =>
   assert.equal(textDisponibile(25), "25 de unități disponibile");
 });
 
-test("oferta pentru dezvoltatori: 3 luni gratuit, apoi 299 lei pe lună", () => {
-  assert.equal(PRET_PROIECT_LUNAR, 299);
+test("oferta pentru dezvoltatori: 3 luni gratuit, apoi 500 lei pe lună", () => {
+  assert.equal(PRET_PROIECT_LUNAR, 500);
   assert.equal(LUNI_GRATUITE_PROIECT, 3);
   assert.equal(finalGratuit(new Date(2026, 9, 28), LUNI_GRATUITE_PROIECT).toDateString(), new Date(2027, 0, 28).toDateString());
 });
