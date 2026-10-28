@@ -107,7 +107,7 @@ export default async function AnuntPage({ params }: Props) {
               <tr><th>Publicat</th><td>{a.publicatLa.toLocaleDateString("ro-RO")}</td></tr>
             </tbody>
           </table>
-          <p>{a.descriere}</p>
+          <p className="descriere-anunt">{a.descriere}</p>
           <Vanzator u={u} />
           <div className="actiuni-anunt">
             <ButonTelefon id={a.id} />
