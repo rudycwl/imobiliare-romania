@@ -12,17 +12,20 @@ const BAZA = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [agentii, orase, anunturi, peOras] = await Promise.all([
+  const [agentii, orase, anunturi, peOras, proiecte] = await Promise.all([
     getAgentii(),
     indiceOrase(),
     db.anunt.findMany({ where: activ(), select: { id: true, ordine: true }, orderBy: { id: "desc" }, take: 45_000 }),
     db.anunt.groupBy({ by: ["judet", "oras"], where: activ(), _count: true }),
+    db.proiect.findMany({ where: { activ: true }, select: { slug: true }, orderBy: { id: "desc" } }),
   ]);
   // Județele și orașele fără anunțuri au noindex (pagini goale), deci nu le trimitem la Google.
   const cuAnunturi = new Set(peOras.flatMap((r) => [r.judet, `${r.judet}/${r.oras}`]));
   return [
     { url: BAZA },
     { url: `${BAZA}/agentii` },
+    { url: `${BAZA}/proiecte` },
+    ...proiecte.map((p) => ({ url: `${BAZA}/proiecte/${p.slug}` })),
     { url: `${BAZA}/pentru-agentii` },
     { url: `${BAZA}/preturi` },
     { url: `${BAZA}/legislatie` },

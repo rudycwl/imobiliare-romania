@@ -19,6 +19,10 @@ export type Email = {
   buton?: { text: string; link: string };
   /** Rânduri mici sub semnătură (ex. cum oprești alertele). */
   subsol?: string;
+  /** Unde ajunge „Răspunde” (implicit adresa de contact CheiaMea). */
+  raspunsLa?: string;
+  /** Copie ascunsă (Bcc). */
+  copie?: string;
 };
 
 function html(e: Email) {
@@ -73,8 +77,9 @@ export async function trimiteEmail(e: Email): Promise<boolean> {
     headers: { "api-key": cheie, "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify({
       sender: { name: "CheiaMea", email: expeditor() },
-      replyTo: { email: FIRMA.email },
+      replyTo: { email: e.raspunsLa || FIRMA.email },
       to: [{ email: e.catre }],
+      ...(e.copie && e.copie.toLowerCase() !== e.catre.toLowerCase() ? { bcc: [{ email: e.copie }] } : {}),
       subject: e.subiect,
       htmlContent: html(e),
       textContent: text(e),

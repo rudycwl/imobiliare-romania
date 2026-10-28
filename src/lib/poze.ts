@@ -14,6 +14,11 @@ export function cheieNoua(anuntId: number, tip: string) {
   return `${prefixCheie()}anunturi/${anuntId}/${randomBytes(8).toString("hex")}.${tip === "image/webp" ? "webp" : "jpg"}`;
 }
 
+/** Pozele proiectelor de dezvoltatori (src/lib/proiecte.ts), alături de cele ale anunțurilor. */
+export function cheieNouaProiect(proiectId: number, tip: string) {
+  return `${prefixCheie()}proiecte/${proiectId}/${randomBytes(8).toString("hex")}.${tip === "image/webp" ? "webp" : "jpg"}`;
+}
+
 export function pozeAnunt(anuntId: number) {
   return db.poza.findMany({ where: { anuntId }, orderBy: [{ ordine: "asc" }, { id: "asc" }] });
 }

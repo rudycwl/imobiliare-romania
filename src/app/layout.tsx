@@ -54,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="subsol-linkuri">
               <Link href="/harta">Caută pe hartă</Link>
               <Link href="/indice-preturi">Prețuri pe cartiere</Link>
+              <Link href="/proiecte">Proiecte noi</Link>
               <Link href="/pentru-agentii">Pentru agenții</Link>
               <Link href="/preturi">Prețuri</Link>
               <Link href="/legislatie">Legislație</Link>

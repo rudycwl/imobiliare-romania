@@ -30,9 +30,9 @@ export const urlPublic = (cheie: string) => (cheie.startsWith(LOCAL) ? `/poze/${
 /** Prefixul cheilor noi: „local/” când pozele stau pe disc. */
 export const prefixCheie = () => (stocareLocala() ? LOCAL : "");
 
-/** Calea pe disc a unei poze locale; refuză orice cheie care nu are forma generată de cheieNoua. */
+/** Calea pe disc a unei poze locale; refuză orice cheie care nu are forma generată de cheieNoua / cheieNouaProiect. */
 export function caleLocala(cheie: string) {
-  if (!/^local\/anunturi\/\d+\/[0-9a-f]{16}\.(webp|jpg)$/.test(cheie)) return null;
+  if (!/^local\/(anunturi|proiecte)\/\d+\/[0-9a-f]{16}\.(webp|jpg)$/.test(cheie)) return null;
   return path.join(dirLocal(), cheie.slice(LOCAL.length));
 }
 

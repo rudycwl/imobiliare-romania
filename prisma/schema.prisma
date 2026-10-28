@@ -321,3 +321,37 @@ model Setare {
   valoare      String
   actualizatLa DateTime @updatedAt
 }
+
+/// Pagină de proiect pentru un dezvoltator imobiliar (ansamblu rezidențial). O administrează doar echipa CheiaMea din /admin/proiecte.
+/// Oferta: primele luni gratuit, apoi preț fix pe lună per proiect, cu unități nelimitate (vezi src/lib/tarife.ts).
+model Proiect {
+  id               Int      @id @default(autoincrement())
+  slug             String   @unique
+  nume             String
+  /// Numele dezvoltatorului (firma).
+  dezvoltator      String
+  descriere        String
+  judet            String
+  oras             String
+  zona             String?
+  adresa           String?
+  lat              Float?
+  lng              Float?
+  website          String?
+  telefon          String
+  /// Emailul dezvoltatorului: aici ajung cererile trimise din formularul de pe pagină.
+  email            String
+  /// Cheile pozelor în stocare (ex. local/proiecte/3/abc.webp), în ordinea afișării; prima e coperta.
+  poze             String[] @default([])
+  /// Unitățile: [{ tip, camere, suprafata, pret, etaj?, stare: disponibil | rezervat | vandut }], prețuri în euro.
+  unitati          Json     @default("[]")
+  /// Ex. „trimestrul IV 2027” (text liber).
+  termenFinalizare String?
+  /// Doar proiectele active apar pe site.
+  activ            Boolean  @default(true)
+  /// Până când pagina e gratuită (3 luni de la creare); după, se facturează lunar.
+  gratuitPanaLa    DateTime @default(dbgenerated("(now() + '3 months'::interval)"))
+  creatLa          DateTime @default(now())
+
+  @@index([activ, judet])
+}

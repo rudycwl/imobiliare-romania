@@ -27,6 +27,7 @@ npm run dev             # http://localhost:3000
 | `/anunt/[id]` | Pagina anunțului, cu datele vânzătorului |
 | `/cautare` | Căutare în toată țara |
 | `/agentii`, `/agentii/[slug]` | Agenții imobiliare și profilul fiecăreia |
+| `/proiecte`, `/proiecte/[slug]` | Proiecte noi ale dezvoltatorilor (pagini administrate din `/admin/proiecte`) |
 | `/cont/inregistrare`, `/cont/autentificare` | Conturi: persoană fizică, firmă, agenție imobiliară |
 | `/cont`, `/cont/anunt-nou` | Contul meu (anunțurile proprii) și publicarea unui anunț |
 

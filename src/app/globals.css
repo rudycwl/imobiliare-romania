@@ -599,3 +599,18 @@ a:hover .sageata { transform: translateX(4px); }
 .banner-fondator p { margin: 0 0 10px; }
 .banner-fondator-titlu { font-size: 1.15rem; font-weight: 700; color: #9a3412; }
 .pret-taiat { color: var(--muted); }
+
+/* ---------- Proiecte ale dezvoltatorilor (/proiecte) ---------- */
+.badge-dezvoltator { background: #ede9fe; color: #5b21b6; }
+.card-img span.badge-dezvoltator { background: #ede9fe; color: #5b21b6; }
+.eticheta-dezvoltator { display: inline-block; margin: 0 0 12px; padding: 4px 12px; border-radius: 999px; background: #ede9fe; color: #5b21b6; font-weight: 700; font-size: .85rem; }
+.contact-dezvoltator { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 16px 0; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
+.contact-dezvoltator strong { flex-basis: 100%; }
+.stare-unitate { display: inline-block; font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.stare-disponibil { background: #dcfce7; color: #166534; }
+.stare-rezervat { background: #fef3c7; color: #92400e; }
+.stare-vandut { background: #e5e7eb; color: #374151; }
+.tabel-preturi tr.unitate-indisponibila td { color: var(--muted); }
+.tabel-preturi tr.unitate-indisponibila .pret { color: var(--muted); font-weight: 600; }
+.proiecte-judet { margin: 24px 0; }
+.pret-proiect { font-size: 1.2rem; margin-top: 0; }

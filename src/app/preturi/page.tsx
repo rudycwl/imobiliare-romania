@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ANUNTURI_GRATUITE, PROMOVARI, ZILE_VALABILITATE, lei } from "@/lib/tarife";
+import { FIRMA } from "@/lib/firma";
+import { ANUNTURI_GRATUITE, LUNI_GRATUITE_PROIECT, PRET_PROIECT_LUNAR, PROMOVARI, ZILE_VALABILITATE, lei } from "@/lib/tarife";
 
 export const metadata: Metadata = {
   title: "Prețuri",
@@ -43,6 +44,25 @@ export default function PreturiPage() {
           </tbody>
         </table>
       </div>
+
+      <h2 id="dezvoltatori">Pentru dezvoltatori</h2>
+      <div className="oferta">
+        <p className="pret-proiect">
+          <strong>{LUNI_GRATUITE_PROIECT} luni gratuit</strong>, apoi <strong>{lei(PRET_PROIECT_LUNAR)} / lună</strong> per proiect
+        </p>
+        <p>
+          O pagină dedicată proiectului tău: galerie foto, descriere, hartă și lista unităților (disponibile, rezervate, vândute), cu
+          <strong> unități nelimitate</strong>. Cererile clienților ajung direct pe emailul tău. Proiectul apare și pe pagina județului.
+        </p>
+        <p>
+          Scrie-ne la <a href={`mailto:${FIRMA.email}`}>{FIRMA.email}</a> și pregătim noi pagina.
+        </p>
+        <div className="rand">
+          <Link href="/contact" className="buton">Contactează-ne</Link>
+          <Link href="/proiecte" className="buton secundar">Vezi proiectele</Link>
+        </div>
+      </div>
+
       <p className="muted mic">Prețuri finale, fără TVA (Hugetech SRL nu este plătitoare de TVA).</p>
     </>
   );

@@ -6,6 +6,7 @@ export const SECTIUNI = [
   { href: "/admin/conturi", titlu: "Conturi", text: "Cine s-a înscris: nume, localitate, email. Ștergere cont sau anunț." },
   { href: "/admin/plati", titlu: "Plăți", text: "Plățile cu cardul prin NETOPIA." },
   { href: "/admin/facturi", titlu: "Facturi", text: "Facturile din Oblio și e-Factura." },
+  { href: "/admin/proiecte", titlu: "Proiecte dezvoltatori", text: "Paginile de proiect: unități, poze, perioada gratuită." },
   { href: "/admin/invitatii", titlu: "Invitații agenții", text: "Coduri pentru agențiile invitate." },
   { href: "/admin/statistici", titlu: "Statistici", text: "De unde vin vizitatorii și conturile noi." },
   { href: "/admin/email", titlu: "Email", text: "Verifică trimiterea emailurilor." },

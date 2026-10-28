@@ -7,7 +7,7 @@ import { cerereIncarcare, confirmaPoza } from "./actiuni";
 const LATURA = 1600;
 
 /** Micșorează poza în browser (max 1600 px, WebP), ca să fie rapidă și să ocupe puțin. */
-async function micsoreaza(f: File): Promise<Blob> {
+export async function micsoreaza(f: File): Promise<Blob> {
   const img = await createImageBitmap(f, { imageOrientation: "from-image" });
   const k = Math.min(1, LATURA / Math.max(img.width, img.height));
   const c = document.createElement("canvas");

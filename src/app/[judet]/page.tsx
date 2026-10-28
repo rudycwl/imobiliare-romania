@@ -8,8 +8,10 @@ import { SalveazaCautarea } from "@/components/SalveazaCautarea";
 import { curataFiltre } from "@/lib/cautari";
 import { ListaAnunturi } from "@/components/AnuntCard";
 import { SeoZona } from "@/components/SeoZona";
+import { ListaProiecte } from "@/components/ProiectCard";
 import { cautaAnunturi, numarAnunturi, statisticiZona, type Filtre as F } from "@/lib/anunturi";
 import { getJudet } from "@/lib/geo";
+import { proiecteActive } from "@/lib/proiecte";
 import { textAnunturi } from "@/lib/etichete";
 
 type Props = { params: Promise<{ judet: string }>; searchParams: Promise<F> };
@@ -34,10 +36,11 @@ export default async function JudetPage({ params, searchParams }: Props) {
   const j = getJudet((await params).judet);
   if (!j) notFound();
   const sp = await searchParams;
-  const [{ anunturi, total }, numar, s] = await Promise.all([
+  const [{ anunturi, total }, numar, s, proiecte] = await Promise.all([
     cautaAnunturi({ ...sp, judet: j.slug, oras: undefined }),
     numarAnunturi(j.slug),
     statisticiZona(j.slug),
+    proiecteActive(j.slug, 3),
   ]);
   return (
     <>
@@ -55,6 +58,15 @@ export default async function JudetPage({ params, searchParams }: Props) {
           </li>
         ))}
       </ul>
+      {proiecte.length > 0 && (
+        <section className="proiecte-judet">
+          <div className="titlu-cu-actiune">
+            <h2>Proiecte noi</h2>
+            <Link href={`/proiecte?judet=${j.slug}`} className="small">Toate proiectele din {j.nume} →</Link>
+          </div>
+          <ListaProiecte proiecte={proiecte} />
+        </section>
+      )}
       <Filtre valori={sp} action={`/${j.slug}`} />
       <SalveazaCautarea filtre={curataFiltre({ ...sp, judet: j.slug, oras: undefined })} />
       <ListaAnunturi anunturi={anunturi} total={total} />
