@@ -43,7 +43,7 @@ export const ABONAMENTE: Abonament[] = [
   { cod: "start", nume: "Start", pret: 149, anunturi: 25, agenti: 1, credite: { reactualizari: 5, top7: 0 } },
   { cod: "pro", nume: "Pro", pret: 349, anunturi: 100, agenti: 1, credite: { reactualizari: 20, top7: 2 }, recomandat: true },
   { cod: "business", nume: "Business", pret: 699, anunturi: 300, agenti: 5, credite: { reactualizari: 60, top7: 6 } },
-  { cod: "nelimitat", nume: "Nelimitat", pret: 1199, anunturi: null, agenti: null, credite: { reactualizari: 150, top7: 15 }, extra: "Import automat (XML)" },
+  { cod: "nelimitat", nume: "Nelimitat", pret: 1199, anunturi: null, agenti: null, credite: { reactualizari: 150, top7: 15 } },
 ];
 
 /** Agenție Fondatoare: reducere permanentă după perioada gratuită. */

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Distribuie } from "@/components/Distribuie";
 import type { Metadata } from "next";
 import { TabelAbonamente } from "@/components/TabelAbonamente";
-import { formatData, getInvitatieValabila } from "@/lib/fondatori";
+import { LOCURI_FONDATOARE, LUNI_GRATUITE, TERMEN_FONDATOARE, formatData, getInvitatieValabila, locuriRamase } from "@/lib/fondatori";
 
 export const metadata: Metadata = {
   title: "Pentru agenții imobiliare",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 const AVANTAJE = [
   { icon: "🏢", titlu: "Profil public de agenție", text: "Pagina agenției tale, cu logo, date de contact și toate ofertele într-un singur loc." },
-  { icon: "📋", titlu: "Totul în contul agenției", text: "Abonamentele, prețurile și facilitățile le vezi în contul agenției, după înscriere." },
+  { icon: "📥", titlu: "Import rapid", text: "Îți aduci toate ofertele dintr-un fișier Excel (CSV) sau prin API, în orice abonament." },
   { icon: "🏷️", titlu: "Insignă „Agenție”", text: "Anunțurile tale apar marcate clar, iar clienții te găsesc la filtrul „Oferit de”." },
   { icon: "🇷🇴", titlu: "Acoperire națională", text: "Toate cele 41 de județe și Bucureștiul, organizate pe orașe." },
 ];
@@ -19,7 +19,7 @@ const AVANTAJE = [
 
 export default async function PentruAgentiiPage({ searchParams }: { searchParams: Promise<{ cod?: string }> }) {
   const { cod } = await searchParams;
-  const invitatie = await getInvitatieValabila(cod);
+  const [invitatie, locuri] = await Promise.all([getInvitatieValabila(cod), locuriRamase()]);
   const inscriere = invitatie ? `/pentru-agentii/inregistrare?cod=${invitatie.cod}` : "/pentru-agentii/inregistrare";
   return (
     <>
@@ -38,6 +38,17 @@ export default async function PentruAgentiiPage({ searchParams }: { searchParams
         </div>
       </section>
 
+      {locuri > 0 && (
+        <div className="banner-fondator">
+          <p className="banner-fondator-titlu">⭐ Agenție Fondatoare: {LUNI_GRATUITE} luni gratuit, apoi 50% reducere pe viață</p>
+          <p>
+            Pentru primele {LOCURI_FONDATOARE} de agenții înscrise până la {formatData(TERMEN_FONDATOARE)}. Mai sunt <strong>{locuri} locuri</strong>.
+            Insigna „Agenție Fondatoare” rămâne permanent pe profil și pe anunțuri, iar ofertele ți le importăm noi.
+          </p>
+          <Link href={inscriere} className="buton">Rezervă locul agenției</Link>
+        </div>
+      )}
+
       <h2>De ce CheiaMea</h2>
       <div className="grid">
         {AVANTAJE.map((a) => (
@@ -50,7 +61,7 @@ export default async function PentruAgentiiPage({ searchParams }: { searchParams
       </div>
 
       <div id="abonamente" style={{ marginTop: 24 }}>
-        <TabelAbonamente />
+        <TabelAbonamente ofertaFondator={locuri > 0} />
       </div>
 
       <Distribuie url="https://cheiamea.ro/pentru-agentii" text="CheiaMea pentru agenții imobiliare: cont de agenție și anunțuri în toată țara." />

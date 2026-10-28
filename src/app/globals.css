@@ -593,3 +593,9 @@ a:hover .sageata { transform: translateX(4px); }
 @media (max-width: 640px) { .panou-banda { grid-template-columns: 1fr; } }
 .calculator-campuri select { width: 100%; min-width: 0; max-width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--fg); font: inherit; font-size: 1rem; }
 .calculator-campuri label, .calculator-campuri input { min-width: 0; }
+
+/* Banner „Agenție Fondatoare” și prețul tăiat (pagina Pentru agenții, 28.10.2026) */
+.banner-fondator { margin: 20px 0 8px; padding: 18px 20px; border-radius: 16px; background: #fff7ed; border: 1px solid #fdba74; }
+.banner-fondator p { margin: 0 0 10px; }
+.banner-fondator-titlu { font-size: 1.15rem; font-weight: 700; color: #9a3412; }
+.pret-taiat { color: var(--muted); }
