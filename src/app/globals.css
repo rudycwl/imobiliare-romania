@@ -329,10 +329,7 @@ a:hover .sageata { transform: translateX(4px); }
 
 @keyframes banda { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes cuvinte { 0%, 20% { transform: translateY(0); } 25%, 45% { transform: translateY(-25%); } 50%, 70% { transform: translateY(-50%); } 75%, 95% { transform: translateY(-75%); } 100% { transform: translateY(0); } }
-@keyframes pluteste-drept { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(-14px) rotate(var(--r, 0deg)); } }
 @keyframes roteste { to { transform: rotate(360deg); } }
-@keyframes bannere { 0%, 28% { transform: translateX(0); } 33%, 61% { transform: translateX(-33.3333%); } 66%, 94% { transform: translateX(-66.6666%); } 100% { transform: translateX(0); } }
-@keyframes punct-banner { 0%, 28% { background: var(--portocaliu); width: 28px; } 33%, 100% { background: #cbd5e1; width: 10px; } }
 @keyframes creste { from { transform: scaleX(0); } }
 
 /* Pagina de start iese din .container ca benzile colorate să fie pe toată lățimea. */
@@ -376,22 +373,8 @@ a:hover .sageata { transform: translateX(4px); }
 .orase-rapide a:hover { background: #13315c; border-color: var(--portocaliu); color: #fff; }
 .orase-rapide a span { font-size: .75rem; color: #fdba74; }
 
-.avantaje-bara { position: relative; z-index: 2; margin-top: -44px !important; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0; padding: 0 !important; background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 20px 50px rgba(11,37,69,.12); overflow: hidden; }
-.avantaj-mic { display: flex; gap: 12px; align-items: flex-start; padding: 18px 20px; font-size: .88rem; line-height: 1.45; color: var(--muted); }
-.avantaj-mic + .avantaj-mic { border-left: 1px solid var(--border); }
-.avantaj-mic strong { display: block; color: var(--fg); font-size: .95rem; }
-.avantaj-icon-mic { flex: none; width: 40px; height: 40px; border-radius: 12px; background: #fff7ed; color: #c2410c; display: grid; place-items: center; }
-@media (max-width: 1000px) { .avantaje-bara { margin-left: 24px !important; margin-right: 24px !important; } }
-@media (max-width: 560px) { .avantaj-mic + .avantaj-mic { border-left: 0; border-top: 1px solid var(--border); } }
 
-.categorii { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
-@media (max-width: 420px) { .categorii { grid-template-columns: 1fr 1fr; gap: 10px; } .categorie { padding: 14px; } }
-.categorie { display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 16px; background: var(--card); border: 1px solid var(--border); color: var(--fg); }
-.categorie:hover { border-color: var(--portocaliu); }
-.categorie-icon { width: 48px; height: 48px; border-radius: 14px; background: #fff7ed; color: #c2410c; display: grid; place-items: center; margin-bottom: 4px; transition: transform .25s ease; }
-.categorie:hover .categorie-icon { transform: scale(1.1) rotate(-4deg); }
 
-.bannere-sectiune { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 
 .pasi { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; counter-reset: none; }
 .pasi li { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 22px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); color: var(--muted); line-height: 1.5; }
@@ -407,43 +390,7 @@ a:hover .sageata { transform: translateX(4px); }
 .calculator-rezultat strong { font-size: clamp(2.2rem, 5vw, 3rem); font-weight: 800; color: #fff; letter-spacing: -0.02em; }
 .calculator-rezultat small { color: #94a3b8; }
 
-.erou-colaj { flex: 1 1 400px; position: relative; height: 420px; }
-.plutitor { position: absolute; border-radius: 18px; overflow: hidden; background: #fff; color: #0f172a; box-shadow: 0 24px 50px rgba(0,0,0,.35); }
-.plutitor-img { height: 140px; }
-.plutitor-text { padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; font-size: .85rem; color: #5b6474; }
-.plutitor-text strong { font-size: 1.2rem; color: #0b2545; }
-.f1 { left: 0; top: 30px; width: 270px; --r: -4deg; animation: pluteste-drept 6s ease-in-out infinite; }
-.f2 { right: 0; top: 0; width: 230px; --r: 3deg; animation: pluteste-drept 7s ease-in-out .8s infinite; }
-.f3 { right: 30px; bottom: 10px; width: 270px; --r: -2deg; animation: pluteste-drept 5.5s ease-in-out 1.6s infinite; }
-.alerta { display: flex; gap: 12px; align-items: center; padding: 16px; background: #fff7ed; color: #431407; font-size: .9rem; line-height: 1.4; }
-.alerta strong { display: block; color: #0b2545; }
-.alerta-icon { flex: none; width: 44px; height: 44px; border-radius: 12px; background: var(--portocaliu); display: grid; place-items: center; }
-.eticheta-direct { left: 40px; right: auto; top: auto; bottom: 40px; width: auto; padding: 10px 16px; border-radius: 999px; background: #dcfce7; color: #166534; font-weight: 800; font-size: .9rem; }
-@media (max-width: 900px) { .erou-colaj { display: none; } }
 
-.bannere { position: relative; margin: -40px auto 0; padding: 0 24px; max-width: 1240px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.bannere-cadru { width: 100%; overflow: hidden; border-radius: 22px; box-shadow: 0 20px 50px rgba(11,37,69,.18); }
-.bannere-pista { display: flex; width: 300%; animation: bannere 18s cubic-bezier(.65,0,.35,1) infinite; }
-.bannere-pista:hover { animation-play-state: paused; }
-.banner { width: 33.3333%; min-height: 220px; padding: 34px 44px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; }
-.banner > div { display: flex; flex-direction: column; gap: 10px; max-width: 640px; }
-.banner h2 { margin: 0; font-size: clamp(1.6rem, 3.5vw, 2.5rem); line-height: 1.1; }
-.banner p { margin: 0; font-size: 1.05rem; }
-.banner-portocaliu { background: var(--portocaliu); color: #0b2545; }
-.banner-portocaliu .supratitlu { color: #0b2545; }
-.banner-albastru { background: #13315c; color: #fff; }
-.banner-albastru .supratitlu { color: #fdba74; }
-.banner-albastru p { color: #cbd5e1; }
-.banner-crem { background: #fff7ed; color: #0b2545; }
-.banner-crem .supratitlu { color: #9a3412; }
-.banner-crem p { color: #431407; }
-@media (max-width: 640px) { .banner { padding: 26px 22px; } }
-.buton-banner { display: inline-flex; align-items: center; gap: 10px; min-height: 50px; padding: 0 22px; border-radius: 12px; background: var(--portocaliu); color: #0b2545; font-weight: 800; white-space: nowrap; }
-.buton-banner.inchis { background: #0b2545; color: #fff; }
-.buton-banner.alb { background: #fff; color: #0b2545; }
-.bannere-puncte { display: flex; gap: 8px; }
-.bannere-puncte span { height: 10px; width: 10px; border-radius: 999px; background: #cbd5e1; animation: punct-banner 18s infinite; }
-.bannere-puncte span:nth-child(2) { animation-delay: 6s; } .bannere-puncte span:nth-child(3) { animation-delay: 12s; }
 
 .sectiuni { display: flex; flex-direction: column; gap: 72px; margin-top: 56px; }
 .sectiuni h2 { margin: 0; }
@@ -495,13 +442,6 @@ a:hover .sageata { transform: translateX(4px); }
 .cuprins-legi { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
 .cuprins-legi a { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-weight: 600; font-size: .9rem; }
 
-.chemari { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-.chemare { border-radius: 22px; padding: 32px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
-.chemare h2 { font-size: 1.9rem; }
-.chemare p { margin: 0; line-height: 1.5; }
-.chemare-portocalie { background: var(--portocaliu); color: #0b2545; }
-.chemare-albastra { background: #0b2545; color: #fff; }
-.chemare-albastra p { color: #cbd5e1; }
 
 /* Bara de jos pe telefon */
 .bara-mobil { display: none; }
@@ -516,7 +456,7 @@ a:hover .sageata { transform: translateX(4px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .banda-pista, .cuvinte-pista, .bannere-pista { animation: none !important; }
+  .banda-pista, .cuvinte-pista { animation: none !important; }
 }
 
 /* ---------- Hartă (Leaflet + OpenStreetMap) și prețuri pe cartiere ---------- */
@@ -614,3 +554,77 @@ a:hover .sageata { transform: translateX(4px); }
 .tabel-preturi tr.unitate-indisponibila .pret { color: var(--muted); font-weight: 600; }
 .proiecte-judet { margin: 24px 0; }
 .pret-proiect { font-size: 1.2rem; margin-top: 0; }
+
+/* ---------- Pagina de start nouă (mockup aprobat 28.10.2026) ---------- */
+/* Cardul „Vinzi sau închiriezi?” din dreapta eroului */
+.erou-card { flex: 1 1 320px; max-width: 460px; display: flex; flex-direction: column; gap: 16px; padding: 28px; border-radius: 20px; border-top: 6px solid var(--portocaliu); background: var(--card); color: var(--fg); box-shadow: 0 24px 60px rgba(0,0,0,.3); }
+.erou .erou-card .supratitlu { color: var(--portocaliu-text); }
+.erou-card h2 { margin: 0; font-size: clamp(1.5rem, 3vw, 1.8rem); line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; color: var(--accent); }
+.bife { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: .97rem; line-height: 1.4; }
+.bife li { display: flex; gap: 10px; align-items: flex-start; }
+.bife svg { flex: none; color: var(--portocaliu-text); stroke-width: 2.5; }
+.buton-plin { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0 22px; border-radius: 12px; background: #0b2545; color: #fff; font-weight: 800; text-align: center; transition: transform .15s ease, box-shadow .2s ease; }
+.buton-plin:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(11,37,69,.3); }
+.erou-card .buton-plin { margin-top: auto; }
+.buton-plin-alb { background: #fff; color: #0b2545; }
+@media (max-width: 900px) { .erou-card { max-width: none; } }
+
+/* Bandă de încredere, albă, pe toată lățimea */
+.incredere { background: var(--card); border-bottom: 1px solid var(--border); }
+.incredere-interior { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px 32px; padding-top: 24px !important; padding-bottom: 24px !important; }
+.incredere-item { display: flex; gap: 12px; align-items: center; font-size: .9rem; line-height: 1.4; color: var(--muted); }
+.incredere-item strong { display: block; color: var(--fg); font-size: .97rem; }
+.incredere-icon { flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #fff7ed; color: #c2410c; }
+
+/* Pornim din Iași: prețuri pe cartiere + carduri */
+.pornire { display: flex; flex-wrap: wrap; gap: 20px; }
+.pornire-preturi { flex: 2 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 20px 24px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); }
+.pornire-preturi p { margin: 0; }
+.pornire-carduri { flex: 1 1 280px; display: flex; flex-direction: column; gap: 20px; }
+.tabel-cartier { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tabel-cartier th, .tabel-cartier td { padding: 12px 4px; text-align: left; border-bottom: 1px solid var(--border); }
+.tabel-cartier thead th { padding-top: 0; font-size: .8rem; font-weight: 600; color: var(--muted); }
+.tabel-cartier tbody th { font-weight: 600; }
+.tabel-cartier tbody tr:last-child > * { border-bottom: 0; }
+.tabel-cartier .num { text-align: right; }
+.tabel-cartier strong { color: var(--accent); }
+.card-mic { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 22px 24px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); color: var(--muted); line-height: 1.5; }
+.card-mic strong { font-size: 1.1rem; color: var(--accent); }
+.card-mic-cald { background: #fff7ed; border-color: #fed7aa; color: #5b6474; }
+.card-mic-cald strong { color: #0b2545; }
+.card-mic-cta { margin-top: auto; font-weight: 700; color: var(--portocaliu-text); }
+.card-mic-cald .card-mic-cta { color: #c2410c; }
+
+/* Anunțuri proaspete, când încă nu e niciunul */
+.gol-anunturi { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; padding: 28px; border-radius: 18px; border: 2px dashed var(--portocaliu); background: color-mix(in srgb, var(--portocaliu) 6%, var(--card)); }
+.gol-anunturi > div { display: flex; flex-direction: column; gap: 4px; }
+.gol-anunturi strong { font-size: 1.25rem; color: var(--accent); }
+
+/* Unelte gratuite */
+.unelte { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; }
+.unealta { display: flex; flex-direction: column; gap: 10px; padding: 24px; border-radius: 16px; background: var(--card); border: 1px solid var(--border); line-height: 1.5; }
+.unealta:hover { border-color: var(--portocaliu); }
+.unealta strong { font-size: 1.07rem; color: var(--accent); }
+.unealta-icon { color: var(--portocaliu-text); }
+
+/* Agenție Fondatoare și Proiecte noi */
+.profesionisti { display: flex; flex-wrap: wrap; gap: 20px; }
+.profesionist { flex: 1 1 360px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: clamp(24px, 4vw, 36px); border-radius: 20px; background: var(--card); border: 1px solid var(--border); color: var(--muted); }
+.profesionist h2 { font-size: clamp(1.6rem, 3vw, 1.9rem); line-height: 1.15; color: var(--accent); }
+.profesionist p { margin: 0; font-size: 1.05rem; line-height: 1.55; }
+.profesionist p.mic { font-size: .9rem; }
+.profesionist .buton-plin { margin-top: 6px; }
+.profesionist-inchis { flex-grow: 1.3; background: #0b2545; border-color: #0b2545; color: #cbd5e1; }
+.profesionist-inchis h2 { color: #fff; }
+.pastila { padding: 6px 12px; border-radius: 999px; background: #fff7ed; color: #c2410c; font-size: .82rem; font-weight: 700; }
+.pastila-portocalie { background: var(--portocaliu); color: #0b2545; }
+
+@media (prefers-color-scheme: dark) {
+  .incredere-icon, .pastila { background: #2a1c10; color: #fdba74; }
+  .pastila-portocalie { background: var(--portocaliu); color: #0b2545; }
+  .card-mic-cald { background: #2a1c10; border-color: #7c3a12; color: var(--muted); }
+  .card-mic-cald strong { color: var(--fg); }
+  .card-mic-cald .card-mic-cta { color: #fdba74; }
+  .profesionist-inchis { background: #0b2545; border-color: #24344f; }
+  .profesionist .buton-plin:not(.buton-plin-alb), .erou-card .buton-plin { background: var(--portocaliu); color: #0b2545; }
+}

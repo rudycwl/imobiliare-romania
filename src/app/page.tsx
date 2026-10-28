@@ -1,52 +1,87 @@
 import Link from "next/link";
 import { ListaAnunturi } from "@/components/AnuntCard";
-import { CalculatorCredit } from "@/components/CalculatorCredit";
-import { LegislatieFile } from "@/components/LegislatieFile";
-import { cautaAnunturi, numarAnunturi, numarPeTip } from "@/lib/anunturi";
-import { PUBLICURI, STIRE_TVA } from "@/lib/continut";
-import { citesteActualizat, citesteStiri, citesteStiriPiata } from "@/lib/continut-db";
-import { formatPret, textAnunturi, TIPURI } from "@/lib/etichete";
+import { cautaAnunturi, numarAnunturi } from "@/lib/anunturi";
+import { STIRE_TVA } from "@/lib/continut";
+import { citesteStiri, citesteStiriPiata, impoziteOrasDb } from "@/lib/continut-db";
+import { TIPURI } from "@/lib/etichete";
+import { formatData, LOCURI_FONDATOARE, locuriRamase, LUNI_GRATUITE, TERMEN_FONDATOARE } from "@/lib/fondatori";
 import { getOras, JUDETE } from "@/lib/geo";
+import { caleImpozite } from "@/lib/impozite-locale";
+import { indiceOras } from "@/lib/indice";
+import { MAX_POZE } from "@/lib/poze";
 import { citesteTexte } from "@/lib/setari";
+import { ANUNTURI_GRATUITE, LUNI_GRATUITE_PROIECT, PRET_PROIECT_LUNAR, REDUCERE_FONDATOARE, ZILE_VALABILITATE, lei } from "@/lib/tarife";
 
 // Regenerată cel mult o dată pe minut: pagina rămâne statică și rapidă.
 export const revalidate = 60;
 
 const CUVINTE = ["un apartament.", "o casă cu curte.", "un teren.", "un birou."];
 
-/** Iconițe (contur) pentru categoriile de pe pagina de start, după cheia din TIPURI. */
-const ICON_TIP: Record<string, string> = {
-  apartament: "M4 21V5h10v16M14 9h6v12M7 9h2M7 13h2M7 17h2M17 13h1M17 17h1M2 21h20",
-  casa: "M3 11l9-7 9 7v10H3zM9 21v-6h6v6",
-  teren: "M3 20l6-10 4 6 3-4 5 8z",
-  "spatiu-comercial": "M3 9l2-5h14l2 5M4 9v11h16V9M3 9h18M9 20v-6h6v6",
-  birouri: "M3 7h18v13H3zM8 7V4h8v3M3 13h18",
-  depozit: "M2 20V9l10-5 10 5v11M6 20v-8h12v8M6 16h12",
-};
+/** Orașul cu care pornim: cartierele lui apar pe pagina de start. */
+const PORNIRE = { judet: "iasi", oras: "iasi" } as const;
+const CARTIERE_AFISATE = 6;
+
+const ADAUGA = "/cont/anunt-nou";
+
+const nr = (n: number) => new Intl.NumberFormat("ro-RO").format(n);
+
+/** Iconiță de contur (24×24), desenată cu culoarea textului. */
+function Icon({ d, marime = 24 }: { d: string; marime?: number }) {
+  return (
+    <svg width={marime} height={marime} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={d} />
+    </svg>
+  );
+}
+
+const BIFA = "M5 12l5 5 9-10";
 
 const AVANTAJE = [
-  { titlu: "Gratuit pentru proprietari", text: "Până la 3 anunțuri active, fără comision.", icon: "M20 12V8H4v4M2 12h20v8H2zM12 8v12" },
   { titlu: "Vezi cine vinde", text: "Proprietar, firmă sau agenție, scris pe fiecare anunț.", icon: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6" },
   { titlu: "Anunțuri moderate", text: "Filtru automat și buton „Raportează” pe fiecare anunț.", icon: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM8.5 12l2.5 2.5 4.5-5" },
-  { titlu: "Alerte pentru căutări", text: "Salvezi căutarea și vezi primul anunțurile noi.", icon: "M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4" },
+  { titlu: "Alerte pe e-mail", text: "Salvezi căutarea și afli primul de anunțurile noi.", icon: "M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4" },
+  { titlu: `${JUDETE.length} de județe`, text: "Pagini pe județe și orașe, din toată țara.", icon: "M3 21h18M5 21V10l7-6 7 6v11M10 21v-6h4v6" },
+];
+
+const UNELTE = [
+  { titlu: "Calculator de rată", text: "Cât plătești lunar pentru un credit ipotecar.", href: "/calculatoare#credit", icon: "M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M16 11v4" },
+  { titlu: "Impozite locale", text: "Impozitul pe clădiri, pe orașe, din hotărârile oficiale.", href: "/impozite-locale", icon: "M3 21h18M5 21V10l7-6 7 6v11M9 14h6" },
+  { titlu: "Prețuri pe cartiere", text: "Prețul median pe metru pătrat, din anunțurile active.", href: "/indice-preturi", icon: "M3 20h18M6 16l4-5 3 3 5-7" },
+  { titlu: "Legislație pe scurt", text: "Regulile la cumpărare și vânzare, din surse oficiale, explicate simplu.", href: "/legislatie", icon: "M6 3h9l4 4v14H6zM9 11h7M9 15h7" },
 ];
 
 export default async function Home() {
-  const [{ anunturi }, numar, peTip, texte, STIRI, STIRI_PIATA, ACTUALIZAT] = await Promise.all([
+  const [{ anunturi }, numar, texte, STIRI, STIRI_PIATA, indice, impozitPornire, locuri] = await Promise.all([
     cautaAnunturi({}, 8),
     numarAnunturi(),
-    numarPeTip(),
     citesteTexte(),
     citesteStiri(),
     citesteStiriPiata(),
-    citesteActualizat(),
+    indiceOras(PORNIRE.judet, PORNIRE.oras),
+    impoziteOrasDb(PORNIRE.judet, PORNIRE.oras),
+    locuriRamase(),
   ]);
   const BANDA = texte.banda;
-  const [p1, p2] = anunturi;
+  const orasPornire = getOras(PORNIRE.judet, PORNIRE.oras)?.nume ?? "Iași";
   // Întâi județele cu anunțuri (cu numărul lor), apoi orașele mari, fără cifre: un „0” lângă „Populare” arată a site gol.
   const MARI = ["bucuresti", "cluj", "timis", "iasi", "constanta", "brasov", "prahova", "bihor"];
   const cuAnunturi = JUDETE.filter((j) => numar[j.slug]).sort((a, b) => numar[b.slug] - numar[a.slug]);
   const populare = [...cuAnunturi, ...JUDETE.filter((j) => !numar[j.slug] && MARI.includes(j.slug)).sort((a, b) => MARI.indexOf(a.slug) - MARI.indexOf(b.slug))].slice(0, 8);
+
+  // Doar cartierele cu medie calculată (cel puțin MIN_ANUNTURI apartamente de vânzare); cele mai bine acoperite întâi.
+  const cartiere = indice.cartiere
+    .filter((c) => c.pretMp !== null && c.nume !== "Fără zonă")
+    .sort((a, b) => b.apartamenteVanzare - a.apartamenteVanzare)
+    .slice(0, CARTIERE_AFISATE);
+  const o = indice.oras;
+  const statOras = [
+    o.pretMp ? { valoare: `${nr(o.pretMp)} €/m²`, ce: `apartamente de vânzare (${o.apartamenteVanzare})` } : null,
+    o.chirie ? { valoare: `${nr(o.chirie)} €`, ce: `chirie apartament pe lună (${o.apartamenteChirie})` } : null,
+    o.pretMpCase ? { valoare: `${nr(o.pretMpCase)} €/m²`, ce: `case de vânzare (${o.caseVanzare})` } : null,
+  ].filter((s) => s !== null);
+  const arePreturi = cartiere.length > 0 || statOras.length > 0;
+  const linkIndice = `/indice-preturi/${PORNIRE.judet}/${PORNIRE.oras}`;
+
   return (
     <div className="acasa">
       {BANDA.length > 0 && (
@@ -135,106 +170,150 @@ export default async function Home() {
             </nav>
           </div>
 
-          <div className="erou-colaj" aria-hidden="true">
-            {p1 && (
-              <div className="plutitor f1">
-                <div className="plutitor-img" style={{ background: p1.imagine }} />
-                <div className="plutitor-text">
-                  <strong>{formatPret(p1)}</strong>
-                  <span>{getOras(p1.judet, p1.oras)?.nume} · {p1.suprafata} m²</span>
-                </div>
-              </div>
-            )}
-            {p2 && (
-              <div className="plutitor f2">
-                <div className="plutitor-img" style={{ background: p2.imagine }} />
-                <div className="plutitor-text">
-                  <strong>{formatPret(p2)}</strong>
-                  <span>{getOras(p2.judet, p2.oras)?.nume} · {p2.suprafata} m²</span>
-                </div>
-              </div>
-            )}
-            <div className="plutitor f3 alerta">
-              <span className="alerta-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0B2545" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4" /></svg>
-              </span>
-              <span><strong>Salvează căutarea</strong>și vezi primul anunțurile noi</span>
-            </div>
-            <div className="plutitor f2 eticheta-direct">Direct de la proprietar</div>
-          </div>
+          <aside className="erou-card apare apare-3" aria-labelledby="publica-titlu">
+            <p className="supratitlu">Vinzi sau închiriezi?</p>
+            <h2 id="publica-titlu">Publici gratuit, în 2 minute.</h2>
+            <ul className="bife">
+              <li><Icon d={BIFA} marime={20} />Până la {ANUNTURI_GRATUITE} anunțuri active, {ZILE_VALABILITATE} de zile</li>
+              <li><Icon d={BIFA} marime={20} />Până la {MAX_POZE} poze pe anunț</li>
+              <li><Icon d={BIFA} marime={20} />Fără comision la vânzare</li>
+              <li><Icon d={BIFA} marime={20} />Vezi în cont câte vizualizări are anunțul</li>
+            </ul>
+            <Link href={ADAUGA} className="buton-plin">Adaugă anunțul tău</Link>
+          </aside>
         </div>
       </section>
 
-      <section className="avantaje-bara container" aria-label="De ce CheiaMea">
-        {AVANTAJE.map((a) => (
-          <div key={a.titlu} className="avantaj-mic">
-            <span className="avantaj-icon-mic" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={a.icon} /></svg>
-            </span>
-            <span>
-              <strong>{a.titlu}</strong>
-              {a.text}
-            </span>
-          </div>
-        ))}
+      <section className="incredere" aria-label="De ce CheiaMea">
+        <div className="container incredere-interior">
+          {AVANTAJE.map((a) => (
+            <div key={a.titlu} className="incredere-item">
+              <span className="incredere-icon"><Icon d={a.icon} marime={26} /></span>
+              <span>
+                <strong>{a.titlu}</strong>
+                {a.text}
+              </span>
+            </div>
+          ))}
+        </div>
       </section>
 
       <div className="container sectiuni">
-        <section aria-labelledby="categorii">
+        {(arePreturi || impozitPornire) && (
+          <section aria-labelledby="pornire">
+            <div className="cap-sectiune">
+              <div>
+                <span className="supratitlu">Pornim din {orasPornire}</span>
+                <h2 id="pornire" className="titlu-mare">
+                  {arePreturi ? "Cât costă o locuință în cartierul tău" : `Fii printre primii în ${orasPornire}`}
+                </h2>
+              </div>
+              {arePreturi && <Link href={linkIndice} className="link-tot">Toate cartierele din {orasPornire} <span className="sageata">→</span></Link>}
+            </div>
+            <div className="pornire">
+              {arePreturi && (
+                <div className="pornire-preturi">
+                  {cartiere.length > 0 ? (
+                    <table className="tabel-cartier">
+                      <thead>
+                        <tr><th scope="col">Cartier</th><th scope="col" className="num">Preț median apartamente</th></tr>
+                      </thead>
+                      <tbody>
+                        {cartiere.map((c) => (
+                          <tr key={c.nume}>
+                            <th scope="row">{c.nume}</th>
+                            <td className="num"><strong>{nr(c.pretMp ?? 0)} €/m²</strong> <span className="muted small">({c.apartamenteVanzare} anunțuri)</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="statistici">
+                      {statOras.map((s) => (
+                        <div key={s.ce}><strong>{s.valoare}</strong><span>{s.ce}</span></div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="muted small">
+                    {cartiere.length > 0 ? "" : `Încă nu sunt destule anunțuri pentru o medie pe cartiere; acestea sunt prețurile din tot orașul ${orasPornire}. `}
+                    Din indicele de prețuri CheiaMea: mediana prețurilor cerute în anunțurile active, nu prețuri de tranzacție.
+                  </p>
+                </div>
+              )}
+              <div className="pornire-carduri">
+                <Link href={ADAUGA} className="card-mic card-mic-cald ridica">
+                  <strong>Primele anunțuri din {orasPornire}</strong>
+                  <span>Anunțul tău apare printre primele din oraș. Gratuit pentru proprietari.</span>
+                  <span className="card-mic-cta">Publică acum <span className="sageata">→</span></span>
+                </Link>
+                {impozitPornire && (
+                  <Link href={`${caleImpozite(impozitPornire)}#calculator`} className="card-mic ridica">
+                    <strong>Impozitul pe locuință în {orasPornire}</strong>
+                    <span>Cotele din hotărârea consiliului local, calculate pentru locuința ta.</span>
+                    <span className="card-mic-cta">Calculează <span className="sageata">→</span></span>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section aria-labelledby="proaspete">
           <div className="cap-sectiune">
-            <h2 id="categorii" className="titlu-mare">Ce cauți?</h2>
+            <h2 id="proaspete" className="titlu-mare">Anunțuri proaspete</h2>
+            {anunturi.length > 0 && <Link href="/cautare" className="link-tot">Toate anunțurile <span className="sageata">→</span></Link>}
           </div>
-          <div className="categorii">
-            {Object.entries(TIPURI).map(([k, v]) => (
-              <Link key={k} href={`/cautare?tip=${k}`} className="categorie ridica">
-                <span className="categorie-icon" aria-hidden="true">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={ICON_TIP[k] ?? ICON_TIP.casa} /></svg>
-                </span>
-                <strong>{v}</strong>
-                <span className="muted">{textAnunturi(peTip[k] ?? 0)}</span>
+          {anunturi.length > 0 ? (
+            <ListaAnunturi anunturi={anunturi} />
+          ) : (
+            <div className="gol-anunturi">
+              <div>
+                <strong>Fii printre primii: publică gratuit</strong>
+                <span className="muted">Anunțurile noi apar aici, primele pe pagina de start.</span>
+              </div>
+              <Link href={ADAUGA} className="buton">Adaugă anunț gratuit</Link>
+            </div>
+          )}
+        </section>
+
+        <section aria-labelledby="unelte">
+          <div className="cap-sectiune">
+            <div>
+              <span className="supratitlu">Unelte gratuite</span>
+              <h2 id="unelte" className="titlu-mare">Tot ce verifici înainte să semnezi</h2>
+            </div>
+          </div>
+          <div className="unelte">
+            {UNELTE.map((u) => (
+              <Link key={u.href} href={u.href} className="unealta ridica">
+                <span className="unealta-icon"><Icon d={u.icon} marime={30} /></span>
+                <strong>{u.titlu}</strong>
+                <span className="muted">{u.text}</span>
               </Link>
             ))}
           </div>
         </section>
 
-        <section className="bannere-sectiune" aria-label="Pe scurt">
-          <div className="bannere-cadru">
-            <div className="bannere-pista">
-              <div className="banner banner-portocaliu">
-                <div>
-                  <span className="supratitlu">Pentru proprietari</span>
-                  <h2>Publici gratuit, în 2 minute.</h2>
-                  <p>Până la 3 anunțuri active, cu 10 poze fiecare. Fără comision.</p>
-                </div>
-                <Link href="/cont/anunt-nou" className="buton-banner inchis">Adaugă anunțul <span className="sageata">→</span></Link>
-              </div>
-              <div className="banner banner-albastru">
-                <div>
-                  <span className="supratitlu">Alerte</span>
-                  <h2>Fii primul care vede anunțul potrivit.</h2>
-                  <p>Caută, apasă „Salvează căutarea” și găsești în cont anunțurile noi.</p>
-                </div>
-                <Link href="/cautare" className="buton-banner alb">Începe o căutare <span className="sageata">→</span></Link>
-              </div>
-              <div className="banner banner-crem">
-                <div>
-                  <span className="supratitlu">Legislație la zi</span>
-                  <h2>Cumperi sau vinzi? Află regulile pe scurt.</h2>
-                  <p>Notar, impozit, TVA și actele necesare, explicate pe înțelesul tuturor.</p>
-                </div>
-                <Link href="/legislatie" className="buton-banner">Vezi regulile <span className="sageata">→</span></Link>
-              </div>
+        <section className="profesionisti" aria-label="Pentru profesioniști">
+          {locuri > 0 && (
+            <div className="profesionist profesionist-inchis">
+              <span className="pastila pastila-portocalie">{locuri === 1 ? "Mai e 1 loc" : `Mai sunt ${locuri} ${locuri % 100 >= 20 || locuri % 100 === 0 ? "de " : ""}locuri`} din {LOCURI_FONDATOARE}</span>
+              <h2>Agenție Fondatoare</h2>
+              <p>
+                {LUNI_GRATUITE} luni gratuit, apoi {Math.round(REDUCERE_FONDATOARE * 100)}% reducere pe viață la abonament. Insigna „Agenție Fondatoare”
+                pe profil și pe anunțuri. Importul din fișier CSV și accesul prin API, incluse.
+              </p>
+              <p className="mic">Ofertă valabilă până la {formatData(TERMEN_FONDATOARE)}.</p>
+              <Link href="/pentru-agentii" className="buton-plin buton-plin-alb">Înscrie agenția</Link>
             </div>
+          )}
+          <div className="profesionist">
+            <span className="pastila">Pentru dezvoltatori</span>
+            <h2>Proiecte noi</h2>
+            <p>Pagină de proiect cu galerie, hartă și lista unităților, cu preț și disponibilitate. Cererile clienților ajung direct la dezvoltator.</p>
+            <p className="mic">{LUNI_GRATUITE_PROIECT} luni gratuit, apoi {lei(PRET_PROIECT_LUNAR)} / lună pe proiect.</p>
+            <Link href="/proiecte" className="buton-plin">Vezi proiectele</Link>
           </div>
-          <div className="bannere-puncte" aria-hidden="true"><span /><span /><span /></div>
-        </section>
-
-        <section>
-          <div className="cap-sectiune">
-            <h2 className="titlu-mare">Anunțuri proaspete</h2>
-            <Link href="/cautare" className="link-tot">Toate anunțurile <span className="sageata">→</span></Link>
-          </div>
-          <ListaAnunturi anunturi={anunturi} />
         </section>
 
         <section aria-labelledby="pasi" className="pasi-sectiune">
@@ -243,21 +322,35 @@ export default async function Home() {
               <span className="supratitlu">Vinzi sau închiriezi?</span>
               <h2 id="pasi" className="titlu-mare">Anunțul tău, online în 3 pași</h2>
             </div>
-            <Link href="/cont/anunt-nou" className="buton">Adaugă anunț gratuit</Link>
+            <Link href={ADAUGA} className="buton">Adaugă anunț gratuit</Link>
           </div>
           <ol className="pasi">
             <li><span className="pas-nr">1</span><strong>Îți faci cont</strong>Cu email și parolă, în mai puțin de un minut.</li>
-            <li><span className="pas-nr">2</span><strong>Completezi anunțul</strong>Preț, suprafață, până la 10 poze. Sau îl imporți de pe OLX.</li>
-            <li><span className="pas-nr">3</span><strong>Primești telefoane</strong>Cumpărătorii te sună direct. Vezi în cont câți au văzut anunțul.</li>
+            <li><span className="pas-nr">2</span><strong>Completezi anunțul</strong>Preț, suprafață, până la {MAX_POZE} poze. Sau îl imporți de pe OLX.</li>
+            <li><span className="pas-nr">3</span><strong>Primești telefoane</strong>Cumpărătorii te sună direct. Vezi în cont câte vizualizări are anunțul.</li>
           </ol>
         </section>
 
-        <section id="stiri">
+        <section aria-labelledby="judete">
+          <h2 id="judete" className="titlu-mare">Caută pe județe</h2>
+          <ul className="judete">
+            {JUDETE.map((j) => (
+              <li key={j.slug}>
+                <Link href={`/${j.slug}`}>
+                  <strong>{j.nume}</strong> <span className="muted">({numar[j.slug] ?? 0})</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section id="stiri" aria-labelledby="stiri-titlu">
           <div className="cap-sectiune">
             <div>
               <span className="supratitlu">Noutăți</span>
-              <h2 className="titlu-mare">Legi noi și piața imobiliară</h2>
+              <h2 id="stiri-titlu" className="titlu-mare">Legi noi și piața imobiliară</h2>
             </div>
+            <Link href="/legislatie" className="link-tot">Toate regulile <span className="sageata">→</span></Link>
           </div>
           <div className="stiri">
             <Link href="/legislatie#tva" className="stire-mare ridica">
@@ -280,59 +373,6 @@ export default async function Home() {
                 <span className="muted small">{s.sursa}</span>
               </a>
             ))}
-            <Link href="/impozite-locale" className="stire ridica">
-              <span className="stire-cat">Impozite locale</span>
-              <span className="stire-titlu">Impozitul pe clădiri în 2026, oraș cu oraș</span>
-              <span className="muted small">Din hotărârile consiliilor locale</span>
-            </Link>
-          </div>
-        </section>
-
-        <section id="credit" aria-labelledby="calc">
-          <div className="cap-sectiune">
-            <div>
-              <span className="supratitlu">Calculator</span>
-              <h2 id="calc" className="titlu-mare">Cât ai plăti pe lună?</h2>
-            </div>
-          </div>
-          <CalculatorCredit />
-          <p><Link href="/calculatoare#impozit">Calculează și impozitul pe locuință →</Link></p>
-        </section>
-
-        <section id="legi" className="legi">
-          <div className="cap-sectiune">
-            <div>
-              <span className="supratitlu">Legislație la zi</span>
-              <h2 className="titlu-mare">Ce trebuie să știi, pe scurt</h2>
-              <p className="muted">Alege cine ești și îți arătăm regulile care te privesc.</p>
-            </div>
-            <span className="actualizat"><span className="punct verde" aria-hidden="true" />Actualizat: {ACTUALIZAT}</span>
-          </div>
-          <LegislatieFile publicuri={PUBLICURI} />
-          <p className="muted small">
-            Informații generale, nu consultanță juridică sau fiscală. Pentru cazul tău, întreabă notarul sau contabilul.{" "}
-            <Link href="/legislatie">Toate regulile →</Link>
-          </p>
-        </section>
-
-        <section>
-          <h2 className="titlu-mare">Caută pe județe</h2>
-          <ul className="judete">
-            {JUDETE.map((j) => (
-              <li key={j.slug}>
-                <Link href={`/${j.slug}`}>
-                  <strong>{j.nume}</strong> <span className="muted">({numar[j.slug] ?? 0})</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="chemari">
-          <div className="chemare chemare-portocalie ridica">
-            <h2>Vinzi? Publică gratuit.</h2>
-            <p>Până la 3 anunțuri active, 60 de zile fiecare, cu până la 10 poze. Poți importa și anunțul tău de pe OLX.</p>
-            <Link href="/cont/anunt-nou" className="buton-banner inchis">Adaugă anunț <span className="sageata">→</span></Link>
           </div>
         </section>
       </div>
