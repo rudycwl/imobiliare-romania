@@ -2,7 +2,7 @@
 // Se actualizează manual aici. Regula casei: doar surse oficiale (Monitorul Oficial, Portal Legislativ,
 // ANAF, Ministerul Finanțelor, hotărârile consiliilor locale), cu link și dată. Presa doar la știrile de piață.
 
-export const ACTUALIZAT = "27.10.2026";
+export const ACTUALIZAT = "28.10.2026";
 
 export type Sursa = { nume: string; url: string };
 /** O noutate legislativă: data actului, ce se schimbă pe scurt și unde se găsește textul oficial. */
@@ -76,6 +76,13 @@ export const STIRI: Stire[] = [
 /** Știri despre piață: doar din presă de afaceri cunoscută, cu sursa datelor scrisă (decizia lui Rudy, 25.10.2026). */
 /** Știri de piață, doar din presa aprobată de Rudy: Agerpres, G4Media, HotNews, Biziday, Profit.ro, Revista Biz. Cu dată și sursa datelor. */
 export const STIRI_PIATA: { data: string; titlu: string; text: string; sursa: string; url: string }[] = [
+  {
+    data: "27.10.2026",
+    titlu: "62% dintre românii cu credit ipotecar vor să-l plătească înainte de termen",
+    text: "Un studiu european făcut în iulie 2026 pe peste 22.000 de adulți din 24 de țări arată că 62% dintre românii cu credit ipotecar se așteaptă să-l achite anticipat, față de 25% media europeană. 77% dintre români locuiesc în casa lor, una dintre cele mai mari rate din Europa, iar 50% sunt optimiști în privința pieței imobiliare. Dintre cei care nu au locuință, 47% vor să devină proprietari, iar 26% cred că nu vor cumpăra niciodată.",
+    sursa: "Agerpres, studiu Re/Max Europe realizat de Kantar Public",
+    url: "https://agerpres.ro/economic/2026/10/27/aproximativ-62-dintre-romanii-cu-credite-ipotecare-se-asteapta-sa-le-achite-anticipat-studiu--1607281",
+  },
   {
     data: "23.10.2026",
     titlu: "Peste 98.000 de locuințe vândute în 9 luni, cu 18% mai puține",
