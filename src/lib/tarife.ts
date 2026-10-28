@@ -78,5 +78,5 @@ export function pretPromovare(p: Promovare, abonat = false) {
 }
 
 /** Pagină de proiect pentru dezvoltatori imobiliari (decis 28.10.2026): primele luni gratuit, apoi preț fix pe lună per proiect, unități nelimitate. */
-export const PRET_PROIECT_LUNAR = 299;
+export const PRET_PROIECT_LUNAR = 500;
 export const LUNI_GRATUITE_PROIECT = 3;
