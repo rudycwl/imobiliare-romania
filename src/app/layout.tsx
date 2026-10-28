@@ -64,6 +64,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/livrare">Livrare</Link>
               <Link href="/retragere">Retragere din contract</Link>
               <Link href="/contact">Contact</Link>
+              <a href="https://www.instagram.com/cheiamea.ro/" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a href="https://www.facebook.com/profile.php?id=61595984848998" target="_blank" rel="noopener noreferrer">Facebook</a>
             </nav>
             <div className="subsol-plati">
               <span>Plăți securizate cu cardul prin</span>
