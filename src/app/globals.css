@@ -628,3 +628,4 @@ a:hover .sageata { transform: translateX(4px); }
   .profesionist-inchis { background: #0b2545; border-color: #24344f; }
   .profesionist .buton-plin:not(.buton-plin-alb), .erou-card .buton-plin { background: var(--portocaliu); color: #0b2545; }
 }
+.descriere-anunt { white-space: pre-line; overflow-wrap: anywhere; }
