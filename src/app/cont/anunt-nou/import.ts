@@ -1,7 +1,7 @@
 "use server";
 
 import { utilizatorCurent } from "@/lib/auth";
-import { extrageAnunt, urlPermis, SITE_IMPORT, type AnuntImportat } from "@/lib/import-anunt";
+import { anuntIndisponibil, extrageAnunt, numeSite, urlPermis, SITE_IMPORT, type AnuntImportat } from "@/lib/import-anunt";
 
 export type RezultatImport = { eroare?: string; valori?: AnuntImportat };
 
@@ -24,9 +24,13 @@ export async function importaAnunt(link: string): Promise<RezultatImport> {
       cache: "no-store",
     });
     if (r.url && !urlPermis(r.url)) return { eroare: "Linkul duce în afara site-urilor acceptate." };
+    const final = new URL(r.url || url);
+    const inactiv = `Anunțul nu mai e activ pe ${numeSite(url)} (inactiv, expirat sau șters), așa că nu are ce să se importe. Reactivează-l acolo și încearcă din nou, sau completează manual.`;
+    if (r.status === 404 || r.status === 410) return { eroare: inactiv };
     if (!r.ok) return { eroare: "Nu am putut deschide anunțul. Verifică linkul sau completează manual." };
     const html = (await r.text()).slice(0, 2_000_000);
-    const valori = extrageAnunt(html, new URL(r.url || url));
+    if (anuntIndisponibil(html, url, final, r.status)) return { eroare: inactiv };
+    const valori = extrageAnunt(html, final);
     if (!valori.titlu) return { eroare: "Nu am găsit datele anunțului pe pagină. Completează manual." };
     return { valori };
   } catch {

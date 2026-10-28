@@ -77,6 +77,27 @@ function gasesteOras(text: string): { judet: string; oras?: string } | undefined
   return j && { judet: j.slug };
 }
 
+/** Numele site-ului de import, pentru mesaje („OLX”, „Storia” …). */
+export function numeSite(url: URL): string {
+  const h = url.hostname.toLowerCase();
+  const s = SITE_IMPORT.find((x) => h === x || h.endsWith("." + x)) ?? h;
+  return ({ "olx.ro": "OLX", "storia.ro": "Storia", "imobiliare.ro": "imobiliare.ro", "publi24.ro": "Publi24", "lajumate.ro": "LaJumate" } as Record<string, string>)[s] ?? s;
+}
+
+/**
+ * Anunț inactiv, expirat sau șters: site-ul răspunde 404/410, ne trimite pe prima pagină
+ * (OLX face așa la anunțurile inactive) sau scrie pe pagină că anunțul nu mai e disponibil.
+ */
+export function anuntIndisponibil(html: string, cerut: URL, final: URL, status = 200): boolean {
+  if (status === 404 || status === 410) return true;
+  const cale = final.pathname.replace(/\/+$/, "");
+  if (cale === "" && cerut.pathname.replace(/\/+$/, "") !== "") return true;
+  const titlu = decodeaza(html.match(/<title>([^<]*)<\/title>/i)?.[1] ?? "");
+  if (/anun[tț]uri gratuite\s*-\s*peste/i.test(titlu)) return true;
+  if (jsonLd(html).some((o) => /Product|Offer|Residence|Apartment|House|RealEstateListing/i.test(String(o["@type"])))) return false;
+  return /anun[tțţ](ul)? (nu mai este (disponibil|activ)|a fost (șters|sters|dezactivat|retras))|anun[tțţ] (inactiv|expirat|dezactivat)/i.test(faraTaguri(html).slice(0, 200_000));
+}
+
 /** Extrage câmpurile anunțului din HTML-ul paginii (JSON-LD, Open Graph și text). Ce nu găsește rămâne gol. */
 export function extrageAnunt(html: string, url: URL): AnuntImportat {
   const r: AnuntImportat = {};
