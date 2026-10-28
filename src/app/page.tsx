@@ -326,7 +326,7 @@ export default async function Home() {
           </div>
           <ol className="pasi">
             <li><span className="pas-nr">1</span><strong>Îți faci cont</strong>Cu email și parolă, în mai puțin de un minut.</li>
-            <li><span className="pas-nr">2</span><strong>Completezi anunțul</strong>Preț, suprafață, până la {MAX_POZE} poze. Sau îl imporți de pe OLX.</li>
+            <li><span className="pas-nr">2</span><strong>Completezi anunțul</strong>Preț, suprafață, până la {MAX_POZE} poze. Sau îl imporți de pe OLX, Storia, imobiliare.ro, Publi24 ori LaJumate.</li>
             <li><span className="pas-nr">3</span><strong>Primești telefoane</strong>Cumpărătorii te sună direct. Vezi în cont câte vizualizări are anunțul.</li>
           </ol>
         </section>

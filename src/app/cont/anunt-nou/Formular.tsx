@@ -14,8 +14,8 @@ function ImportAnunt({ laImport }: { laImport: (v: AnuntImportat) => void }) {
   const [inLucru, porneste] = useTransition();
   return (
     <div className="import-box">
-      <strong>Ai deja anunțul pe OLX, Storia sau imobiliare.ro?</strong>
-      <span className="muted small">Lipește linkul anunțului tău și completăm noi formularul. Tu verifici și publici.</span>
+      <strong>Ai deja anunțul pe OLX, Storia, imobiliare.ro, Publi24 sau LaJumate?</strong>
+      <span className="muted small">Lipește linkul anunțului tău și completăm noi formularul. Tu verifici și publici. Anunțul trebuie să fie activ pe site-ul respectiv.</span>
       <div className="rand">
         <input
           type="url"

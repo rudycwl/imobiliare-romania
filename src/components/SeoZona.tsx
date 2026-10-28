@@ -21,7 +21,7 @@ export function intrebariZona(loc: string, s: Stat) {
     },
     {
       q: `Cum public gratuit un anunț imobiliar în ${loc}?`,
-      a: `Creezi un cont gratuit pe CheiaMea și apeși „Adaugă anunț”. Dacă ai deja anunțul pe OLX sau Storia, lipești linkul și formularul se completează singur.`,
+      a: `Creezi un cont gratuit pe CheiaMea și apeși „Adaugă anunț”. Dacă ai deja anunțul activ pe OLX, Storia, imobiliare.ro, Publi24 sau LaJumate, lipești linkul și formularul se completează singur.`,
     },
     {
       q: `Pot căuta doar anunțuri de la proprietari în ${loc}?`,
