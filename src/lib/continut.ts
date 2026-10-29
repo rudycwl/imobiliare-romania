@@ -2,7 +2,7 @@
 // Se actualizează manual aici. Regula casei: doar surse oficiale (Monitorul Oficial, Portal Legislativ,
 // ANAF, Ministerul Finanțelor, hotărârile consiliilor locale), cu link și dată. Presa doar la știrile de piață.
 
-export const ACTUALIZAT = "28.10.2026";
+export const ACTUALIZAT = "29.10.2026";
 
 export type Sursa = { nume: string; url: string };
 /** O noutate legislativă: data actului, ce se schimbă pe scurt și unde se găsește textul oficial. */
@@ -76,6 +76,13 @@ export const STIRI: Stire[] = [
 /** Știri despre piață: doar din presă de afaceri cunoscută, cu sursa datelor scrisă (decizia lui Rudy, 25.10.2026). */
 /** Știri de piață, doar din presa aprobată de Rudy: Agerpres, G4Media, HotNews, Biziday, Profit.ro, Revista Biz. Cu dată și sursa datelor. */
 export const STIRI_PIATA: { data: string; titlu: string; text: string; sursa: string; url: string }[] = [
+  {
+    data: "27.10.2026",
+    titlu: "Apartamentele, cu peste 30% mai scumpe în 3 ani; rata a scăzut, chiria a crescut",
+    text: "Valoarea apartamentelor a crescut cu peste 30% în ultimii 3 ani, iar chiria pentru un apartament cu 2 camere în marile orașe a ajuns la 440–600 de euro pe lună. În schimb, pentru un credit ipotecar de 300.000 de lei cu dobândă fixă de circa 4,95% în primii trei ani, rata este acum de circa 1.600 de lei pe lună, față de 1.780 de lei în 2023.",
+    sursa: "HotNews, analiză OferteBancare.ro",
+    url: "https://hotnews.ro/chiria-urca-rata-sta-pe-loc-cine-a-castigat-din-scumpirea-apartamentelor-si-cat-mai-tine-avantajul-2387764",
+  },
   {
     data: "27.10.2026",
     titlu: "62% dintre românii cu credit ipotecar vor să-l plătească înainte de termen",
