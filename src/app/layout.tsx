@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "CheiaMea: apartamente, case, terenuri și spații comerciale de vânzare și de închiriat în toate județele și orașele României.",
   applicationName: "CheiaMea",
   openGraph: { siteName: "CheiaMea", locale: "ro_RO", type: "website" },
+  // Pinterest: revendicarea cheiamea.ro pe profilul pinterest.com/cheiamearo (30.10.2026)
+  other: { "p:domain_verify": "88d35b4b5b12ad0449ad3e8d41e88e7f" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -67,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/contact">Contact</Link>
               <a href="https://www.instagram.com/cheiamea.ro/" target="_blank" rel="noopener noreferrer">Instagram</a>
               <a href="https://www.facebook.com/profile.php?id=61595984848998" target="_blank" rel="noopener noreferrer">Facebook</a>
+              <a href="https://www.pinterest.com/cheiamearo/" target="_blank" rel="noopener noreferrer">Pinterest</a>
             </nav>
             <div className="subsol-plati">
               <span>Plăți securizate cu cardul prin</span>
