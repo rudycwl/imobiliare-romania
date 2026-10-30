@@ -2,7 +2,7 @@
 // Se actualizează manual aici. Regula casei: doar surse oficiale (Monitorul Oficial, Portal Legislativ,
 // ANAF, Ministerul Finanțelor, hotărârile consiliilor locale), cu link și dată. Presa doar la știrile de piață.
 
-export const ACTUALIZAT = "29.10.2026";
+export const ACTUALIZAT = "30.10.2026";
 
 export type Sursa = { nume: string; url: string };
 /** O noutate legislativă: data actului, ce se schimbă pe scurt și unde se găsește textul oficial. */
@@ -76,6 +76,13 @@ export const STIRI: Stire[] = [
 /** Știri despre piață: doar din presă de afaceri cunoscută, cu sursa datelor scrisă (decizia lui Rudy, 25.10.2026). */
 /** Știri de piață, doar din presa aprobată de Rudy: Agerpres, G4Media, HotNews, Biziday, Profit.ro, Revista Biz. Cu dată și sursa datelor. */
 export const STIRI_PIATA: { data: string; titlu: string; text: string; sursa: string; url: string }[] = [
+  {
+    data: "29.10.2026",
+    titlu: "Apartamentul mediu cere 114.900 de euro, cu aproape 5% mai mult decât acum un an",
+    text: "Prețul mediu cerut pentru un apartament în România a ajuns la 114.900 de euro, cu aproape 5% peste anul trecut, iar o casă costă în medie 170.000 de euro, pentru 116 mp utili. Cluj-Napoca rămâne cel mai scump oraș (peste 3.300 euro/mp util), urmat de București (2.312), Brașov (2.309), Craiova (2.142), Sibiu, Constanța și Iași (2.000 euro/mp util). Cele mai mari creșteri au fost la Reșița (+15,4%) și Zalău (+15,3%), iar în Călărași și Brăila prețurile au scăzut cu circa 3%. Sunt prețuri cerute în anunțuri, nu prețuri de vânzare.",
+    sursa: "Agerpres, date Imobiliare.ro",
+    url: "https://agerpres.ro/economic/2026/10/29/pretul-unui-apartament-in-romania-a-crescut-in-medie-cu-aproape-5-in-2026-analiza--1607982",
+  },
   {
     data: "27.10.2026",
     titlu: "Apartamentele, cu peste 30% mai scumpe în 3 ani; rata a scăzut, chiria a crescut",
