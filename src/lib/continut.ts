@@ -2,7 +2,7 @@
 // Se actualizează manual aici. Regula casei: doar surse oficiale (Monitorul Oficial, Portal Legislativ,
 // ANAF, Ministerul Finanțelor, hotărârile consiliilor locale), cu link și dată. Presa doar la știrile de piață.
 
-export const ACTUALIZAT = "30.10.2026";
+export const ACTUALIZAT = "31.10.2026";
 
 export type Sursa = { nume: string; url: string };
 /** O noutate legislativă: data actului, ce se schimbă pe scurt și unde se găsește textul oficial. */
@@ -76,6 +76,13 @@ export const STIRI: Stire[] = [
 /** Știri despre piață: doar din presă de afaceri cunoscută, cu sursa datelor scrisă (decizia lui Rudy, 25.10.2026). */
 /** Știri de piață, doar din presa aprobată de Rudy: Agerpres, G4Media, HotNews, Biziday, Profit.ro, Revista Biz. Cu dată și sursa datelor. */
 export const STIRI_PIATA: { data: string; titlu: string; text: string; sursa: string; url: string }[] = [
+  {
+    data: "30.10.2026",
+    titlu: "Creditele pentru locuințe cresc cu 6,7% pe an; dobânda medie a coborât la 6,35%",
+    text: "Soldul creditelor pentru locuințe a ajuns în septembrie la 123,3 miliarde de lei, cu 6,7% mai mult decât acum un an, cea mai mare creștere din ultimele 12 luni. În septembrie s-au acordat credite ipotecare noi în lei de peste 5,3 miliarde de lei, cu 14% mai mult decât în septembrie 2025 și cel mai mare volum lunar din 2026. Dobânda anuală efectivă medie la creditele ipotecare noi în lei a scăzut la 6,35% în august, de la 7,62% în aprilie.",
+    sursa: "Profit.ro, date BNR",
+    url: "https://www.profit.ro/povesti-cu-profit/financiar/grafice-creditul-ipotecar-si-de-consum-accelereaza-creditarea-firmelor-se-tine-bine-sectorul-bancar-este-bine-pozitionat-pentru-ultimul-trimestru-22900064",
+  },
   {
     data: "29.10.2026",
     titlu: "Apartamentul mediu cere 114.900 de euro, cu aproape 5% mai mult decât acum un an",
