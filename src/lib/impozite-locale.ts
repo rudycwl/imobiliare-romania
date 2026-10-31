@@ -585,6 +585,49 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     surse: [{ nume: "HCL nr. 645/2025 (targujiu.ro, PDF)", url: "https://www.targujiu.ro/dm_tgjiu/2025/hotarari.nsf/F624C6ABB7307D3AC2258D6F00490045/$FILE/HOTARAREA%20NR.645.pdf" }],
     verificat: "29.10.2026",
   },
+  {
+    judet: "covasna",
+    oras: "targu-secuiesc",
+    nume: "Târgu Secuiesc",
+    an: 2026,
+    hotarare: "HCL nr. 195 din 30.12.2025 privind stabilirea impozitelor și taxelor locale pentru anul 2026 (anexa nr. 1), modificată prin HCL nr. 36/2026",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale) ale persoanelor fizice", valoare: "0,1%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "0,8%" },
+      { ce: "Clădiri rezidențiale ale firmelor", valoare: "0,2%" },
+      { ce: "Clădiri nerezidențiale ale firmelor", valoare: "1,3%" },
+    ],
+    bonificatie: "10% pentru persoanele fizice și 5% pentru firme, pentru plata integrală până la 31 martie 2026 (art. 7 din hotărâre)",
+    note: [
+      "Prin HCL nr. 36/2026 s-au eliminat cotele adiționale pentru clădirile firmelor (16% la rezidențiale și 26,5% la nerezidențiale); cotele de bază au rămas aceleași.",
+      "Consiliul local poate majora cu până la 500% impozitul pe clădirile și terenurile neîngrijite (art. 9 din hotărâre).",
+    ],
+    surse: [
+      { nume: "HCL nr. 195/2025 (kezdi.ro, PDF)", url: "https://www.kezdi.ro/wp-content/themes/kezdi/dokumentumok/tanacshatarozatok/2025/195.pdf" },
+      { nume: "Anexa nr. 1 la HCL nr. 195/2025, cu cotele (kezdi.ro, PDF)", url: "https://www.kezdi.ro/wp-content/themes/kezdi/dokumentumok/tanacshatarozatok/2025/195_1.pdf" },
+      { nume: "HCL nr. 36/2026, eliminarea cotelor adiționale (kezdi.ro, PDF)", url: "https://www.kezdi.ro/wp-content/themes/kezdi/dokumentumok/tanacshatarozatok/2026/36.pdf" },
+    ],
+    verificat: "31.10.2026",
+  },
+  {
+    judet: "timis",
+    oras: "recas",
+    nume: "Recaș",
+    an: 2026,
+    hotarare: "HCL nr. 300 din 29.12.2025 privind impozitele și taxele locale pentru anul 2026 (anexa nr. 1)",
+    cote: [
+      { ce: "Locuințe (clădiri rezidențiale) ale persoanelor fizice", valoare: "0,1%" },
+      { ce: "Clădiri nerezidențiale ale persoanelor fizice", valoare: "1% (2% fără raport de evaluare)" },
+      { ce: "Clădiri mixte ale persoanelor fizice, fără suprafața nerezidențială declarată", valoare: "0,3%" },
+    ],
+    bonificatie: "10% pentru persoanele fizice, pentru plata integrală până la 31 martie",
+    note: [
+      "Anexa nu scrie separat cotele pentru clădirile firmelor; pentru acestea întreabă la Primăria Recaș.",
+      "La clădirile firmelor a căror valoare nu a fost actualizată în ultimii 5 ani, cota este 5%.",
+    ],
+    surse: [{ nume: "Anexa nr. 1 la HCL nr. 300/2025 (primariarecas.ro, PDF)", url: "https://primariarecas.ro/wp-content/uploads/2025/12/Anexa-nr.-1-la-HCL-300_2025-ptr.2026.pdf" }],
+    verificat: "31.10.2026",
+  },
 ];
 
 /** Reguli valabile în toată țara pentru 2026, din Codul fiscal. */
