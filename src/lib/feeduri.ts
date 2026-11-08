@@ -130,6 +130,8 @@ export async function ruleazaFeed(feedId: number): Promise<RaportFeed> {
         continue;
       }
       if (vechi.moderare === "respins") continue;
+      // Preț în lei: diferențele sub 2% vin din cursul euro, nu din prețul agenției; nu le notăm ca schimbare de preț.
+      if (a.rand.moneda === "RON" && Math.abs(r.date.pret - vechi.pret) < vechi.pret * 0.02) r.date.pret = vechi.pret;
       const textSchimbat = vechi.titlu !== r.date.titlu || vechi.descriere !== r.date.descriere;
       await db.anunt.update({
         where: { id: vechi.id },

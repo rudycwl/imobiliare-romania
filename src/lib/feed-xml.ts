@@ -182,6 +182,8 @@ export function randDinNod(n: Nod, cursEuro: number | null): RandFeed | { eroare
     oras: text(c.get("oras")),
     zona: text(c.get("zona")),
     poze: linkuri(pozeNod).join(" "),
+    // Prețul în lei se transformă în euro la cursul zilei; la actualizare îl ignorăm dacă diferă doar prin curs.
+    moneda: pret && /RON|LEI/.test(moneda) ? "RON" : "EUR",
   };
   return { externId, rand };
 }

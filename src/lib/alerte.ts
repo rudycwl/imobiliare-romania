@@ -107,7 +107,7 @@ async function trimiteScaderiFavorite(acum: Date) {
       },
     });
     const vechi = a?.istoricPret[0]?.pret;
-    if (!a || !vechi || a.pret >= vechi) continue;
+    if (!a || !vechi || a.pret > vechi * 0.99) continue;
     for (const { utilizator: u } of a.favorite) {
       if (!u.email || u.stersLa || u.id === a.proprietarId) continue;
       const x = peUtilizator.get(u.id) ?? { email: u.email, anunturi: [] };

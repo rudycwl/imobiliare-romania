@@ -165,7 +165,8 @@ export async function anunturiIeftinite(f: Filtre, dupa: Date, limita = 10) {
   });
   return lista
     .map(({ istoricPret, ...a }) => ({ ...a, pretVechi: istoricPret[0]?.pret ?? null }))
-    .filter((a): a is typeof a & { pretVechi: number } => a.pretVechi !== null && a.pret < a.pretVechi)
+    // Scăderile sub 1% (rotunjiri) nu merită un email.
+    .filter((a): a is typeof a & { pretVechi: number } => a.pretVechi !== null && a.pret <= a.pretVechi * 0.99)
     .slice(0, limita);
 }
 
