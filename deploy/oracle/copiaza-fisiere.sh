@@ -19,14 +19,14 @@ if [ "$(cat /run/cheiamea-configurare.sha 2>/dev/null)" != "$h" ]; then
   systemctl restart cheiamea-configurare.service 2>/dev/null && echo "$h" > /run/cheiamea-configurare.sha || true
 fi
 schimbat=0
-for u in cheiamea.service cheiamea-configurare.service cheiamea-actualizare.service cheiamea-actualizare.timer cheiamea-alerte.service cheiamea-alerte.timer cheiamea-copie-poze.service cheiamea-copie-poze.timer cheiamea-copie-baza.service cheiamea-copie-baza.timer; do
+for u in cheiamea.service cheiamea-configurare.service cheiamea-actualizare.service cheiamea-actualizare.timer cheiamea-alerte.service cheiamea-alerte.timer cheiamea-feeduri.service cheiamea-feeduri.timer cheiamea-copie-poze.service cheiamea-copie-poze.timer cheiamea-copie-baza.service cheiamea-copie-baza.timer; do
   cmp -s "$SRC/$u" "/etc/systemd/system/$u" || { install -m 644 "$SRC/$u" /etc/systemd/system/; schimbat=1; }
 done
 if [ "$schimbat" = 1 ]; then
   systemctl daemon-reload
   systemctl restart cheiamea-actualizare.timer 2>/dev/null || true
 fi
-for t in cheiamea-alerte.timer cheiamea-copie-poze.timer cheiamea-copie-baza.timer; do
+for t in cheiamea-alerte.timer cheiamea-feeduri.timer cheiamea-copie-poze.timer cheiamea-copie-baza.timer; do
   systemctl is-enabled -q $t 2>/dev/null || systemctl enable --now $t 2>/dev/null || true
 done
 if ! cmp -s "$SRC/Caddyfile" /etc/caddy/Caddyfile; then

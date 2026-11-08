@@ -21,6 +21,7 @@
     "@ip-location-db/dbip-city-mmdb": "2.3.2026060513",
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",
+    "fast-xml-parser": "5.12.0",
     "leaflet": "^1.9.4",
     "maxmind": "5.0.7",
     "next": "^15.5.28",

@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Vanzator } from "@/components/Vanzator";
 import { Distribuie } from "@/components/Distribuie";
-import { getAnunt } from "@/lib/anunturi";
+import { aceeasiProprietate, getAnunt, istoricPret } from "@/lib/anunturi";
+import { evolutiePret } from "@/lib/istoric-pret";
 import { pozeAnunt } from "@/lib/poze";
 import { urlPublic } from "@/lib/stocare";
 import { formatLei, formatPret, TIPURI, TRANZACTII } from "@/lib/etichete";
@@ -61,7 +62,8 @@ export default async function AnuntPage({ params }: Props) {
         </p>
       </div>
     );
-  const [poze, curs] = await Promise.all([pozeAnunt(a.id), cursEuro()]);
+  const [poze, curs, istoric, altele] = await Promise.all([pozeAnunt(a.id), cursEuro(), istoricPret(a.id), aceeasiProprietate(a)]);
+  const ev = evolutiePret(istoric, a.pret, a.publicatLa);
   return (
     <>
       <Breadcrumbs
@@ -97,6 +99,11 @@ export default async function AnuntPage({ params }: Props) {
           <h1>{a.titlu}</h1>
           <div className="pret mare">{formatPret(a)}</div>
           {curs && <div className="pret-lei" title={`La cursul de ${curs.toFixed(4)} lei pentru 1 €. Prețul de referință e cel în euro.`}>{formatLei(a, curs)}</div>}
+          {ev.scadere && (
+            <p className="eticheta-pret scazut">
+              Preț scăzut cu {ev.scadere.procent}% (de la {formatPret({ pret: ev.scadere.dela, tranzactie: a.tranzactie })})
+            </p>
+          )}
           <table className="detalii">
             <tbody>
               <tr><th>Tranzacție</th><td>{TRANZACTII[a.tranzactie]}</td></tr>
@@ -104,7 +111,20 @@ export default async function AnuntPage({ params }: Props) {
               <tr><th>Suprafață</th><td>{a.suprafata} m²</td></tr>
               {a.camere && <tr><th>Camere</th><td>{a.camere}</td></tr>}
               <tr><th>Localizare</th><td>{a.zona}, <Link href={`/${j.slug}/${o.slug}`}>{o.nume}</Link>, {j.nume}</td></tr>
-              <tr><th>Publicat</th><td>{a.publicatLa.toLocaleDateString("ro-RO")}</td></tr>
+              <tr><th>Publicat</th><td>{a.publicatLa.toLocaleDateString("ro-RO")} · pe piață de {ev.zile === 1 ? "o zi" : `${ev.zile} zile`}</td></tr>
+              {ev.schimbari.length > 1 && (
+                <tr>
+                  <th>Istoric preț</th>
+                  <td className="small">
+                    {ev.schimbari.map((x, i) => (
+                      <span key={i}>
+                        {i > 0 && " → "}
+                        {formatPret({ pret: x.pret, tranzactie: a.tranzactie })} ({x.la.toLocaleDateString("ro-RO")})
+                      </span>
+                    ))}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
           <p className="descriere-anunt">{a.descriere}</p>
@@ -113,6 +133,21 @@ export default async function AnuntPage({ params }: Props) {
             <ButonTelefon id={a.id} />
             <Favorit id={a.id} mare />
           </div>
+          {altele.length > 0 && (
+            <div className="aceeasi-proprietate">
+              <p>
+                <b>Aceeași proprietate</b> pare publicată și de {altele.length === 1 ? "un alt vânzător" : `alți ${altele.length} vânzători`}:
+              </p>
+              <ul>
+                {altele.map((x) => (
+                  <li key={x.id}>
+                    <Link href={`/anunt/${x.id}`}>{x.proprietar.nume}</Link>: {formatPret({ pret: x.pret, tranzactie: a.tranzactie })}
+                    {x.pret < a.pret ? " (mai ieftin)" : x.pret > a.pret ? " (mai scump)" : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <Distribuie url={`${SITE}/anunt/${a.id}`} text={`${a.titlu} – ${formatPret(a)} pe CheiaMea`} />
           <Raporteaza id={a.id} />
         </div>

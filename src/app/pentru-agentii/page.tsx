@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 const AVANTAJE = [
   { icon: "🏢", titlu: "Profil public de agenție", text: "Pagina agenției tale, cu logo, date de contact și toate ofertele într-un singur loc." },
-  { icon: "📥", titlu: "Import rapid", text: "Îți aduci toate ofertele dintr-un fișier Excel (CSV) sau prin API, în orice abonament." },
+  { icon: "📥", titlu: "Conectezi CRM-ul", text: "Anunțurile vin singure din programul agenției, prin feed XML sau API, ori dintr-un fișier Excel (CSV), în orice abonament." },
   { icon: "🏷️", titlu: "Insignă „Agenție”", text: "Anunțurile tale apar marcate clar, iar clienții te găsesc la filtrul „Oferit de”." },
   { icon: "🇷🇴", titlu: "Acoperire națională", text: "Toate cele 41 de județe și Bucureștiul, organizate pe orașe." },
 ];
@@ -66,7 +66,7 @@ export default async function PentruAgentiiPage({ searchParams }: { searchParams
 
       <Distribuie url="https://cheiamea.ro/pentru-agentii" text="CheiaMea pentru agenții imobiliare: cont de agenție și anunțuri în toată țara." />
       <p className="muted" style={{ marginTop: 24 }}>
-        Vezi și <Link href="/agentii">lista agențiilor de pe CheiaMea</Link>.
+        Ai deja un program imobiliar (CRM)? <Link href="/pentru-agentii/feed">Conectează-l în 2 minute</Link> și anunțurile se publică singure. Vezi și <Link href="/agentii">lista agențiilor de pe CheiaMea</Link>.
       </p>
     </>
   );

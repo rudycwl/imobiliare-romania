@@ -8,6 +8,7 @@ import { ZILE_VALABILITATE } from "./tarife";
 import { limitaPentru } from "./abonamente";
 import { ruleazaReactualizari } from "./promovari";
 import { getOras } from "./geo";
+import { cheieProprietate, suprafataApropiata } from "./duplicate";
 
 export type Filtre = {
   q?: string;
@@ -151,6 +152,23 @@ export function anunturiNoi(f: Filtre, dupa: Date, limita = 10) {
   });
 }
 
+/** Anunțurile mai vechi decât `dupa` care se potrivesc filtrelor și s-au ieftinit de atunci (pentru alertele pe email). */
+export async function anunturiIeftinite(f: Filtre, dupa: Date, limita = 10) {
+  const lista = await db.anunt.findMany({
+    where: { AND: [unde(f), { publicatLa: { lte: dupa } }, { istoricPret: { some: { la: { gt: dupa } } } }] },
+    orderBy: { ordine: "desc" },
+    take: 50,
+    select: {
+      id: true, titlu: true, pret: true, tranzactie: true, oras: true, judet: true, zona: true,
+      istoricPret: { where: { la: { lte: dupa } }, orderBy: { la: "desc" }, take: 1, select: { pret: true } },
+    },
+  });
+  return lista
+    .map(({ istoricPret, ...a }) => ({ ...a, pretVechi: istoricPret[0]?.pret ?? null }))
+    .filter((a): a is typeof a & { pretVechi: number } => a.pretVechi !== null && a.pret < a.pretVechi)
+    .slice(0, limita);
+}
+
 /** Anunțurile favorite ale unui utilizator, cele mai recent salvate primele (inclusiv cele expirate). */
 export async function anunturiFavorite(utilizatorId: string) {
   const f = await db.favorit.findMany({
@@ -170,13 +188,47 @@ const peste = (zile: number) => new Date(Date.now() + zile * 864e5);
 export type PunctAnunt = { lat: number | null; lng: number | null; punctProprietar: boolean };
 
 export async function creeazaAnunt(proprietarId: string, a: AnuntNou, punct: PunctAnunt) {
-  return db.anunt.create({ data: { ...a, ...punct, proprietarId, imagine: "#64748b", expiraLa: peste(ZILE_VALABILITATE) } });
+  return db.anunt.create({
+    data: {
+      ...a,
+      ...punct,
+      proprietarId,
+      imagine: "#64748b",
+      expiraLa: peste(ZILE_VALABILITATE),
+      cheieProprietate: cheieProprietate(a),
+      istoricPret: { create: { pret: a.pret } },
+    },
+  });
+}
+
+/** Notează noul preț în istoric, doar dacă diferă de ultimul notat. */
+export async function notaPret(anuntId: number, pret: number) {
+  const ultim = await db.istoricPret.findFirst({ where: { anuntId }, orderBy: { la: "desc" }, select: { pret: true } });
+  if (ultim?.pret !== pret) await db.istoricPret.create({ data: { anuntId, pret } });
 }
 
 /** Modifică un anunț propriu; întoarce false dacă anunțul nu e al lui. */
 export async function editeaza(id: number, proprietarId: string, a: AnuntNou, punct: PunctAnunt) {
-  const r = await db.anunt.updateMany({ where: { id, proprietarId }, data: { ...a, ...punct } });
+  const r = await db.anunt.updateMany({ where: { id, proprietarId }, data: { ...a, ...punct, cheieProprietate: cheieProprietate(a) } });
+  if (r.count > 0) await notaPret(id, a.pret);
   return r.count > 0;
+}
+
+/** Aceeași proprietate publicată de alți vânzători (altă agenție): același oraș, cartier, tip, camere și suprafață ±3%. */
+export async function aceeasiProprietate(a: { id: number; proprietarId: string; cheieProprietate: string | null; suprafata: number }) {
+  if (!a.cheieProprietate) return [];
+  const lista = await db.anunt.findMany({
+    where: { cheieProprietate: a.cheieProprietate, proprietarId: { not: a.proprietarId }, id: { not: a.id }, ...activ() },
+    select: { id: true, pret: true, suprafata: true, tranzactie: true, proprietar: { select: { nume: true, tip: true } } },
+    orderBy: { pret: "asc" },
+    take: 20,
+  });
+  return lista.filter((x) => suprafataApropiata(x.suprafata, a.suprafata)).slice(0, 5);
+}
+
+/** Istoricul de preț al unui anunț, cel mai vechi primul. */
+export function istoricPret(anuntId: number) {
+  return db.istoricPret.findMany({ where: { anuntId }, orderBy: { la: "asc" }, select: { pret: true, la: true }, take: 50 });
 }
 
 /** Câte anunțuri active poate avea un cont; null = fără limită (abonamentul Nelimitat). */

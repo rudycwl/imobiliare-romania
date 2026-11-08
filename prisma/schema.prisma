@@ -64,6 +64,7 @@ model Utilizator {
   favorite             Favorit[]
   cautari              CautareSalvata[]
   resetariParola       ResetareParola[]
+  feeduri              FeedAgentie[]
   /// Contul a fost șters de utilizator: datele personale sunt golite, comenzile și facturile rămân pentru contabilitate.
   stersLa              DateTime?
 
@@ -71,7 +72,7 @@ model Utilizator {
 }
 
 model Anunt {
-  id                  Int        @id @default(autoincrement())
+  id                  Int           @id @default(autoincrement())
   titlu               String
   descriere           String
   /// apartament | casa | teren | spatiu-comercial
@@ -89,38 +90,82 @@ model Anunt {
   lat                 Float?
   lng                 Float?
   /// true = punctul l-a pus proprietarul; false = l-am găsit noi după cartier și se recalculează la editare.
-  punctProprietar     Boolean    @default(false)
+  punctProprietar     Boolean       @default(false)
   imagine             String
-  publicatLa          DateTime   @default(now())
+  publicatLa          DateTime      @default(now())
   /// Anunțul e public cât timp expiraLa e în viitor (60 de zile, cu prelungire).
-  expiraLa            DateTime   @default(dbgenerated("(now() + '60 days'::interval)"))
+  expiraLa            DateTime      @default(dbgenerated("(now() + '60 days'::interval)"))
   /// Cheia de ordonare în liste: data publicării sau a ultimei reactualizări.
-  ordine              DateTime   @default(now())
+  ordine              DateTime      @default(now())
   /// Promovări active până la data respectivă.
   evidentiatPanaLa    DateTime?
   topPanaLa           DateTime?
   primaPaginaPanaLa   DateTime?
   /// Pachetul „Vânzare rapidă”: reactualizări automate, una pe săptămână.
-  reactualizariRamase Int        @default(0)
+  reactualizariRamase Int           @default(0)
   urmReactualizare    DateTime?
   /// ok | verificare | respins. Doar „ok” apare pe site.
-  moderare            String     @default("ok")
+  moderare            String        @default("ok")
   /// De ce a fost oprit (filtrul automat sau administratorul).
   motivModerare       String?
   /// Statistici pentru proprietar, numărate din browserul vizitatorilor (fără roboți și fără proprietar).
-  vizualizari         Int        @default(0)
-  afisariTelefon      Int        @default(0)
+  vizualizari         Int           @default(0)
+  afisariTelefon      Int           @default(0)
   raportari           Raportare[]
   poze                Poza[]
   favorite            Favorit[]
+  /// Codul anunțului în programul agenției (CRM), pentru anunțurile venite prin feed sau API; null la cele scrise pe site.
+  externId            String?
+  /// Feed-ul din care a venit anunțul; null = publicat pe site, prin fișier sau prin API.
+  feedId              Int?
+  feed                FeedAgentie?  @relation(fields: [feedId], references: [id], onDelete: SetNull)
+  /// Cheia aceleiași proprietăți la mai multe agenții (oraș, tip, tranzacție, camere, suprafață, cartier); vezi src/lib/duplicate.ts.
+  cheieProprietate    String?
+  istoricPret         IstoricPret[]
   proprietarId        String
-  proprietar          Utilizator @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
+  proprietar          Utilizator    @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
 
+  @@unique([proprietarId, externId])
   @@index([moderare])
   @@index([judet, oras, publicatLa])
   @@index([judet, oras, ordine])
   @@index([tranzactie, tip, pret])
   @@index([proprietarId, expiraLa])
+  @@index([cheieProprietate])
+}
+
+/// Feed-ul XML al unei agenții (exportul din programul agenției, același pe care îl trimite la alte portaluri).
+/// Serverul îl citește la câteva ore: anunțurile noi apar, cele modificate se actualizează, cele dispărute se retrag.
+model FeedAgentie {
+  id           Int        @id @default(autoincrement())
+  utilizatorId String
+  utilizator   Utilizator @relation(fields: [utilizatorId], references: [id], onDelete: Cascade)
+  url          String
+  activ        Boolean    @default(true)
+  /// Agenția a bifat acordul pentru feed (licența pe date și poze, temeiul GDPR) – vezi /pentru-agentii/feed.
+  acordLa      DateTime
+  creatLa      DateTime   @default(now())
+  ultimaRulare DateTime?
+  /// ok | eroare
+  ultimaStare  String?
+  /// Rezumatul ultimei rulări: { gasite, noi, actualizate, retrase, sarite: [{ id, motiv }], eroare? }
+  raport       Json?
+  /// Erori la rând; după 5 feed-ul se oprește și agenția primește un email.
+  eroriLaRand  Int        @default(0)
+  anunturi     Anunt[]
+
+  @@unique([utilizatorId, url])
+}
+
+/// Prețul unui anunț în timp: un rând la publicare și câte unul la fiecare schimbare de preț.
+model IstoricPret {
+  id      Int      @id @default(autoincrement())
+  anuntId Int
+  anunt   Anunt    @relation(fields: [anuntId], references: [id], onDelete: Cascade)
+  pret    Int
+  la      DateTime @default(now())
+
+  @@index([anuntId, la])
 }
 
 model Sesiune {
@@ -149,12 +194,12 @@ model InvitatieAgentie {
 
 /// O vizită nouă pe site (o dată pe sesiune de browser), cu sursa ei, pentru statistici.
 model Vizita {
-  id       Int      @id @default(autoincrement())
-  creatLa  DateTime @default(now())
-  sursa    String
-  mediu    String?
-  campanie String?
-  pagina   String?
+  id         Int      @id @default(autoincrement())
+  creatLa    DateTime @default(now())
+  sursa      String
+  mediu      String?
+  campanie   String?
+  pagina     String?
   /// Platforma, din User-Agent: Telefon | Tabletă | Calculator, sistemul (Android, iOS, Windows…) și browserul.
   dispozitiv String?
   sistem     String?
@@ -263,14 +308,14 @@ model Poza {
 
 /// Cerere de retragere din contract trimisă prin formularul online (art. 11¹ din OUG nr. 34/2014).
 model CerereRetragere {
-  id        String   @id
-  creatLa   DateTime @default(now())
-  nume      String
-  email     String
+  id       String   @id
+  creatLa  DateTime @default(now())
+  nume     String
+  email    String
   /// Numărul comenzii sau al facturii, așa cum l-a scris clientul.
-  comanda   String
-  mesaj     String?
-  rezolvat  Boolean  @default(false)
+  comanda  String
+  mesaj    String?
+  rezolvat Boolean  @default(false)
 }
 
 /// Anunțurile salvate cu inima de un utilizator.
@@ -354,4 +399,24 @@ model Proiect {
   creatLa          DateTime @default(now())
 
   @@index([activ, judet])
+}
+
+/// Indicele de preț pe lună, ca să se vadă evoluția: o fotografie a medianelor pe oraș (zona = "") și pe fiecare cartier.
+/// Se actualizează de câteva ori pe zi în luna curentă (timerul feed-urilor), apoi rămâne neschimbat.
+model IndiceLunar {
+  /// AAAA-LL
+  luna       String
+  judet      String
+  oras       String
+  /// Cheia cartierului (src/lib/indice.ts → slugCartier); "" = tot orașul.
+  zona       String
+  nume       String
+  pretMp     Int?
+  chirie     Int?
+  pretMpCase Int?
+  anunturi   Int
+  actualizat DateTime @updatedAt
+
+  @@id([luna, judet, oras, zona])
+  @@index([judet, oras, zona])
 }

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { getJudet, getOras } from "@/lib/geo";
-import { indiceOras } from "@/lib/indice";
+import { indiceOras, slugCartier } from "@/lib/indice";
 import { CumCalculam, nr } from "../../comun";
 
 type Props = { params: Promise<{ judet: string; oras: string }> };
@@ -94,7 +94,11 @@ export default async function IndiceOrasPage({ params }: Props) {
               {cartiere.map((c) => (
                 <tr key={c.nume}>
                   <td>
-                    <Link href={`/${j.slug}/${o.slug}?q=${encodeURIComponent(c.nume)}`}>{c.nume}</Link>
+                    {slugCartier(c.nume) ? (
+                      <Link href={`/indice-preturi/${j.slug}/${o.slug}/${slugCartier(c.nume)}`}>{c.nume}</Link>
+                    ) : (
+                      c.nume
+                    )}
                   </td>
                   <td>
                     {c.pretMp ? (

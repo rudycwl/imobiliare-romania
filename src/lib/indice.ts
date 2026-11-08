@@ -111,3 +111,68 @@ export async function indiceOrase() {
     })
     .sort((a, b) => b.total - a.total);
 }
+
+/** Cheia cartierului în linkuri: „Cartierul Tătărași” → „tatarasi”. */
+export const slugCartier = (zona: string) => cheieZona(zona).replace(/ /g, "-");
+
+/** Un cartier din oraș: statisticile de acum și anunțurile lui. null dacă nu are anunțuri active. */
+export async function indiceCartier(judet: string, oras: string, slug: string) {
+  const rows = (
+    await db.anunt.findMany({
+      where: { judet, oras, ...activ() },
+      select: { id: true, titlu: true, zona: true, tip: true, tranzactie: true, pret: true, suprafata: true, camere: true, ordine: true },
+    })
+  ).filter((r) => slugCartier(r.zona) === slug);
+  if (!rows.length) return null;
+  const nume = new Map<string, number>();
+  for (const r of rows) nume.set(r.zona.trim(), (nume.get(r.zona.trim()) ?? 0) + 1);
+  const peCamere = CAMERE.map((c) => {
+    const v = rows.filter((r) => r.tip === "apartament" && r.tranzactie === "vanzare" && pretMpValid(r) && (c === 4 ? (r.camere ?? 0) >= 4 : r.camere === c));
+    return { camere: c, pretVanzare: mediana(v.map((r) => r.pret)), vanzare: v.length };
+  });
+  return {
+    nume: [...nume.entries()].sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]))[0][0],
+    ...statistici(rows),
+    peCamere,
+    recente: [...rows].sort((a, b) => b.ordine.getTime() - a.ordine.getTime()).slice(0, 12),
+  };
+}
+
+/** Evoluția pe ultimele 12 luni (oraș: zona = ""), cele mai vechi primele. */
+export function evolutieIndice(judet: string, oras: string, zona = "") {
+  return db.indiceLunar
+    .findMany({ where: { judet, oras, zona }, orderBy: { luna: "desc" }, take: 12 })
+    .then((l) => l.reverse());
+}
+
+/** Fotografia lunii curente pentru toate orașele și cartierele cu anunțuri (o pornește timerul de pe server). */
+export async function salveazaIndiceLunar(acum = new Date()) {
+  const luna = acum.toLocaleDateString("sv-SE", { timeZone: "Europe/Bucharest" }).slice(0, 7);
+  const rows = await db.anunt.findMany({
+    where: activ(),
+    select: { judet: true, oras: true, zona: true, tip: true, tranzactie: true, pret: true, suprafata: true, camere: true },
+  });
+  const grupuri = new Map<string, { judet: string; oras: string; zona: string; nume: string; rows: Rand[] }>();
+  const adauga = (k: string, g: Omit<{ judet: string; oras: string; zona: string; nume: string }, never>, r: Rand) => {
+    const x = grupuri.get(k) ?? { ...g, rows: [] as Rand[] };
+    x.rows.push(r);
+    grupuri.set(k, x);
+  };
+  for (const r of rows) {
+    adauga(`${r.judet}|${r.oras}|`, { judet: r.judet, oras: r.oras, zona: "", nume: "" }, r);
+    const z = slugCartier(r.zona);
+    if (z) adauga(`${r.judet}|${r.oras}|${z}`, { judet: r.judet, oras: r.oras, zona: z, nume: r.zona.trim().slice(0, 80) }, r);
+  }
+  let scrise = 0;
+  for (const g of grupuri.values()) {
+    const s = statistici(g.rows);
+    const date = { nume: g.nume, pretMp: s.pretMp, chirie: s.chirie, pretMpCase: s.pretMpCase, anunturi: s.total };
+    await db.indiceLunar.upsert({
+      where: { luna_judet_oras_zona: { luna, judet: g.judet, oras: g.oras, zona: g.zona } },
+      create: { luna, judet: g.judet, oras: g.oras, zona: g.zona, ...date },
+      update: date,
+    });
+    scrise++;
+  }
+  return { luna, scrise };
+}

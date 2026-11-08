@@ -1,0 +1,9 @@
+[Unit]
+Description=CheiaMea - feed-urile agențiilor, la fiecare 3 ore
+
+[Timer]
+OnCalendar=*-*-* 00/3:20:00 Europe/Bucharest
+Persistent=true
+
+[Install]
+WantedBy=timers.target
