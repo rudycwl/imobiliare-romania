@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Același feed de test după o zi: TEST-1 s-a ieftinit, TEST-2 s-a închiriat (nu mai e în feed). -->
+<anunturi>
+  <anunt>
+    <id>TEST-1</id>
+    <titlu>Apartament 2 camere Tătărași, renovat (test feed)</titlu>
+    <descriere>Decomandat, etaj 2/4, centrală proprie. Anunț de test.</descriere>
+    <tip>apartament</tip>
+    <tranzactie>vanzare</tranzactie>
+    <pret moneda="EUR">85000</pret>
+    <suprafata>54</suprafata>
+    <camere>2</camere>
+    <judet>Iași</judet>
+    <oras>Iași</oras>
+    <zona>Tătărași</zona>
+  </anunt>
+  <anunt>
+    <id>TEST-3</id>
+    <titlu>Casă 4 camere Bucium cu teren (test feed)</titlu>
+    <tip>casa</tip>
+    <tranzactie>vanzare</tranzactie>
+    <pret moneda="RON">750000</pret>
+    <suprafata>120</suprafata>
+    <camere>4</camere>
+    <judet>Iasi</judet>
+    <oras>Iasi</oras>
+    <zona>Bucium</zona>
+  </anunt>
+</anunturi>
