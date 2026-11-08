@@ -36,6 +36,10 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .pret.mare { font-size: 1.6rem; margin-bottom: 12px; }
 .pret-lei { color: var(--muted); font-size: .85rem; }
 .pret.mare + .pret-lei { margin: -8px 0 12px; font-size: .95rem; }
+.eticheta-pret.scazut { display: inline-block; margin: 0 0 12px; padding: 3px 10px; border-radius: 999px; background: #dcfce7; color: #166534; font-size: .85rem; font-weight: 700; }
+.aceeasi-proprietate { margin: 14px 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); font-size: .9rem; }
+.aceeasi-proprietate p { margin: 0 0 6px; }
+.aceeasi-proprietate ul { margin: 0; padding-left: 18px; }
 .anunt { display: grid; grid-template-columns: 3fr 2fr; gap: 24px; }
 .anunt-img { height: 340px; border-radius: 12px; }
 .detalii { border-collapse: collapse; margin-bottom: 16px; }
@@ -629,3 +633,4 @@ a:hover .sageata { transform: translateX(4px); }
   .profesionist .buton-plin:not(.buton-plin-alb), .erou-card .buton-plin { background: var(--portocaliu); color: #0b2545; }
 }
 .descriere-anunt { white-space: pre-line; overflow-wrap: anywhere; }
+@media (prefers-color-scheme: dark) { .eticheta-pret.scazut { background: #14532d; color: #bbf7d0; } }
