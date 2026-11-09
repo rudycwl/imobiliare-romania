@@ -24,9 +24,11 @@ export const coeficient = (zona: Zona, rang: Rang) => COEFICIENTI[zona][RANGURI.
 
 /** Municipiile de rang I (Legea 351/2001); Bucureștiul are rang 0, celelalte reședințe de județ rang II. */
 const RANG_I = new Set(["bacau", "brasov", "braila", "cluj-napoca", "constanta", "craiova", "galati", "iasi", "oradea", "ploiesti", "timisoara"]);
+/** Orașele (nu municipiile) din listă au de regulă rangul III (Legea 351/2001), ex. Buftea (reședința Ilfov), Recaș. */
+const RANG_III = new Set(["buftea", "recas"]);
 export function rangImplicit(judet: string, oras?: string): Rang {
   if (!oras) return judet === "bucuresti" ? "0" : "II";
-  return RANG_I.has(oras) ? "I" : "II";
+  return RANG_I.has(oras) ? "I" : RANG_III.has(oras) ? "III" : "II";
 }
 
 export type DateCladire = {
