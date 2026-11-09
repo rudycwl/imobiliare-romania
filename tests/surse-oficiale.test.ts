@@ -31,6 +31,17 @@ test("orașele cu impozite există în lista de județe și au căi unice", () =
   assert.equal(impoziteOras("iasi", "pascani"), undefined);
 });
 
+// Calculatorul de pe pagina orașului ia prima cotă din listă, deci ea trebuie să fie cea pentru locuințe.
+test("prima cotă a fiecărui oraș e cea pentru locuințe, între 0,08% și 0,2%", () => {
+  for (const o of ORASE_IMPOZITE) {
+    assert.match(o.cote[0].ce, /^Locuin/, o.nume);
+    const cota = Number(o.cote[0].valoare.match(/(\d+(?:,\d+)?)\s*%/)?.[1].replace(",", "."));
+    assert.ok(cota >= 0.08 && cota <= 0.2, `${o.nume}: ${o.cote[0].valoare}`);
+  }
+  assert.equal(impoziteOras("buzau", "buzau")?.cote[0].valoare, "0,12%");
+  assert.equal(impoziteOras("ilfov", "buftea")?.hotarare.startsWith("HCL nr. 185"), true);
+});
+
 // Știrile de piață: doar presa aprobată de Rudy (25.10.2026). BZI și Antena 3 sunt excluse.
 test("știrile de piață vin doar din presa aprobată și au dată", () => {
   for (const s of STIRI_PIATA) {
