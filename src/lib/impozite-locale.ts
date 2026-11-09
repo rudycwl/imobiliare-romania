@@ -767,7 +767,7 @@ export const ORASE_IMPOZITE: ImpoziteOras[] = [
     ],
     bonificatie: "10% pentru plata integrală până la 31 martie 2026 (clădiri, teren, mașini; art. 3 din hotărâre)",
     note: [
-      "Buftea este oraș (reședința județului Ilfov), nu municipiu, așa că în calculator alege rangul localității potrivit (de obicei III).",
+      "Buftea este oraș (reședința județului Ilfov), nu municipiu; calculatorul pornește de la rangul III (îl poți schimba dacă e cazul).",
       "Zonele de impozitare din oraș sunt stabilite prin HCL nr. 170/2025.",
     ],
     surse: [{ nume: "HCL nr. 185/2025 (primariabuftea.ro, PDF)", url: "https://primariabuftea.ro/hcl/2025/185.pdf" }],
