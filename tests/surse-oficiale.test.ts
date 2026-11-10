@@ -40,6 +40,9 @@ test("prima cotă a fiecărui oraș e cea pentru locuințe, între 0,08% și 0,2
   }
   assert.equal(impoziteOras("buzau", "buzau")?.cote[0].valoare, "0,12%");
   assert.equal(impoziteOras("ilfov", "buftea")?.hotarare.startsWith("HCL nr. 185"), true);
+  assert.equal(impoziteOras("arad", "arad")?.cote[0].valoare, "0,15%");
+  assert.equal(impoziteOras("valcea", "ramnicu-valcea")?.cote[0].valoare, "0,12%");
+  assert.equal(impoziteOras("mehedinti", "drobeta-turnu-severin")?.hotarare.startsWith("HCL nr. 97"), true);
 });
 
 // Știrile de piață: doar presa aprobată de Rudy (25.10.2026). BZI și Antena 3 sunt excluse.
