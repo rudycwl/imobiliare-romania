@@ -34,6 +34,8 @@ model Utilizator {
   adresa               String?
   culoare              String            @default("#0b6bcb")
   creatLa              DateTime          @default(now())
+  /// Ultima modificare (pentru sincronizarea cu ERP-ul Hugetech: /api/erp?de=…).
+  actualizatLa         DateTime          @default(now()) @updatedAt
   /// Agenție Fondatoare: una din primele 100 de agenții înscrise până la 31.12.2026.
   fondator             Boolean           @default(false)
   /// Până când abonamentul de agenție e gratuit (6 luni pentru fondatori).
@@ -218,6 +220,8 @@ model Vizita {
 model Factura {
   id           Int         @id @default(autoincrement())
   creatLa      DateTime    @default(now())
+  /// Ultima modificare (storno, e-Factura, reemitere) – pentru sincronizarea cu ERP-ul.
+  actualizatLa DateTime    @default(now()) @updatedAt
   /// factura | storno
   tip          String      @default("factura")
   /// in-asteptare (neemisă încă) | emisa | eroare | stornata
@@ -247,6 +251,7 @@ model Factura {
 
   @@unique([seria, numar])
   @@index([creatLa])
+  @@index([actualizatLa])
   @@index([stare])
   @@index([utilizatorId])
 }
@@ -256,6 +261,8 @@ model Comanda {
   /// Trimis la NETOPIA ca orderID și folosit ca plataRef pe factură.
   id           String     @id
   creatLa      DateTime   @default(now())
+  /// Ultima modificare (ex. plată respinsă după 5 minute) – pentru sincronizarea cu ERP-ul.
+  actualizatLa DateTime   @default(now()) @updatedAt
   utilizatorId String
   utilizator   Utilizator @relation(fields: [utilizatorId], references: [id], onDelete: Cascade)
   /// promovare | abonament
@@ -275,6 +282,7 @@ model Comanda {
   stareNetopia Int?
 
   @@index([utilizatorId, creatLa])
+  @@index([actualizatLa])
 }
 
 /// „Raportează anunțul”, trimis de vizitatori. O singură raportare per anunț și vizitator.
