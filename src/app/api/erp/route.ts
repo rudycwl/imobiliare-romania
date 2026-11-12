@@ -4,7 +4,8 @@ import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-// Date pentru ERP-ul Hugetech (doar citire). ERP-ul cere la 10 minute ce s-a schimbat de la ultima sincronizare:
+// Date pentru ERP-ul Hugetech (doar citire). ERP-ul cere la 10 minute ce s-a schimbat de la ultima sincronizare
+// (create, plătite, emise SAU modificate după `de` – câmpul actualizatLa: storno, e-Factura, plăți respinse, conturi):
 //   GET /api/erp?de=2026-10-01T00:00:00Z   cu antetul X-ERP-Key: <ERP_KEY din pagina /configurare>
 // Fără `de` se întorc toate datele (prima sincronizare).
 
@@ -27,14 +28,14 @@ export async function GET(req: NextRequest) {
 
   const [comenzi, facturi, utilizatori, toateId, idComenzi, idFacturi, pePeTip, anunturiActive, anunturiVerificare, vizite30] = await Promise.all([
     db.comanda.findMany({
-      where: { OR: [{ creatLa: { gte: de } }, { platitaLa: { gte: de } }] },
+      where: { OR: [{ creatLa: { gte: de } }, { platitaLa: { gte: de } }, { actualizatLa: { gte: de } }] },
       orderBy: { creatLa: "asc" },
       include: { utilizator: { select: { id: true, nume: true, email: true, tip: true } } },
     }),
-    db.factura.findMany({ where: { OR: [{ creatLa: { gte: de } }, { emisaLa: { gte: de } }] }, orderBy: { creatLa: "asc" } }),
-    // Conturile noi, plus toate agențiile (ca abonamentul și data expirării să fie mereu la zi în ERP).
+    db.factura.findMany({ where: { OR: [{ creatLa: { gte: de } }, { emisaLa: { gte: de } }, { actualizatLa: { gte: de } }] }, orderBy: { creatLa: "asc" } }),
+    // Conturile noi sau modificate, plus toate agențiile (ca abonamentul și data expirării să fie mereu la zi în ERP).
     db.utilizator.findMany({
-      where: { stersLa: null, OR: [{ creatLa: { gte: de } }, { tip: "agentie" }] },
+      where: { stersLa: null, OR: [{ creatLa: { gte: de } }, { actualizatLa: { gte: de } }, { tip: "agentie" }] },
       select: {
         id: true, tip: true, nume: true, contact: true, email: true, emailConfirmatLa: true, telefon: true, judet: true, oras: true, cui: true, creatLa: true,
         fondator: true, gratuitPanaLa: true, abonament: true, abonamentPanaLa: true, plataAnuala: true, sursa: true,
@@ -62,12 +63,14 @@ export async function GET(req: NextRequest) {
     },
     comenzi: comenzi.map((c) => ({
       id: c.id, creatLa: c.creatLa, platitaLa: c.platitaLa, tip: c.tip, produs: c.produs, descriere: c.descriere, anual: c.anual,
-      anuntId: c.anuntId, sumaBani: c.sumaBani, stare: c.stare, client: c.utilizator,
+      anuntId: c.anuntId, sumaBani: c.sumaBani, stare: c.stare, client: c.utilizator, actualizatLa: c.actualizatLa,
     })),
     facturi: facturi.map((f) => ({
       id: f.id, creatLa: f.creatLa, tip: f.tip, stare: f.stare, plataRef: f.plataRef, seria: f.seria, numar: f.numar, emisaLa: f.emisaLa,
       totalBani: f.totalBani, cotaTva: f.cotaTva, eFactura: f.eFactura, linkPdf: f.linkPdf, eroare: f.eroare, utilizatorId: f.utilizatorId,
-      cumparator: f.cumparator,
+      cumparator: f.cumparator, actualizatLa: f.actualizatLa,
+      // Pentru storno: factura stornată (de aici ERP-ul ajunge la plată prin plataRef-ul ei).
+      referintaId: f.referintaId,
     })),
     utilizatori: utilizatori.map(({ _count, ...u }) => ({ ...u, anunturi: _count.anunturi })),
     idUtilizatori: toateId.map((u) => u.id),
