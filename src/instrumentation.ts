@@ -10,7 +10,7 @@ export async function register() {
   void actualizeazaStariEFactura().catch((e) => console.error("Starea e-Factura:", e));
 }
 
-// Next.js apelează onRequestError pentru orice eroare din pagini, acțiuni și rute API: adminii primesc un email.
+// Next.js apelează onRequestError pentru orice eroare din pagini, acțiuni și rute API: eroarea se păstrează pentru ERP (/api/erp/erori).
 export const onRequestError: Instrumentation.onRequestError = async (err, request, context) => {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
   const e = err instanceof Error ? err : new Error(String(err));

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ipClient, noteaza, permis } from "@/lib/limita";
 import { raporteazaEroare } from "@/lib/raport-erori";
 
-/** Erorile din browser (pagina „Ceva n-a mers”) ajung aici și pleacă pe email la admini. Cel mult 5 pe oră de la o conexiune. */
+/** Erorile din browser (pagina „Ceva n-a mers”) ajung aici și se păstrează pentru ERP (/api/erp/erori). Cel mult 5 pe oră de la o conexiune. */
 export async function POST(req: Request) {
   const ip = await ipClient();
   if (!permis(`eroare:${ip}`, 5, 60 * 60_000)) return new NextResponse(null, { status: 429 });
