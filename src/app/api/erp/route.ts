@@ -1,6 +1,6 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
+import { cheieBuna } from "@/lib/cheie-erp";
 
 export const dynamic = "force-dynamic";
 
@@ -10,13 +10,6 @@ export const dynamic = "force-dynamic";
 // Fără `de` se întorc toate datele (prima sincronizare).
 
 const ZI = 864e5;
-
-function cheieBuna(primita: string | null) {
-  const asteptata = process.env.ERP_KEY?.trim();
-  if (!asteptata || !primita) return false;
-  const h = (s: string) => createHash("sha256").update(s).digest();
-  return timingSafeEqual(h(primita), h(asteptata));
-}
 
 export async function GET(req: NextRequest) {
   // Fără cheie setată pe site răspundem altfel decât la o cheie greșită, ca ERP-ul să arate cauza exactă.
