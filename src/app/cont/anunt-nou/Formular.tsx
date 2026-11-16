@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { Localitate } from "@/components/Localitate";
 import { AlegePunct } from "@/components/harta/AlegePunct";
 import { TIPURI, TRANZACTII } from "@/lib/etichete";
@@ -8,10 +8,24 @@ import type { AnuntImportat } from "@/lib/import-anunt";
 import { editeazaAnunt, publicaAnunt } from "../actiuni";
 import { importaAnunt } from "./import";
 
-function ImportAnunt({ laImport, agentie }: { laImport: (v: AnuntImportat) => void; agentie: boolean }) {
-  const [link, setLink] = useState("");
+function ImportAnunt({ laImport, agentie, linkInitial }: { laImport: (v: AnuntImportat) => void; agentie: boolean; linkInitial?: string }) {
+  const [link, setLink] = useState(linkInitial ?? "");
   const [eroare, setEroare] = useState<string>();
   const [inLucru, porneste] = useTransition();
+  const importa = (l: string) =>
+    porneste(async () => {
+      const r = await importaAnunt(l);
+      setEroare(r.eroare);
+      if (r.valori) laImport(r.valori);
+    });
+  // Venit din pagina de import (feed cu linkul unui anunț): importăm direct, fără alt clic.
+  const pornit = useRef(false);
+  useEffect(() => {
+    if (linkInitial && !pornit.current) {
+      pornit.current = true;
+      importa(linkInitial);
+    }
+  }, [linkInitial]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="import-box">
       {agentie ? (
@@ -40,13 +54,7 @@ function ImportAnunt({ laImport, agentie }: { laImport: (v: AnuntImportat) => vo
           type="button"
           className="secundar"
           disabled={inLucru || !link}
-          onClick={() =>
-            porneste(async () => {
-              const r = await importaAnunt(link);
-              setEroare(r.eroare);
-              if (r.valori) laImport(r.valori);
-            })
-          }
+          onClick={() => importa(link)}
         >
           {inLucru ? "Se importă…" : "Importă"}
         </button>
@@ -93,7 +101,7 @@ function PozeImportate({ poze, setPoze }: { poze: string[]; setPoze: (p: string[
   );
 }
 
-export function FormularAnunt({ judet, oras, poateImporta, agentie = false }: { judet: string; oras: string; poateImporta: boolean; agentie?: boolean }) {
+export function FormularAnunt({ judet, oras, poateImporta, agentie = false, linkInitial }: { judet: string; oras: string; poateImporta: boolean; agentie?: boolean; linkInitial?: string }) {
   const [importat, setImportat] = useState<AnuntImportat>();
   const [cheie, setCheie] = useState(0);
   return (
@@ -101,6 +109,7 @@ export function FormularAnunt({ judet, oras, poateImporta, agentie = false }: { 
       {poateImporta && (
         <ImportAnunt
           agentie={agentie}
+          linkInitial={linkInitial}
           laImport={(v) => {
             setImportat(v);
             setCheie((k) => k + 1);

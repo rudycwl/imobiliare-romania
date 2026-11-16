@@ -9,7 +9,9 @@ import { FormularAnunt } from "./Formular";
 
 export const metadata: Metadata = { title: "Adaugă anunț" };
 
-export default async function AnuntNouPage() {
+export default async function AnuntNouPage({ searchParams }: { searchParams: Promise<{ link?: string }> }) {
+  const { link } = await searchParams;
+  const linkInitial = typeof link === "string" && /^https?:\/\//i.test(link) ? link.slice(0, 500) : undefined;
   const u = await utilizatorCurent();
   if (!u) redirect("/cont/inregistrare");
   if (!u.emailConfirmat) {
@@ -45,7 +47,7 @@ export default async function AnuntNouPage() {
   return (
     <div className="ingust">
       <h1>Adaugă anunț</h1>
-      <FormularAnunt judet={u.judet} oras={u.oras} poateImporta agentie={u.tip === "agentie"} />
+      <FormularAnunt judet={u.judet} oras={u.oras} poateImporta agentie={u.tip === "agentie"} linkInitial={linkInitial} />
     </div>
   );
 }
