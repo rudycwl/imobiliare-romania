@@ -17,6 +17,8 @@ import { ButonTelefon, Vizualizare } from "./Statistica";
 import { Favorit } from "@/components/Favorit";
 import { HartaLoc } from "@/components/harta/HartaLoc";
 import { Galerie } from "@/components/Galerie";
+import { extrageCaracteristici, localizare, randuriCaracteristici, textLocalizare } from "@/lib/anunt-format";
+import { Caracteristici, Descriere, TextLocalizare } from "./Detalii";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -65,6 +67,11 @@ export default async function AnuntPage({ params }: Props) {
     );
   const [poze, curs, istoric, altele] = await Promise.all([pozeAnunt(a.id), cursEuro(), istoricPret(a.id), aceeasiProprietate(a)]);
   const ev = evolutiePret(istoric, a.pret, a.publicatLa);
+  const loc = localizare(a.zona, o.nume, j.nume, j.slug);
+  const caracteristici = randuriCaracteristici(a, extrageCaracteristici(a.descriere), {
+    tranzactie: TRANZACTII[a.tranzactie],
+    tip: TIPURI[a.tip],
+  });
   return (
     <>
       <Breadcrumbs
@@ -101,13 +108,10 @@ export default async function AnuntPage({ params }: Props) {
               Preț scăzut cu {ev.scadere.procent}% (de la {formatPret({ pret: ev.scadere.dela, tranzactie: a.tranzactie })})
             </p>
           )}
+          <Caracteristici randuri={caracteristici} />
           <table className="detalii">
             <tbody>
-              <tr><th>Tranzacție</th><td>{TRANZACTII[a.tranzactie]}</td></tr>
-              <tr><th>Tip</th><td>{TIPURI[a.tip]}</td></tr>
-              <tr><th>Suprafață</th><td>{a.suprafata} m²</td></tr>
-              {a.camere && <tr><th>Camere</th><td>{a.camere}</td></tr>}
-              <tr><th>Localizare</th><td>{a.zona}, <Link href={`/${j.slug}/${o.slug}`}>{o.nume}</Link>, {j.nume}</td></tr>
+              <tr><th>Localizare</th><td><TextLocalizare l={loc} href={`/${j.slug}/${o.slug}`} bucuresti={j.slug === "bucuresti"} /></td></tr>
               <tr><th>Publicat</th><td>{a.publicatLa.toLocaleDateString("ro-RO")} · pe piață de {ev.zile === 1 ? "o zi" : `${ev.zile} zile`}</td></tr>
               {ev.schimbari.length > 1 && (
                 <tr>
@@ -124,7 +128,7 @@ export default async function AnuntPage({ params }: Props) {
               )}
             </tbody>
           </table>
-          <p className="descriere-anunt">{a.descriere}</p>
+          <Descriere text={a.descriere} />
           <Vanzator u={u} />
           <div className="actiuni-anunt">
             <ButonTelefon id={a.id} />
@@ -161,7 +165,7 @@ export default async function AnuntPage({ params }: Props) {
               datePosted: a.publicatLa.toISOString(),
               image: poze.map((p) => new URL(urlPublic(p.cheie), SITE).toString()),
               offers: { "@type": "Offer", price: a.pret, priceCurrency: "EUR", availability: "https://schema.org/InStock" },
-              contentLocation: { "@type": "Place", name: `${a.zona}, ${o.nume}, ${j.nume}` },
+              contentLocation: { "@type": "Place", name: textLocalizare(loc, j.slug) },
             }).replace(/</g, "\\u003c"),
           }}
         />
