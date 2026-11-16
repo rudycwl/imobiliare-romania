@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { anuntDinPagina, decodeaza, esteLinkAnuntAgentie, paginaDisparuta, valoriFormular, judetPentruOras, listaAnunturi, paginiDeListaDinSitemap, robotsPermite } from "@/lib/import-site-softimobiliar";
+import { anuntDinPagina, decodeaza, esteLinkAnuntAgentie, paginaDisparuta, pozeDinSite, valoriFormular, judetPentruOras, listaAnunturi, paginiDeListaDinSitemap, robotsPermite } from "@/lib/import-site-softimobiliar";
 
 // Pagină sintetică după șablonul Soft Imobiliar (aceleași clase și structură, date inventate).
 const PAGINA = `<!doctype html><html><head><base href="https://agentie.test/" />
@@ -98,4 +98,28 @@ test("import din link (ca la OLX): linkul, pagina dispărută și valorile formu
   assert.equal(v.tranzactie, "vanzare");
   assert.equal(v.camere, "3");
   assert.ok(!("poze" in v));
+});
+
+test("pozele din import: doar galeria de pe același site, JPG/WebP, fără dubluri, cel mult max", () => {
+  const link = "https://agentie.test/apartament-3-camere-de-vanzare-tudor-vladimirescu-iasi-900.html";
+  const r = anuntDinPagina(PAGINA, link);
+  assert.ok("rand" in r);
+  assert.deepEqual(pozeDinSite(r.rand.poze.split(" "), link, 10), [
+    "https://agentie.test/images/propertiessite/img_900_1.jpg",
+    "https://agentie.test/images/propertiessite/img_900_2.jpg",
+  ]);
+  const lista = [
+    "https://www.agentie.test/a/1.jpeg",
+    "https://agentie.test/a/1.jpeg",
+    "https://agentie.test/a/1.jpeg",
+    "http://agentie.test/a/2.jpg",
+    "https://alt-site.test/a/3.jpg",
+    "https://agentie.test/a/4.png",
+    "https://user:p@agentie.test/a/5.jpg",
+    "https://agentie.test/a/6.webp",
+    "https://agentie.test/a/7.jpg",
+  ];
+  assert.deepEqual(pozeDinSite(lista, link, 10), ["https://www.agentie.test/a/1.jpeg", "https://agentie.test/a/1.jpeg", "https://agentie.test/a/6.webp", "https://agentie.test/a/7.jpg"]);
+  assert.equal(pozeDinSite(lista, link, 2).length, 2);
+  assert.deepEqual(pozeDinSite(lista, "nu e link", 10), []);
 });

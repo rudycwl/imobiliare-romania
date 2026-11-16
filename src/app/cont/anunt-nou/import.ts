@@ -3,7 +3,8 @@
 import { utilizatorCurent } from "@/lib/auth";
 import { cursEuro } from "@/lib/curs";
 import { anuntIndisponibil, extrageAnunt, numeSite, urlPermis, SITE_IMPORT, type AnuntImportat } from "@/lib/import-anunt";
-import { anuntDinPagina, esteLinkAnuntAgentie, valoriFormular } from "@/lib/import-site-softimobiliar";
+import { anuntDinPagina, esteLinkAnuntAgentie, pozeDinSite, valoriFormular } from "@/lib/import-site-softimobiliar";
+import { MAX_POZE } from "@/lib/poze";
 import { descarcaPaginaAgentie } from "@/lib/pagina-agentie";
 
 export type RezultatImport = { eroare?: string; valori?: AnuntImportat };
@@ -64,7 +65,9 @@ async function importaDeLaAgentie(link: string, u: { judet: string; oras: string
     }
     const valori = valoriFormular(r.rand);
     if (!valori.titlu) return { eroare: "Nu am găsit datele anunțului pe pagină. Completează manual." };
-    return { valori: { ...valori, sursa: p.final.toString() } };
+    const sursa = p.final.toString();
+    const poze = pozeDinSite((r.rand.poze ?? "").split(/\s+/), sursa, MAX_POZE);
+    return { valori: { ...valori, sursa, ...(poze.length ? { poze: poze.join(" ") } : {}) } };
   } catch (e) {
     const nostru = e instanceof Error && !["TimeoutError", "AbortError", "TypeError"].includes(e.name);
     return { eroare: nostru ? `${(e as Error).message} Încearcă din nou sau completează manual.` : "Site-ul agenției nu a răspuns la timp. Încearcă din nou sau completează manual." };

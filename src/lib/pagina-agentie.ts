@@ -1,6 +1,6 @@
 import { lookup } from "dns/promises";
 import { ipPrivat } from "./ip";
-import { paginaDisparuta, robotsPermite, USER_AGENT_SITE } from "./import-site-softimobiliar";
+import { paginaDisparuta, pozeDinSite, robotsPermite, USER_AGENT_SITE } from "./import-site-softimobiliar";
 
 // Descărcarea unei pagini de anunț de pe site-ul unei agenții (importul din link, ca la OLX).
 // Doar adrese publice, User-Agent identificabil, robots.txt respectat, cel mult o cerere la 1,5 s pe același site.
@@ -60,4 +60,21 @@ export async function descarcaPaginaAgentie(link: string): Promise<PaginaAgentie
     return { stare: "ok", html: date.toString("utf-8"), final: adresa };
   }
   throw new Error("Prea multe redirecționări.");
+}
+
+/** Pozele din import nu trec prin micșorarea din browser: aceeași limită ca la importul din fișier (src/lib/import-masa.ts). */
+export const MAX_POZA_SITE = 6 * 1024 * 1024;
+
+/** O poză din galeria anunțului (același site, robots.txt, User-Agent, pauză, adresă publică, JPG/WebP, max. 6 MB). */
+export async function descarcaPozaAgentie(url: string, sursa: string): Promise<{ date: Buffer; tip: string } | null> {
+  if (!pozeDinSite([url], sursa, 1).length) return null;
+  const u = new URL(url);
+  if (!robotsPermite(await robots(u), u.pathname)) return null;
+  const r = await cerere(u, "image/jpeg,image/webp,image/*;q=0.8").catch(() => null);
+  if (!r?.ok) return null;
+  const tip = (r.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase().replace("image/jpg", "image/jpeg");
+  if (tip !== "image/jpeg" && tip !== "image/webp") return null;
+  if (Number(r.headers.get("content-length") ?? 0) > MAX_POZA_SITE) return null;
+  const date = Buffer.from(await r.arrayBuffer());
+  return date.length && date.length <= MAX_POZA_SITE ? { date, tip } : null;
 }

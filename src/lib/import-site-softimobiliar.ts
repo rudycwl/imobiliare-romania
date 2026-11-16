@@ -306,3 +306,32 @@ export function valoriFormular(rand: Record<string, string>): Record<string, str
   };
   return Object.fromEntries(Object.entries(v).filter(([, x]) => x));
 }
+
+const faraWww = (h: string) => h.toLowerCase().replace(/^www\./, "");
+
+/**
+ * Pozele unui anunț importat din link: doar https, de pe același site ca anunțul, JPG/JPEG/WebP, fără dubluri, cel mult `max`.
+ * Se aplică și la publicare, pe lista trimisă din formular (agenția a putut scoate sau reordona poze, nu adăuga altele).
+ */
+export function pozeDinSite(urls: string[], sursa: string, max: number): string[] {
+  let host: string;
+  try {
+    host = faraWww(new URL(sursa).hostname);
+  } catch {
+    return [];
+  }
+  const out: string[] = [];
+  for (const raw of urls) {
+    try {
+      const u = new URL(raw.trim());
+      if (u.protocol !== "https:" || u.username || u.password || faraWww(u.hostname) !== host) continue;
+      if (!/\.(jpe?g|webp)$/i.test(u.pathname)) continue;
+      const s = u.toString();
+      if (!out.includes(s)) out.push(s);
+    } catch {
+      /* link invalid */
+    }
+    if (out.length >= max) break;
+  }
+  return out;
+}

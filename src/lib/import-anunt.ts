@@ -17,6 +17,8 @@ export type AnuntImportat = Partial<{
   zona: string;
   /** Linkul paginii de pe site-ul agenției (importul din link pentru agenții). */
   sursa: string;
+  /** Linkurile pozelor din galeria paginii, despărțite prin spațiu (se descarcă la publicare). */
+  poze: string;
 }>;
 
 export function urlPermis(raw: string): URL | null {

@@ -16,6 +16,7 @@ import { anuntaAgentieNoua, aplicaOfertaFondator } from "@/lib/fondatori";
 import { aplicaRecomandare } from "@/lib/atribuire";
 import { aplicaFiltru } from "@/lib/moderare";
 import { stocareConfigurata } from "@/lib/stocare";
+import { atasazaPozeDinSite } from "@/lib/poze-agentie";
 import { completeazaCoordonate } from "@/lib/geocodare";
 import { ipClient, noteaza, permis, sterge } from "@/lib/limita";
 import { trimiteConfirmare } from "@/lib/confirmare";
@@ -185,6 +186,10 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   if (!(await poatePublica(u))) return esec(MESAJ_LIMITA, f);
 
   const a = await creeazaAnunt(u.id, r.date, citestePunct(f));
+  // Anunț importat din link de pe site-ul agenției: pozele rămase în formular (ordinea aleasă) se descarcă și se urcă acum.
+  const sursa = text(f, "sursa");
+  const pozeSursa = text(f, "pozeSursa").split(/\s+/).filter(Boolean);
+  if (u.tip === "agentie" && sursa && pozeSursa.length) await atasazaPozeDinSite(a.id, sursa, pozeSursa).catch((e) => console.error("poze agenție", e));
   after(() => completeazaCoordonate());
   await aplicaFiltru(a.id, r.date.titlu, r.date.descriere);
   // Paginile cache-uite (ISR) arată anunțul nou imediat, nu după expirare.
