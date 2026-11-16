@@ -57,7 +57,9 @@ test("moneda necunoscută și prețul în lei fără curs dau eroare pe anunț",
 });
 
 test("fișier care nu e feed", () => {
-  assert.throws(() => citesteFeed("<html><body>nimic</body></html>", null), /Nu am găsit anunțuri/);
+  assert.throws(() => citesteFeed("<html><body>nimic</body></html>", null), /pagină web/);
+  assert.throws(() => citesteFeed("<!DOCTYPE html><html><body>anunț</body></html>", null), /pagină web/);
+  assert.throws(() => citesteFeed("<?xml version='1.0'?><anunturi></anunturi>", null), /Nu am găsit anunțuri/);
 });
 
 test("numerele din feed", () => {
