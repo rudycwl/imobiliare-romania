@@ -338,7 +338,7 @@ a:hover .sageata { transform: translateX(4px); }
 
 /* Pagina de start iese din .container ca benzile colorate să fie pe toată lățimea. */
 .acasa { margin: 0 calc(50% - 50vw); }
-.acasa .container { padding: 0 24px; max-width: 1240px; }
+.acasa .container { padding: 0 24px; max-width: 1488px; }
 .banda { background: var(--portocaliu); color: #0b2545; overflow: hidden; font-size: .88rem; font-weight: 700; }
 .banda-pista { display: flex; width: max-content; animation: banda 45s linear infinite; }
 .banda-pista:hover { animation-play-state: paused; }
