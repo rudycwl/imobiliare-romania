@@ -8,20 +8,31 @@ import type { AnuntImportat } from "@/lib/import-anunt";
 import { editeazaAnunt, publicaAnunt } from "../actiuni";
 import { importaAnunt } from "./import";
 
-function ImportAnunt({ laImport }: { laImport: (v: AnuntImportat) => void }) {
+function ImportAnunt({ laImport, agentie }: { laImport: (v: AnuntImportat) => void; agentie: boolean }) {
   const [link, setLink] = useState("");
   const [eroare, setEroare] = useState<string>();
   const [inLucru, porneste] = useTransition();
   return (
     <div className="import-box">
-      <strong>Ai deja anunțul pe OLX, Storia, imobiliare.ro, Publi24 sau LaJumate?</strong>
-      <span className="muted small">Lipește linkul anunțului tău și completăm noi formularul. Tu verifici și publici. Anunțul trebuie să fie activ pe site-ul respectiv.</span>
+      {agentie ? (
+        <>
+          <strong>Ai anunțul pe site-ul agenției?</strong>
+          <span className="muted small">
+            Lipește linkul paginii anunțului de pe site-ul agenției și completăm noi formularul. Tu verifici și publici. Merge deocamdată cu site-urile făcute cu Soft Imobiliar.
+          </span>
+        </>
+      ) : (
+        <>
+          <strong>Ai deja anunțul pe OLX, Storia, imobiliare.ro, Publi24 sau LaJumate?</strong>
+          <span className="muted small">Lipește linkul anunțului tău și completăm noi formularul. Tu verifici și publici. Anunțul trebuie să fie activ pe site-ul respectiv.</span>
+        </>
+      )}
       <div className="rand">
         <input
           type="url"
           value={link}
           onChange={(e) => setLink(e.target.value)}
-          placeholder="https://www.olx.ro/d/oferta/..."
+          placeholder={agentie ? "https://www.agentia-ta.ro/apartament-…-12345.html" : "https://www.olx.ro/d/oferta/..."}
           aria-label="Linkul anunțului tău"
           style={{ flex: "1 1 260px" }}
         />
@@ -45,13 +56,14 @@ function ImportAnunt({ laImport }: { laImport: (v: AnuntImportat) => void }) {
   );
 }
 
-export function FormularAnunt({ judet, oras, poateImporta }: { judet: string; oras: string; poateImporta: boolean }) {
+export function FormularAnunt({ judet, oras, poateImporta, agentie = false }: { judet: string; oras: string; poateImporta: boolean; agentie?: boolean }) {
   const [importat, setImportat] = useState<AnuntImportat>();
   const [cheie, setCheie] = useState(0);
   return (
     <>
       {poateImporta && (
         <ImportAnunt
+          agentie={agentie}
           laImport={(v) => {
             setImportat(v);
             setCheie((k) => k + 1);
@@ -82,7 +94,11 @@ export function FormularCampuri({
     <form className="formular" action={actiune}>
       {editare && <input type="hidden" name="id" value={editare.id} />}
       {importat && (
-        <p className="succes small">Am completat ce am găsit în anunțul tău. Verifică fiecare câmp înainte să publici.</p>
+        <p className="succes small">
+          {importat.sursa && importat.titlu
+            ? `Am importat anunțul „${importat.titlu}” de pe site-ul agenției. Verifică fiecare câmp înainte să publici; pozele le adaugi după publicare.`
+            : "Am completat ce am găsit în anunțul tău. Verifică fiecare câmp înainte să publici."}
+        </p>
       )}
       <div className="rand">
         <label>

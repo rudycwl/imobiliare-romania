@@ -14,6 +14,9 @@ export type AnuntImportat = Partial<{
   tranzactie: string;
   judet: string;
   oras: string;
+  zona: string;
+  /** Linkul paginii de pe site-ul agenției (importul din link pentru agenții). */
+  sursa: string;
 }>;
 
 export function urlPermis(raw: string): URL | null {
