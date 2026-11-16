@@ -36,6 +36,7 @@ export type Caracteristici = {
   balcon?: string;
   incalzire?: string;
   mobilare?: string;
+  aerConditionat?: string;
   suprafataUtila?: number;
   suprafataTotala?: number;
 };
@@ -119,6 +120,16 @@ export function extrageCaracteristici(descriere: string, acum = new Date()): Car
     else if (ut) c.mobilare = "Utilat";
   }
 
+  // Aer condiționat: „două aparate de aer condiționat”, „AC în fiecare cameră”; nu „fără aer condiționat”.
+  if (!re("\\<f(?:ă|a)r(?:ă|a) aer condi(?:ț|ţ|t)ionat\\>").test(t)) {
+    const ac = t.match(re("\\<(?:(\\d+|un|o|unu|dou(?:ă|a)|doi|trei|patru)\\s+(?:aparate?|unit(?:ăți|ati|ate))\\s+(?:de\\s+)?)?aer(?:ul)?\\s+condi(?:ț|ţ|t)ionat\\>|\\<climatizare\\>|\\<(?:aparat|aparate) (?:de )?AC\\>"));
+    if (ac) {
+      const n: Record<string, number> = { un: 1, o: 1, unu: 1, doua: 2, "două": 2, doi: 2, trei: 3, patru: 4 };
+      const k = ac[1] ? (/^\d+$/.test(ac[1]) ? Number(ac[1]) : n[ac[1].toLowerCase()]) : undefined;
+      c.aerConditionat = k && k > 1 ? `Da, ${k} aparate` : "Da";
+    }
+  }
+
   // Suprafețe: „suprafață totală de 79,69 mp, din care 73,65 mp utili”, „suprafață utilă 60 mp”.
   const tot = t.match(re(`\\<suprafa(?:ț|ţ|t)(?:ă|a) total(?:ă|a)\\s*(?:de\\s+|:\\s*)?${NUM}\\s*${MP}`)) ?? t.match(re(`${NUM}\\s*${MP}\\s+(?:suprafață |suprafata )?total(?:i|e|ă|a)?\\>`));
   if (tot) c.suprafataTotala = Math.round(numar(tot[1]));
@@ -152,6 +163,7 @@ export function randuriCaracteristici(
   if (c.balcon) r.push({ eticheta: "Balcon", valoare: c.balcon });
   if (c.incalzire) r.push({ eticheta: "Încălzire", valoare: c.incalzire });
   if (c.mobilare) r.push({ eticheta: "Mobilare", valoare: c.mobilare });
+  if (c.aerConditionat) r.push({ eticheta: "Aer condiționat", valoare: c.aerConditionat });
   if (c.clasaEnergetica) r.push({ eticheta: "Clasă energetică", valoare: c.clasaEnergetica });
   return r;
 }
