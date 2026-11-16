@@ -30,9 +30,9 @@ async function actualizeazaCoperta(anuntId: number) {
   await db.anunt.update({ where: { id: anuntId }, data: { imagine } });
 }
 
-export async function adaugaPoza(anuntId: number, cheie: string) {
+export async function adaugaPoza(anuntId: number, cheie: string, sursaUrl?: string) {
   const ultima = await db.poza.findFirst({ where: { anuntId }, orderBy: { ordine: "desc" } });
-  await db.poza.create({ data: { anuntId, cheie, ordine: (ultima?.ordine ?? -1) + 1 } });
+  await db.poza.create({ data: { anuntId, cheie, ordine: (ultima?.ordine ?? -1) + 1, sursaUrl: sursaUrl ?? null } });
   await actualizeazaCoperta(anuntId);
 }
 
