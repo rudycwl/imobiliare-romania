@@ -1,6 +1,6 @@
 import "server-only";
 import { lookup } from "dns/promises";
-import { isIP } from "net";
+import { ipPrivat } from "./ip";
 import { db } from "./db";
 import { slugify, TIPURI, TRANZACTII } from "./etichete";
 import { getJudet, getOras } from "./geo";
@@ -10,6 +10,8 @@ import { aplicaFiltru } from "./moderare";
 import { LUNGIME } from "./lungimi";
 import { adaugaPoza, cheieNoua, MAX_POZE } from "./poze";
 import { salveazaLocal, stocareLocala } from "./stocare";
+
+export { ipPrivat };
 
 // Importul în masă pentru agenții: un fișier CSV (salvat din Excel sau exportat din programul agenției),
 // un rând pe anunț. Coloanele sunt cele din public/model-import-cheiamea.csv; ordinea nu contează.
@@ -104,12 +106,6 @@ export function citesteRand(r: Record<string, string>): { eroare: string } | { d
     },
     poze: (r.poze ?? "").split(/[\s|]+/).filter((u) => /^https:\/\//i.test(u)).slice(0, MAX_POZE),
   };
-}
-
-/** Doar adrese publice: serverul nu trebuie să poată fi folosit pentru a citi adrese din rețeaua internă. */
-export function ipPrivat(ip: string) {
-  if (isIP(ip) === 6) return /^(::1?$|f[cd]|fe80|::ffff:(10|127|169\.254|192\.168|172\.(1[6-9]|2\d|3[01]))\.)/i.test(ip);
-  return /^(0|10|127|169\.254|192\.168|172\.(1[6-9]|2\d|3[01])|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7]))\./.test(ip);
 }
 
 async function descarcaPoza(url: string): Promise<{ date: Buffer; tip: string } | null> {
