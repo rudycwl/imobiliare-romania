@@ -16,6 +16,7 @@ import { ActiuniProprietar } from "./ActiuniProprietar";
 import { ButonTelefon, Vizualizare } from "./Statistica";
 import { Favorit } from "@/components/Favorit";
 import { HartaLoc } from "@/components/harta/HartaLoc";
+import { Galerie } from "@/components/Galerie";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -82,14 +83,10 @@ export default async function AnuntPage({ params }: Props) {
       <Vizualizare id={a.id} />
       <div className="anunt">
         {poze.length ? (
-          <div className="galerie" aria-label="Pozele anunțului">
-            {poze.map((p, i) => (
-              <a key={p.id} href={urlPublic(p.cheie)} target="_blank" rel="noopener" title="Deschide poza mărită">
-                {/* eslint-disable-next-line @next/next/no-img-element -- pozele vin direct din stocare, nu prin Netlify */}
-                <img src={urlPublic(p.cheie)} alt={`${a.titlu}, poza ${i + 1} din ${poze.length}`} loading={i ? "lazy" : "eager"} />
-              </a>
-            ))}
-          </div>
+          <Galerie
+            eticheta="Pozele anunțului"
+            poze={poze.map((p, i) => ({ src: urlPublic(p.cheie), alt: `${a.titlu}, poza ${i + 1} din ${poze.length}` }))}
+          />
         ) : (
           <div className="anunt-img" style={{ background: a.imagine }}>
             <span>{TIPURI[a.tip]}</span>
