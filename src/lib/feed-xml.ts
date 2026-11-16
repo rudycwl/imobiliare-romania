@@ -203,6 +203,14 @@ export type FeedCitit = { anunturi: (RandFeed | { eroare: string; externId: stri
 
 /** Citește feed-ul; aruncă o eroare pe înțelesul agenției dacă fișierul nu e XML sau nu are anunțuri. */
 export function citesteFeed(xml: string, cursEuro: number | null): FeedCitit {
+  // Greșeala cea mai des întâlnită: linkul unui anunț sau al site-ului agenției (pagină HTML), nu linkul de export XML.
+  if (/^\s*(<!doctype\s+html|<html[\s>])/i.test(xml)) {
+    throw new Error(
+      "Linkul duce la o pagină web (de exemplu un anunț de pe site-ul agenției), nu la feed-ul XML. " +
+        "Ai nevoie de linkul de export XML din programul agenției (CRM), de obicei în setările de export către portaluri. " +
+        "Dacă vrei să adaugi doar un anunț, folosește „Adaugă anunț”.",
+    );
+  }
   let rad: unknown;
   try {
     rad = parser.parse(xml);
