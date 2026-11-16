@@ -11,6 +11,7 @@ import { completeazaCoordonate } from "./geocodare";
 import { salveazaIndiceLunar } from "./indice";
 import { citesteRand, importaRanduri, ipPrivat } from "./import-masa";
 import { aplicaFiltru } from "./moderare";
+import { actualizeazaDinSite } from "./actualizare-site";
 import { ZILE_VALABILITATE } from "./tarife";
 
 // Feed-urile XML ale agențiilor: serverul le citește la câteva ore (cheiamea-feeduri.timer → /api/feeduri).
@@ -221,9 +222,12 @@ export async function ruleazaFeeduri() {
   const feeduri = await db.feedAgentie.findMany({ where: { activ: true }, select: { id: true }, orderBy: { ultimaRulare: { sort: "asc", nulls: "first" } } });
   const rezultate: { id: number; raport: RaportFeed }[] = [];
   for (const f of feeduri) rezultate.push({ id: f.id, raport: await ruleazaFeed(f.id) });
+  // Anunțurile importate din link de pe site-ul agenției (Adaugă anunț → import din link).
+  const site = await actualizeazaDinSite().catch((e) => ({ eroare: String(e) }));
+  if (!("eroare" in site) && (site.actualizate || site.retrase)) reimprospateaza("/", "/cont");
   // Tot la 3 ore: fotografia lunii pentru evoluția prețurilor pe cartiere.
   const indice = await salveazaIndiceLunar().catch((e) => ({ eroare: String(e) }));
-  return { feeduri: rezultate.length, rezultate, indice };
+  return { feeduri: rezultate.length, rezultate, site, indice };
 }
 
 /** Anunțurile vechi (de dinainte de cheia de proprietate) primesc cheia, câte 2000 la o rulare. */

@@ -116,6 +116,17 @@ model Anunt {
   raportari           Raportare[]
   poze                Poza[]
   favorite            Favorit[]
+  /// Pagina anunțului de pe site-ul agenției (importul din link); de acolo se actualizează la 3 ore. null = fără sursă.
+  sursaLink           String?
+  /// Agenția poate opri actualizarea automată din cont (anunțul rămâne, nu se mai recitește pagina).
+  sursaActiva         Boolean       @default(true)
+  sursaVerificatLa    DateTime?
+  /// ok | disparut | eroare | interzis | retras (rezultatul ultimei verificări)
+  sursaStare          String?
+  /// De câte ori la rând pagina a lipsit (404 / trimite la listă); la 2 anunțul se retrage.
+  sursaDisparut       Int           @default(0)
+  /// Galeria de pe site la ultima verificare (linkuri despărțite prin spațiu): pozele se schimbă doar când ea se schimbă.
+  sursaPoze           String?
   /// Codul anunțului în programul agenției (CRM), pentru anunțurile venite prin feed sau API; null la cele scrise pe site.
   externId            String?
   /// Feed-ul din care a venit anunțul; null = publicat pe site, prin fișier sau prin API.
@@ -128,6 +139,7 @@ model Anunt {
   proprietar          Utilizator    @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
 
   @@unique([proprietarId, externId])
+  @@index([sursaLink])
   @@index([moderare])
   @@index([judet, oras, publicatLa])
   @@index([judet, oras, ordine])
@@ -303,13 +315,15 @@ model Raportare {
 
 /// O fotografie a unui anunț, stocată în afara Netlify (Cloudflare R2). Prima (ordine minimă) e coperta.
 model Poza {
-  id      Int      @id @default(autoincrement())
-  anuntId Int
-  anunt   Anunt    @relation(fields: [anuntId], references: [id], onDelete: Cascade)
+  id       Int      @id @default(autoincrement())
+  anuntId  Int
+  anunt    Anunt    @relation(fields: [anuntId], references: [id], onDelete: Cascade)
   /// Cheia obiectului în stocare, ex. anunturi/123/abc.webp
-  cheie   String   @unique
-  ordine  Int      @default(0)
-  creatLa DateTime @default(now())
+  cheie    String   @unique
+  ordine   Int      @default(0)
+  /// Linkul pozei pe site-ul agenției, la pozele preluate din link; null la cele încărcate de mână.
+  sursaUrl String?
+  creatLa  DateTime @default(now())
 
   @@index([anuntId, ordine])
 }

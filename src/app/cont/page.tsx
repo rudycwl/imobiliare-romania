@@ -7,7 +7,7 @@ import { cautaAnunturi } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
 import { formatData } from "@/lib/fondatori";
 import { db } from "@/lib/db";
-import { prelungeste, retrage, retrimiteConfirmare } from "./actiuni";
+import { comutaActualizareSite, prelungeste, retrage, retrimiteConfirmare } from "./actiuni";
 import { CadruCont } from "./CadruCont";
 import { formatPret } from "@/lib/etichete";
 import { credite } from "@/lib/abonamente";
@@ -160,6 +160,17 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
                           )}
                           {!expirat && <EtichetePromovare a={a} acum={acum} />}
                         </div>
+                        {a.sursaLink && (
+                          <div className="small muted">
+                            {a.sursaActiva ? "Actualizat automat de pe " : "Actualizarea automată e oprită · sursa: "}
+                            <a href={a.sursaLink} target="_blank" rel="noopener noreferrer">site-ul agenției</a>
+                            {a.sursaActiva &&
+                              ` · ultima verificare ${a.sursaVerificatLa ? a.sursaVerificatLa.toLocaleString("ro-RO", { timeZone: "Europe/Bucharest", dateStyle: "short", timeStyle: "short" }) : "încă nu"}`}
+                            {a.sursaActiva && a.sursaStare === "disparut" && " · pagina lipsește (se retrage dacă lipsește și la verificarea următoare)"}
+                            {a.sursaStare === "retras" && " · retras: pagina nu mai există pe site-ul agenției"}
+                            {a.sursaActiva && a.sursaStare === "eroare" && " · site-ul nu a răspuns la ultima verificare"}
+                          </div>
+                        )}
                         <div className="small statistici-anunt">👁 {cate(a.vizualizari, "vizualizare", "vizualizări")} · 📞 {cate(a.afisariTelefon, "apăsare", "apăsări")} pe „Sună”</div>
                       </div>
                     </div>
@@ -172,6 +183,12 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
                       <Link href={`/cont/anunt/${a.id}/poze`} className="buton buton-contur-inchis">Poze</Link>
                       {!expirat && <Link href={`/cont/promoveaza/${a.id}`} className="buton">Promovează</Link>}
                       {!expirat && <button type="submit" formAction={retrage} className="secundar">Retrage</button>}
+                      {a.sursaLink &&
+                        (a.sursaActiva ? (
+                          <button type="submit" formAction={comutaActualizareSite} className="secundar">Oprește actualizarea</button>
+                        ) : (
+                          <button type="submit" formAction={comutaActualizareSite} name="porneste" value="da" className="secundar">Pornește actualizarea</button>
+                        ))}
                     </form>
                   </li>
                 );

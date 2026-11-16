@@ -17,6 +17,7 @@ import { aplicaRecomandare } from "@/lib/atribuire";
 import { aplicaFiltru } from "@/lib/moderare";
 import { stocareConfigurata } from "@/lib/stocare";
 import { atasazaPozeDinSite } from "@/lib/poze-agentie";
+import { esteLinkAnuntAgentie } from "@/lib/import-site-softimobiliar";
 import { completeazaCoordonate } from "@/lib/geocodare";
 import { ipClient, noteaza, permis, sterge } from "@/lib/limita";
 import { trimiteConfirmare } from "@/lib/confirmare";
@@ -189,7 +190,11 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   // Anunț importat din link de pe site-ul agenției: pozele rămase în formular (ordinea aleasă) se descarcă și se urcă acum.
   const sursa = text(f, "sursa");
   const pozeSursa = text(f, "pozeSursa").split(/\s+/).filter(Boolean);
-  if (u.tip === "agentie" && sursa && pozeSursa.length) await atasazaPozeDinSite(a.id, sursa, pozeSursa).catch((e) => console.error("poze agenție", e));
+  if (u.tip === "agentie" && sursa && esteLinkAnuntAgentie(sursa)) {
+    // Legăm anunțul de pagina sursă: de acum se actualizează singur la 3 ore (src/lib/actualizare-site.ts).
+    await db.anunt.update({ where: { id: a.id }, data: { sursaLink: sursa.slice(0, 1000), sursaVerificatLa: new Date(), sursaStare: "ok" } });
+    if (pozeSursa.length) await atasazaPozeDinSite(a.id, sursa, pozeSursa).catch((e) => console.error("poze agenție", e));
+  }
   after(() => completeazaCoordonate());
   await aplicaFiltru(a.id, r.date.titlu, r.date.descriere);
   // Paginile cache-uite (ISR) arată anunțul nou imediat, nu după expirare.
@@ -247,4 +252,13 @@ export async function prelungeste(f: FormData) {
   if (a.expiraLa <= new Date() && !(await poatePublica(u))) redirect("/cont?eroare=limita#anunturile-mele");
   await prelungesteAnunt(id, u.id);
   dupaSchimbare(u, id);
+}
+
+/** „Oprește / pornește actualizarea automată” la un anunț importat din link de pe site-ul agenției. */
+export async function comutaActualizareSite(f: FormData) {
+  const { u, id } = await proprietarSiId(f);
+  const porneste = f.get("porneste") === "da";
+  await db.anunt.updateMany({ where: { id, proprietarId: u.id, sursaLink: { not: null } }, data: porneste ? { sursaActiva: true, sursaDisparut: 0 } : { sursaActiva: false } });
+  revalidatePath("/cont");
+  redirect("/cont#anunturile-mele");
 }

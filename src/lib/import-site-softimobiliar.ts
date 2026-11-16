@@ -335,3 +335,63 @@ export function pozeDinSite(urls: string[], sursa: string, max: number): string[
   }
   return out;
 }
+
+// ── Actualizarea periodică a anunțurilor importate din link (src/lib/actualizare-site.ts) ──
+
+export type Verificare = { tip: "ok"; externId: string; rand: Record<string, string> } | { tip: "disparut" } | { tip: "eroare"; motiv: string };
+export type Decizie = "actualizeaza" | "retrage" | "noteaza-disparut" | "nimic";
+
+/** La a câta lipsă la rând a paginii retragem anunțul. */
+export const LIPSURI_PANA_LA_RETRAGERE = 2;
+/** Peste acest procent de eșecuri la o agenție într-o rulare nu retragem nimic (site căzut, șablon schimbat). */
+export const PRAG_ESECURI = 0.3;
+/** Pragul se aplică de la atâtea anunțuri verificate la agenție; sub el ajunge regula „de 2 ori la rând”. */
+export const MIN_PENTRU_PRAG = 5;
+
+/**
+ * Ce facem cu fiecare anunț după verificarea paginilor. Site-ul care nu răspunde nu schimbă nimic;
+ * pagina dispărută se retrage abia a doua oară la rând și doar dacă agenția nu are prea multe eșecuri în rularea asta.
+ */
+export function decizii(lista: { anuntId: number; proprietarId: string; lipsuriInainte: number; v: Verificare }[]): Map<number, Decizie> {
+  const peAgentie = new Map<string, { total: number; esecuri: number }>();
+  for (const x of lista) {
+    const a = peAgentie.get(x.proprietarId) ?? { total: 0, esecuri: 0 };
+    a.total++;
+    if (x.v.tip !== "ok") a.esecuri++;
+    peAgentie.set(x.proprietarId, a);
+  }
+  const rez = new Map<number, Decizie>();
+  for (const x of lista) {
+    const a = peAgentie.get(x.proprietarId)!;
+    const protejat = a.total >= MIN_PENTRU_PRAG && a.esecuri / a.total > PRAG_ESECURI;
+    if (x.v.tip === "ok") rez.set(x.anuntId, "actualizeaza");
+    else if (x.v.tip === "eroare" || protejat) rez.set(x.anuntId, "nimic");
+    else rez.set(x.anuntId, x.lipsuriInainte + 1 >= LIPSURI_PANA_LA_RETRAGERE ? "retrage" : "noteaza-disparut");
+  }
+  return rez;
+}
+
+/**
+ * Pozele de schimbat, față de galeria văzută la verificarea anterioară (`anterioare`):
+ * - prima verificare (anterioare = null) sau galerie neschimbată → nimic;
+ * - pozele preluate de pe site care nu mai sunt în galerie ies;
+ * - intră doar pozele apărute nou pe site (nu și cele scoase de agenție la import), fără să trecem de max.
+ * Pozele puse de mână rămân.
+ */
+export function diferentaPoze(
+  existente: { id: number; sursaUrl: string | null }[],
+  anterioare: string[] | null,
+  noi: string[],
+  max: number,
+): { deSters: number[]; deAdaugat: string[] } {
+  const nimic = { deSters: [], deAdaugat: [] };
+  if (!anterioare) return nimic;
+  const set = new Set(noi);
+  const inainte = new Set(anterioare);
+  if (set.size === inainte.size && [...set].every((u) => inainte.has(u))) return nimic;
+  const deSters = existente.filter((p) => p.sursaUrl && !set.has(p.sursaUrl)).map((p) => p.id);
+  const avem = new Set(existente.map((p) => p.sursaUrl).filter(Boolean));
+  const locuri = Math.max(0, max - (existente.length - deSters.length));
+  const deAdaugat = noi.filter((u) => !inainte.has(u) && !avem.has(u)).slice(0, locuri);
+  return { deSters, deAdaugat };
+}

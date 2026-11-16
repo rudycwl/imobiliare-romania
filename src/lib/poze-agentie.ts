@@ -22,7 +22,7 @@ export async function atasazaPozeDinSite(anuntId: number, sursa: string, urls: s
       console.error("poze agenție", e);
       continue;
     }
-    await adaugaPoza(anuntId, cheie);
+    await adaugaPoza(anuntId, cheie, url);
     puse++;
   }
   return puse;
