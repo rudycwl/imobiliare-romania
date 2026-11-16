@@ -231,10 +231,35 @@ button.secundar, .buton.secundar { background: transparent; color: var(--accent)
 .pret-vechi { text-decoration: line-through; color: var(--muted); margin-right: 6px; font-weight: 400; font-size: .9em; }
 
 /* Poze */
-.galerie { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; border-radius: 12px; height: 520px; scrollbar-width: thin; }
-.galerie a { flex: 0 0 100%; height: 100%; scroll-snap-align: start; cursor: zoom-in; }
-.galerie img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; background: var(--border); display: block; }
-@media (max-width: 760px) { .galerie { height: 300px; } }
+.galerie { min-width: 0; }
+.galerie-mare { position: relative; display: block; width: 100%; height: 520px; padding: 0; border: 0; border-radius: 12px; overflow: hidden; background: var(--border); cursor: zoom-in; }
+.galerie-mare img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.galerie-contor { position: absolute; right: 12px; bottom: 12px; padding: 4px 10px; border-radius: 999px; background: rgb(0 0 0 / 0.6); color: #fff; font-size: 0.85rem; font-weight: 600; }
+.galerie-mini { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: thin; padding-bottom: 4px; }
+.galerie-mini button { flex: 0 0 96px; height: 68px; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; background: var(--border); scroll-snap-align: start; opacity: 0.7; transition: opacity 0.15s, border-color 0.15s; }
+.galerie-mini button:hover, .galerie-mini button:focus-visible { opacity: 1; }
+.galerie-mini button.activ { border-color: var(--portocaliu); opacity: 1; }
+.galerie-mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lightbox { position: fixed; inset: 0; z-index: 1000; background: #000; display: flex; flex-direction: column; touch-action: pan-y; overscroll-behavior: contain; }
+.lightbox-sus { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; color: #fff; }
+.lightbox-contor { font-weight: 600; font-variant-numeric: tabular-nums; }
+.lightbox-scena { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 72px 16px; }
+.lightbox-scena img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; user-select: none; }
+.lightbox button { background: rgb(255 255 255 / 0.12); color: #fff; border: 0; border-radius: 999px; line-height: 1; }
+.lightbox button:hover, .lightbox button:focus-visible { background: rgb(255 255 255 / 0.25); }
+.lightbox button:focus-visible { outline: 2px solid var(--portocaliu); outline-offset: 2px; }
+.lightbox-inchide { width: 44px; height: 44px; font-size: 2rem; padding: 0; }
+.lightbox-sageata { position: absolute; top: 50%; transform: translateY(-50%); width: 56px; height: 56px; font-size: 2.6rem; padding: 0 0 4px; }
+.lightbox-sageata.stanga { left: 12px; }
+.lightbox-sageata.dreapta { right: 12px; }
+@media (max-width: 760px) {
+  .galerie-mare { height: 300px; }
+  .galerie-mini button { flex-basis: 72px; height: 54px; }
+  .lightbox-scena { padding: 0 0 88px; }
+  .lightbox-sageata { top: auto; bottom: 16px; transform: none; width: 60px; height: 60px; background: rgb(255 255 255 / 0.2); }
+  .lightbox-sageata.stanga { left: 24px; }
+  .lightbox-sageata.dreapta { right: 24px; }
+}
 .poze-editare { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .poze-editare li { position: relative; border-radius: 10px; overflow: hidden; background: var(--border); }
 .poze-editare img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }

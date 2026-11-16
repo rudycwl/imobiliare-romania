@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Galerie } from "@/components/Galerie";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -52,14 +53,10 @@ export default async function ProiectPage({ params }: Props) {
       <p className="eticheta-dezvoltator">Proiect imobiliar nou · prezentat de dezvoltator</p>
       <div className="anunt">
         {p.poze.length ? (
-          <div className="galerie" aria-label="Pozele proiectului">
-            {p.poze.map((cheie, i) => (
-              <a key={cheie} href={urlPublic(cheie)} target="_blank" rel="noopener" title="Deschide poza mărită">
-                {/* eslint-disable-next-line @next/next/no-img-element -- pozele vin direct din stocare */}
-                <img src={urlPublic(cheie)} alt={`${p.nume}, poza ${i + 1} din ${p.poze.length}`} loading={i ? "lazy" : "eager"} />
-              </a>
-            ))}
-          </div>
+          <Galerie
+            eticheta="Pozele proiectului"
+            poze={p.poze.map((cheie, i) => ({ src: urlPublic(cheie), alt: `${p.nume}, poza ${i + 1} din ${p.poze.length}` }))}
+          />
         ) : (
           <div className="anunt-img" style={{ background: "#0b2545" }}>
             <span>Proiect nou</span>
