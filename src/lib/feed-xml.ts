@@ -9,7 +9,7 @@ import { XMLParser } from "fast-xml-parser";
 export type RandFeed = { externId: string; rand: Record<string, string> };
 
 /** Cheia unui câmp, fără diacritice, majuscule și separatori: „Nr_Camere” → „nrcamere”. */
-const norm = (s: string) =>
+export const norm = (s: string) =>
   s
     .replace(/^@_/, "")
     .replace(/^[a-z0-9]+:/i, "")
@@ -116,7 +116,7 @@ function linkuri(v: unknown, out: string[] = [], adancime = 0): string[] {
   return out;
 }
 
-const TIP: [RegExp, string][] = [
+export const TIP: [RegExp, string][] = [
   [/garsonier|studio|apart|flat|condo|bloc/, "apartament"],
   [/birou|office/, "birouri"],
   [/depozit|hala|warehouse|industrial|logistic/, "depozit"],
@@ -124,11 +124,11 @@ const TIP: [RegExp, string][] = [
   [/comercial|commercial|retail|shop|magazin|spatiu/, "spatiu-comercial"],
   [/casa|vila|villa|house|home|duplex|cabana/, "casa"],
 ];
-const TRANZ: [RegExp, string][] = [
+export const TRANZ: [RegExp, string][] = [
   [/inchir|chiri|rent|lease|letting/, "inchiriere"],
   [/vanz|vand|vind|sale|sell|buy|cumpar/, "vanzare"],
 ];
-const potrivire = (v: string, l: [RegExp, string][]) => {
+export const potrivire = (v: string, l: [RegExp, string][]) => {
   const s = norm(v);
   return l.find(([r]) => r.test(s))?.[1] ?? v;
 };
