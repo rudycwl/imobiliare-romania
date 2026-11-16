@@ -40,6 +40,15 @@ export default async function ImportPage() {
             {f.ultimaStare === "eroare" ? ` · eroare (${f.eroriLaRand} la rând)` : ""}
           </p>
           {f.raport ? <RaportFeedVizibil r={f.raport as unknown as RaportFeed} /> : null}
+          {/\.html?(\?|#|$)/i.test(f.url) && (
+            <p style={{ margin: "8px 0" }}>
+              Acesta e linkul unui singur anunț, nu un feed.{" "}
+              <Link href={`/cont/anunt-nou?link=${encodeURIComponent(f.url)}`} className="buton">
+                Importă acest anunț
+              </Link>{" "}
+              <span className="small muted">(completăm formularul cu datele și pozele, tu verifici și publici; apoi poți șterge feed-ul de aici)</span>
+            </p>
+          )}
           <form action={actiuneFeed} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <input type="hidden" name="id" value={f.id} />
             <button type="submit" name="actiune" value={f.activ ? "acum" : "porneste"}>
