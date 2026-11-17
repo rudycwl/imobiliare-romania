@@ -103,8 +103,44 @@ export function anuntIndisponibil(html: string, cerut: URL, final: URL, status =
   return /anun[tțţ](ul)? (nu mai este (disponibil|activ)|a fost (șters|sters|dezactivat|retras))|anun[tțţ] (inactiv|expirat|dezactivat)/i.test(faraTaguri(html).slice(0, 200_000));
 }
 
-/** Extrage câmpurile anunțului din HTML-ul paginii (JSON-LD, Open Graph și text). Ce nu găsește rămâne gol. */
-export function extrageAnunt(html: string, url: URL): AnuntImportat {
+const TIPURI_TEXT: [RegExp, string][] = [
+  [/apartament|garsonier|studio/, "apartament"],
+  [/\b(casa|case|vila|vile)\b|casa-|vila-/, "casa"],
+  [/teren/, "teren"],
+  [/birou/, "birouri"],
+  [/depozit|\bhala\b|\bhale\b/, "depozit"],
+  [/spatiu|comercial/, "spatiu-comercial"],
+];
+
+/** Tipul proprietății: cuvântul cheie care apare primul în text („Casă cu teren” → casă; „Teren cu casă veche” → teren). */
+function tipDinText(t: string): string | undefined {
+  let best: { poz: number; tip: string } | undefined;
+  for (const [re, tip] of TIPURI_TEXT) {
+    const m = t.match(re);
+    if (m && m.index !== undefined && (!best || m.index < best.poz)) best = { poz: m.index, tip };
+  }
+  return best?.tip;
+}
+
+/** Tranzacția: tot primul cuvânt cheie („spre vânzare … se poate și închiria” → vânzare). */
+function tranzactieDinText(t: string): string | undefined {
+  const i = t.search(/inchiri|chirie/);
+  const v = t.search(/vanzar|vand|vind/);
+  if (i < 0 && v < 0) return undefined;
+  return i >= 0 && (v < 0 || i < v) ? "inchiriere" : "vanzare";
+}
+
+/** Suprafața din lista de caracteristici a paginii („Suprafata utila: 40 m²”, cum o arată OLX și Storia). */
+function suprafataDinPagina(text: string): string | undefined {
+  const m = text.match(/suprafa[tțţ][aă] util[aă]\s*:?\s*(\d{1,5}(?:[.,]\d+)?)\s*(?:m²|mp|m2)/i) ?? text.match(/suprafa[tțţ][aă]\s*:?\s*(\d{1,5}(?:[.,]\d+)?)\s*(?:m²|mp|m2)/i);
+  return m ? String(Math.round(Number(m[1].replace(",", ".")))) : undefined;
+}
+
+/**
+ * Extrage câmpurile anunțului din HTML-ul paginii (JSON-LD, Open Graph și text). Ce nu găsește rămâne gol.
+ * cursEuro: lei pentru 1 €; cu el, prețul afișat în lei (des pe OLX) se transformă în euro.
+ */
+export function extrageAnunt(html: string, url: URL, cursEuro: number | null = null): AnuntImportat {
   const r: AnuntImportat = {};
   const ld = jsonLd(html);
   const produs = ld.find((o) => /Product|Offer|Residence|Apartment|House|RealEstateListing|SingleFamilyResidence/i.test(String(o["@type"])));
@@ -117,7 +153,9 @@ export function extrageAnunt(html: string, url: URL): AnuntImportat {
   const oferta = (Array.isArray(produs?.offers) ? produs?.offers[0] : produs?.offers) as Record<string, unknown> | undefined;
   const pretLd = str(oferta?.price) ?? meta(html, "product:price:amount") ?? meta(html, "og:price:amount");
   const moneda = (str(oferta?.priceCurrency) ?? meta(html, "product:price:currency") ?? "EUR").toUpperCase();
-  if (pretLd && moneda === "EUR") r.pret = String(Math.round(Number(pretLd.replace(/[^\d.]/g, ""))) || "");
+  const pretNum = pretLd ? Number(pretLd.replace(/[^\d.]/g, "")) : NaN;
+  if (pretNum > 0 && moneda === "EUR") r.pret = String(Math.round(pretNum));
+  else if (pretNum > 0 && /RON|LEI/.test(moneda) && cursEuro) r.pret = String(Math.round(pretNum / cursEuro));
   if (!r.pret) {
     const m = (r.titlu + " " + (r.descriere ?? "")).match(/(\d{1,3}(?:[.\s]\d{3})+|\d{3,7})\s*(?:€|eur)/i);
     if (m) r.pret = m[1].replace(/[.\s]/g, "");
@@ -125,17 +163,23 @@ export function extrageAnunt(html: string, url: URL): AnuntImportat {
 
   const text = `${r.titlu ?? ""}\n${r.descriere ?? ""}`;
   const mp = text.match(/(\d{2,5}(?:[.,]\d+)?)\s*(?:m²|mp|m2|metri p)/i);
-  if (mp) r.suprafata = String(Math.round(Number(mp[1].replace(",", "."))));
+  r.suprafata = suprafataDinPagina(faraTaguri(html.replace(/<script[\s\S]*?<\/script>/gi, " ")).slice(0, 300_000)) ?? (mp ? String(Math.round(Number(mp[1].replace(",", ".")))) : undefined);
   const cam = text.match(/(\d{1,2})\s*(?:camere|cam\.)/i);
   if (cam) r.camere = cam[1];
   else if (/garsonier/i.test(text)) r.camere = "1";
 
-  const t = slugify(text + " " + url.pathname);
-  r.tip = /teren/.test(t) ? "teren" : /\b(casa|case|vila)\b|casa-|vila-/.test(t) ? "casa" : /birou/.test(t) ? "birouri" : /depozit|hala|hale/.test(t) ? "depozit" : /spatiu|comercial/.test(t) ? "spatiu-comercial" : "apartament";
-  r.tranzactie = /inchiri|chirie|de-inchiriat/.test(t) ? "inchiriere" : "vanzare";
+  // Tipul și tranzacția: întâi din titlu, link și categoria site-ului; descrierea doar dacă acolo nu scrie nimic.
+  // (O descriere de apartament de vânzare poate pomeni „spații de depozitare” sau „se poate închiria”.)
+  const principal = slugify(`${r.titlu ?? ""} ${url.pathname} ${str(produs?.category) ?? ""}`);
+  const dinDescriere = slugify(r.descriere ?? "");
+  r.tip = tipDinText(principal) ?? tipDinText(dinDescriere) ?? "apartament";
+  r.tranzactie = tranzactieDinText(principal) ?? tranzactieDinText(dinDescriere) ?? "vanzare";
 
   const adresa = produs?.address as Record<string, unknown> | undefined;
-  const loc = gasesteOras([str(adresa?.addressLocality), str(adresa?.addressRegion), r.titlu, url.pathname.replace(/[-/]/g, " ")].filter(Boolean).join(" "));
+  const zonaServita = (oferta?.areaServed ?? produs?.areaServed) as Record<string, unknown> | undefined;
+  const loc = gasesteOras(
+    [str(adresa?.addressLocality), str(adresa?.addressRegion), str(zonaServita?.name), r.titlu, url.pathname.replace(/[-/]/g, " ")].filter(Boolean).join(" "),
+  );
   if (loc) Object.assign(r, loc);
 
   return Object.fromEntries(Object.entries(r).filter(([, v]) => v)) as AnuntImportat;

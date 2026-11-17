@@ -34,7 +34,9 @@ export async function importaAnunt(link: string): Promise<RezultatImport> {
     if (!r.ok) return { eroare: "Nu am putut deschide anunțul. Verifică linkul sau completează manual." };
     const html = (await r.text()).slice(0, 2_000_000);
     if (anuntIndisponibil(html, url, final, r.status)) return { eroare: inactiv };
-    const valori = extrageAnunt(html, final);
+    // Pe OLX prețul e des în lei: îl transformăm în euro la cursul zilei, ca la feed-ul XML.
+    const inLei = /"priceCurrency"\s*:\s*"(RON|LEI)"|price:currency"[^>]*content="(RON|LEI)"/i.test(html);
+    const valori = extrageAnunt(html, final, inLei ? await cursEuro().catch(() => null) : null);
     if (!valori.titlu) return { eroare: "Nu am găsit datele anunțului pe pagină. Completează manual." };
     return { valori };
   } catch {
