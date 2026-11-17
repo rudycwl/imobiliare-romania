@@ -111,6 +111,45 @@ async function r2(env) {
   return { stare: "chei-refuzate", mesaj: (r.text.match(/<Message>([^<]*)/)?.[1] ?? mesaj(r)).slice(0, 200) };
 }
 
+/**
+ * O cerere semnată (S3 v4) către bucket-ul R2: GET/PUT pe o cheie, sau listare (cheie goală + query).
+ * Folosită de copia pg_dump de noapte și de restaurarea din copie (scripts/restaureaza-copie.mjs).
+ */
+export async function cerereR2(env, metoda, cheie = "", query = {}, corp) {
+  const cont = contR2(env.R2_ACCOUNT_ID);
+  if (!cont || !env.R2_ACCESS_KEY_ID || !env.R2_SECRET_ACCESS_KEY) return { ok: false, status: 0, text: "lipsesc cheile R2" };
+  const bucket = env.R2_BUCKET || "cheiamea-poze";
+  const host = `${cont}.r2.cloudflarestorage.com`;
+  const acum = new Date().toISOString().replace(/[-:]|\.\d{3}/g, "");
+  const zi = acum.slice(0, 8);
+  const enc = (x) => encodeURIComponent(x).replace(/[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+  const cale = `/${bucket}${cheie ? `/${cheie.split("/").map(enc).join("/")}` : ""}`;
+  const qs = Object.keys(query).sort().map((k) => `${enc(k)}=${enc(query[k])}`).join("&");
+  const hashCorp = corp ? createHash("sha256").update(corp).digest("hex") : sha("");
+  const antete = `host:${host}\nx-amz-content-sha256:${hashCorp}\nx-amz-date:${acum}\n`;
+  const semnate = "host;x-amz-content-sha256;x-amz-date";
+  const canonic = [metoda, cale, qs, antete, semnate, hashCorp].join("\n");
+  const scop = `${zi}/auto/s3/aws4_request`;
+  const deSemnat = ["AWS4-HMAC-SHA256", acum, scop, sha(canonic)].join("\n");
+  const k = hmac(hmac(hmac(hmac(`AWS4${env.R2_SECRET_ACCESS_KEY}`, zi), "auto"), "s3"), "aws4_request");
+  try {
+    const r = await fetch(`https://${host}${cale}${qs ? `?${qs}` : ""}`, {
+      method: metoda,
+      body: corp,
+      headers: {
+        "x-amz-date": acum,
+        "x-amz-content-sha256": hashCorp,
+        authorization: `AWS4-HMAC-SHA256 Credential=${env.R2_ACCESS_KEY_ID}/${scop}, SignedHeaders=${semnate}, Signature=${createHmac("sha256", k).update(deSemnat).digest("hex")}`,
+      },
+      signal: AbortSignal.timeout(10 * 60_000),
+    });
+    const buffer = Buffer.from(await r.arrayBuffer());
+    return { ok: r.ok, status: r.status, buffer, text: metoda === "GET" && cheie ? "" : buffer.toString("utf8") };
+  } catch (e) {
+    return { ok: false, status: 0, text: String(e?.message ?? e) };
+  }
+}
+
 // ---------- paza site-ului ----------
 // La fiecare minut cerem pagina de start; după 5 minute la rând fără răspuns, adminii primesc un email
 // (și încă unul când site-ul revine). systemd repornește singur aplicația dacă se oprește.

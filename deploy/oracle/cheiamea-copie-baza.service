@@ -1,7 +1,9 @@
 [Unit]
-Description=CheiaMea - copia de rezervă a bazei de date (pe disc și în Cloudflare R2)
+Description=CheiaMea - copiile de rezervă ale bazei de date (JSON + pg_dump, pe disc și în Cloudflare R2)
 After=cheiamea.service
 
 [Service]
 Type=oneshot
+# pg_dump al bazei locale (nu depinde de aplicație; „-” = o eroare aici nu oprește copia JSON).
+ExecStart=-/usr/bin/node /opt/cheiamea/bin/copie-pgdump.mjs
 ExecStart=/bin/sh -c 'curl -fsS -m 600 -X POST -H "x-cheie: $(cat /etc/cheiamea/cheie-alerte)" http://127.0.0.1:3000/api/copie-baza'

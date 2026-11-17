@@ -168,6 +168,7 @@ model Anunt {
   /// Cheia aceleiași proprietăți la mai multe agenții (oraș, tip, tranzacție, camere, suprafață, cartier); vezi src/lib/duplicate.ts.
   cheieProprietate    String?
   istoricPret         IstoricPret[]
+  postariSociale      PostareSociala[]
   proprietarId        String
   proprietar          Utilizator    @relation(fields: [proprietarId], references: [id], onDelete: Cascade)
 
@@ -474,4 +475,23 @@ model IndiceLunar {
 
   @@id([luna, judet, oras, zona])
   @@index([judet, oras, zona])
+}
+
+/// Promovarea unui anunț pe rețelele sociale ale CheiaMea (Instagram, Facebook …). Rudy 17.11.2026: „când postez un anunț
+/// pe rețele, clientul trebuie anunțat automat” și „fiecare client are dreptul să știe, să vadă”. Se înregistrează prin
+/// POST /api/postari-sociale; proprietarul primește un e-mail o singură dată pe postare și o vede în „Anunțurile mele”.
+model PostareSociala {
+  id            Int       @id @default(autoincrement())
+  anuntId       Int
+  anunt         Anunt     @relation(fields: [anuntId], references: [id], onDelete: Cascade)
+  /// instagram | facebook | tiktok | youtube | linkedin | x (src/lib/postari-sociale.ts → RETELE)
+  retea         String
+  /// Linkul postării (https), normalizat; aceeași postare nu se înregistrează de două ori pe același anunț.
+  url           String
+  creatLa       DateTime  @default(now())
+  /// Când a plecat e-mailul către proprietar; null = netrimis încă (fără e-mail în cont sau serviciul de e-mail indisponibil).
+  emailTrimisLa DateTime?
+
+  @@unique([anuntId, url])
+  @@index([anuntId, creatLa])
 }

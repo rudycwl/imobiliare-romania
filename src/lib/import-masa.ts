@@ -119,7 +119,7 @@ export function citesteRand(
   };
 }
 
-async function descarcaPoza(url: string): Promise<{ date: Buffer; tip: string } | null> {
+export async function descarcaPoza(url: string): Promise<{ date: Buffer; tip: string } | null> {
   let u: URL;
   try {
     u = new URL(url);

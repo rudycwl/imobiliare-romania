@@ -40,11 +40,16 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .aceeasi-proprietate { margin: 14px 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); font-size: .9rem; }
 .aceeasi-proprietate p { margin: 0 0 6px; }
 .aceeasi-proprietate ul { margin: 0; padding-left: 18px; }
-.anunt { display: grid; grid-template-columns: 3fr 2fr; gap: 24px; }
+/* Desktop: galeria și descrierea în coloana principală, informațiile (preț, contact) în dreapta pe toată înălțimea. */
+.anunt { display: grid; grid-template-columns: 3fr 2fr; grid-template-areas: "media info" "descriere info"; grid-template-rows: auto 1fr; align-items: start; gap: 24px; }
+.anunt-media { grid-area: media; min-width: 0; }
+.anunt-info { grid-area: info; min-width: 0; }
+.anunt-descriere { grid-area: descriere; min-width: 0; }
+.anunt-descriere h2 { font-size: 1.05rem; margin: 0 0 8px; }
 .anunt-img { height: 340px; border-radius: 12px; }
 .detalii { border-collapse: collapse; margin-bottom: 16px; }
 .detalii th { text-align: left; padding: 4px 16px 4px 0; color: var(--muted); font-weight: 500; }
-@media (max-width: 760px) { .anunt { grid-template-columns: 1fr; } .anunt-img { height: 220px; } }
+@media (max-width: 760px) { .anunt { grid-template-columns: 1fr; grid-template-areas: "media" "info" "descriere"; grid-template-rows: auto; } .anunt-img { height: 220px; } }
 .header nav { display: flex; gap: 16px; align-items: center; }
 .buton { display: inline-block; background: var(--portocaliu); color: #0b2545; padding: 10px 16px; border-radius: 10px; font-weight: 700; }
 .small { font-size: .82rem; }
