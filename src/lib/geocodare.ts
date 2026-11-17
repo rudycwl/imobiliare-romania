@@ -77,7 +77,7 @@ const slug = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCa
 const MAX_KM_DE_LOCALITATE = 25;
 
 /** Un rezultat Nominatim cu adresa detaliată (addressdetails=1). */
-export type RezultatAdresa = { lat: string; lon: string; address?: Record<string, string | undefined> };
+export type RezultatAdresa = { lat: string; lon: string; name?: string; category?: string; boundingbox?: string[]; address?: Record<string, string | undefined> };
 
 /** Câmpurile în care Nominatim pune localitatea (oraș, comună, sat). */
 const CAMPURI_LOCALITATE = ["city", "town", "village", "municipality"] as const;
@@ -129,7 +129,7 @@ async function cautaAdrese(text: string, parametri?: Record<string, string>): Pr
   const r = await laRand(async () => {
     try {
       const q = parametri ? new URLSearchParams(parametri).toString() : `q=${encodeURIComponent(text)}`;
-      const url = `${NOMINATIM}?format=jsonv2&limit=5&addressdetails=1&countrycodes=ro&accept-language=ro&${q}`;
+      const url = `${NOMINATIM}?format=jsonv2${parametri?.limit ? "" : "&limit=5"}&addressdetails=1&countrycodes=ro&accept-language=ro&${q}`;
       const res = await fetch(url, { headers: { "User-Agent": AGENT }, signal: AbortSignal.timeout(6000) });
       if (!res.ok) return undefined;
       return (await res.json()) as RezultatAdresa[];
@@ -187,6 +187,113 @@ export async function adresaLaPunct(lat: number, lng: number): Promise<{ strada:
   });
   if (r !== undefined) cacheInvers.set(cheie, r);
   return r ?? null;
+}
+
+// ---------- Sugestii de străzi (câmpul „Stradă” din formular) ----------
+
+/** Text pentru comparat: fără diacritice (și ş/ţ cu sedilă), litere mici, doar litere și cifre, spații simple. */
+export function normalizeazaStrada(s: string): string {
+  // „î” în interiorul cuvântului = „â” (ortografia veche: „Sfînt” = „Sfânt”), ca să nu apară aceeași stradă de două ori.
+  return slug(s.replace(/[şŞ]/g, "s").replace(/[ţŢ]/g, "t").replace(/(?<=\p{L})[îÎ](?=\p{L})/gu, "â"))
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+export type CandidatStrada = { nume: string; localitati: (string | undefined)[] };
+
+/**
+ * Din rezultatele brute (Photon sau Nominatim): doar străzile din localitatea aleasă care conțin toate cuvintele
+ * scrise (ca început de cuvânt, fără diacritice: „bratianu” → „Strada Ion C. Brătianu”), fără dubluri (aceeași
+ * stradă vine pe mai multe bucăți), cel mult `max`. Întâi cele în care primul cuvânt scris începe numele propriu-zis.
+ */
+export function filtreazaStrazi(candidati: CandidatStrada[], text: string, oras: string, max = 8, bucuresti = false): string[] {
+  const cuvinteScrise = normalizeazaStrada(text).split(" ").filter(Boolean);
+  if (!cuvinteScrise.length) return [];
+  const tinta = normalizeazaStrada(bucuresti ? "București" : oras);
+  const vazute = new Set<string>();
+  const bune: { nume: string; scor: number }[] = [];
+  for (const c of candidati) {
+    const nume = c.nume?.trim();
+    if (!nume || !c.localitati.some((l) => l && normalizeazaStrada(l) === tinta)) continue;
+    const n = normalizeazaStrada(nume);
+    if (vazute.has(n)) continue;
+    const cuv = n.split(" ");
+    if (!cuvinteScrise.every((w) => cuv.some((x) => x.startsWith(w)))) continue;
+    vazute.add(n);
+    // Scor: potrivire după tipul străzii („Strada”, „Bd.”) mai jos; nume scurte mai sus.
+    const primul = cuv.findIndex((x) => x.startsWith(cuvinteScrise[0]));
+    bune.push({ nume, scor: (primul === 0 && cuv.length > 1 ? 100 : 0) + n.length });
+  }
+  return bune.sort((x, y) => x.scor - y.scor).slice(0, max).map((x) => x.nume);
+}
+
+const cacheZonaLocalitate = new Map<string, { centru: Punct; box: [number, number, number, number] } | null>();
+
+/** Zona localității (centru + dreptunghi: vest, sud, est, nord), din Nominatim; cache în memorie. */
+async function zonaLocalitate(judet: string, oras: string) {
+  const cheie = `${judet}|${oras}`;
+  if (cacheZonaLocalitate.has(cheie)) return cacheZonaLocalitate.get(cheie)!;
+  const j = getJudet(judet)?.nume;
+  const o = getOras(judet, oras)?.nume;
+  if (!j || !o) return null;
+  const rez = await cautaAdrese("", judet === "bucuresti" ? { city: "București" } : { city: o, county: j });
+  const r = rez.find((x) => x.boundingbox?.length === 4);
+  if (!r) return null; // eroare de rețea sau nimic găsit: nu ținem minte, se reîncearcă
+  const [s, n, v, e] = r.boundingbox!.map(Number);
+  const z = { centru: { lat: Number(r.lat), lng: Number(r.lon) }, box: [v, s, e, n] as [number, number, number, number] };
+  cacheZonaLocalitate.set(cheie, z);
+  return z;
+}
+
+const PHOTON = "https://photon.komoot.io/api/";
+const cacheSugestii = new Map<string, string[]>();
+
+/** Photon (OpenStreetMap, potrivire și după începutul cuvântului), doar străzi, în dreptunghiul localității. */
+async function cautaPhoton(text: string, box: [number, number, number, number]): Promise<CandidatStrada[] | undefined> {
+  return laRand(async () => {
+    try {
+      const url = `${PHOTON}?q=${encodeURIComponent(text)}&limit=20&layer=street&bbox=${box.join(",")}`;
+      const res = await fetch(url, { headers: { "User-Agent": AGENT }, signal: AbortSignal.timeout(5000) });
+      if (!res.ok) return undefined;
+      const j = (await res.json()) as { features?: { properties?: Record<string, string | undefined> }[] };
+      return (j.features ?? []).map(({ properties: p = {} }) => ({ nume: p.name ?? "", localitati: [p.city, p.town, p.village, p.municipality, p.locality] }));
+    } catch {
+      return undefined;
+    }
+  });
+}
+
+/** Nominatim în dreptunghiul localității (bounded): găsește cuvinte întregi („bratianu”), nu început de cuvânt. */
+async function cautaNominatimStrazi(text: string, box: [number, number, number, number]): Promise<CandidatStrada[]> {
+  const [v, s, e, n] = box;
+  const rez = await cautaAdrese("", { q: text, viewbox: `${v},${n},${e},${s}`, bounded: "1", limit: "40" });
+  return rez
+    .filter((r) => r.category === "highway" || r.address?.road)
+    .map((r) => ({
+      nume: (r.category === "highway" ? r.name : r.address?.road) ?? r.address?.road ?? "",
+      localitati: CAMPURI_LOCALITATE.map((k) => r.address?.[k]),
+    }));
+}
+
+/**
+ * Străzile din localitatea aleasă care se potrivesc cu ce a scris omul (de la 3 litere), pentru lista de sugestii.
+ * Întâi Photon (știe și început de cuvânt), apoi Nominatim dacă Photon nu răspunde sau nu găsește. Cererile trec
+ * pe rând (≤ 1 pe secundă) și rezultatele se țin minte. Lista goală = omul scrie strada liber, ca până acum.
+ */
+export async function sugestiiStrazi(text: string, judet: string, oras: string, max = 8): Promise<string[]> {
+  const t = text.trim().slice(0, 80);
+  const o = getOras(judet, oras)?.nume;
+  if (!o || normalizeazaStrada(t).replace(/ /g, "").length < 3) return [];
+  const cheie = `${judet}|${oras}|${normalizeazaStrada(t)}`;
+  if (cacheSugestii.has(cheie)) return cacheSugestii.get(cheie)!;
+  const zona = await zonaLocalitate(judet, oras);
+  if (!zona) return [];
+  const bucuresti = judet === "bucuresti";
+  let lista = filtreazaStrazi((await cautaPhoton(t, zona.box)) ?? [], t, o, max, bucuresti);
+  if (!lista.length) lista = filtreazaStrazi(await cautaNominatimStrazi(t, zona.box), t, o, max, bucuresti);
+  if (cacheSugestii.size > 2000) cacheSugestii.clear();
+  cacheSugestii.set(cheie, lista);
+  return lista;
 }
 
 /** Anunțul, cât trebuie pentru locul lui aproximativ. */
