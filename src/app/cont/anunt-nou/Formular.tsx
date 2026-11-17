@@ -264,8 +264,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
             <select name="camere" defaultValue={v.camere ?? ""} {...aria("camere", erori, tip, "camere")}>
               <option value="">Alege</option>
               {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
-                // „Garsonieră” (valoarea rămâne 1): „1 (garsonieră)” nu încăpea pe jumătate de rând la 360 px.
-                <option key={n} value={n}>{n === 1 && tip === "apartament" ? "Garsonieră" : n}</option>
+                <option key={n} value={n}>{n}</option>
               ))}
             </select>
             <MesajCamp camp="camere" erori={erori} />
