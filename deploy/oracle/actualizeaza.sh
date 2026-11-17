@@ -19,6 +19,9 @@ timeout 120 git -C "$SURSA" fetch -q origin main
 git -C "$SURSA" reset -q --hard origin/main
 SHA=$(git -C "$SURSA" rev-parse --short=12 HEAD)
 bash "$SURSA/deploy/oracle/copiaza-fisiere.sh"
+# Mutarea bazei de date de pe Neon pe PostgreSQL local (o singură dată; vezi scriptul). O eroare acolo nu oprește
+# publicarea: site-ul rămâne pe baza veche, iar eroarea apare în /configurare/stare (câmpul „baza”).
+[ -f /etc/cheiamea/baza-locala.gata ] || bash "$SURSA/deploy/oracle/baza-locala.sh" || true
 
 FORTEAZA=0; [ -f $BAZA/forteaza ] && FORTEAZA=1 && rm -f $BAZA/forteaza
 [ "$FORTEAZA" = 0 ] && [ "$(cat $BAZA/versiune 2>/dev/null)" = "$SHA" ] && exit 0

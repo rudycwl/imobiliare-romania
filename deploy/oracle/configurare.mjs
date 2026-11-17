@@ -2,7 +2,7 @@
 // Protejată de codul din /etc/cheiamea/cod. Rulează ca root doar pe 127.0.0.1:3001, în spatele Caddy (HTTPS).
 // Codul se scrie o dată într-un formular și apoi ține minte un cookie: nu mai stă în adresa paginii (istoric, capturi, linkuri).
 import { createServer } from "node:http";
-import { readFileSync, writeFileSync, renameSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, renameSync, existsSync, readdirSync } from "node:fs";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { execFile, execFileSync } from "node:child_process";
 import { contR2, pazesteSite, stareServicii, verificaServiciile } from "./servicii.mjs";
@@ -13,8 +13,8 @@ let COD = readFileSync(FISIER_COD, "utf8").trim();
 
 // secret: valoarea nu se mai afișează după salvare. Ordinea e cea din formular.
 const CAMPURI = [
-  { grup: "Baza de date (Neon)" },
-  { k: "DATABASE_URL", secret: true, ajutor: "Neon → proiectul cheiamea → Connect → oprește „Connection pooling” → copiază textul care începe cu postgresql://" },
+  { grup: "Baza de date" },
+  { k: "DATABASE_URL", secret: true, ajutor: "Din 17.11.2026 baza e locală, pe acest server (pusă automat; vechea adresă Neon e păstrată ca NEON_DATABASE_URL). Nu o schimba." },
   { grup: "Site" },
   { k: "NEXT_PUBLIC_SITE_URL", implicit: "https://cheiamea.ro", ajutor: "Lasă așa." },
   { k: "ADMIN_EMAILS", ajutor: "Emailul cu care intri în contul tău de pe CheiaMea (pentru Moderare)." },
@@ -101,13 +101,55 @@ const citeste = (f) => { try { return readFileSync(f, "utf8").trim(); } catch { 
 const stare = () => {
   try { return JSON.parse(readFileSync("/opt/cheiamea/stare.json", "utf8")); } catch { return { stare: "necunoscut" }; }
 };
+// ---------- baza de date (mutarea de pe Neon pe PostgreSQL local, deploy/oracle/baza-locala.sh) ----------
+const COPII = "/var/lib/cheiamea-copii";
+const esteLocala = (url) => /^postgres(ql)?:\/\/[^/]*@(127\.0\.0\.1|localhost)[:/]/.test(url ?? "");
+let numarLocal = { la: null };
+// Numărul de anunțuri și utilizatori din baza locală (ca postgres, prin socket; fără parolă), la 5 minute.
+function numaraLocal() {
+  execFile("runuser", ["-u", "postgres", "--", "psql", "-d", "cheiamea", "-At", "-c",
+    'SELECT (SELECT count(*) FROM "Anunt"), (SELECT count(*) FROM "Utilizator")'],
+  { timeout: 20_000 }, (err, out) => {
+    if (err) { numarLocal = { la: new Date().toISOString(), eroare: String(err.message).split("\n")[0].slice(0, 200) }; return; }
+    const [anunturi, utilizatori] = out.trim().split("|").map(Number);
+    numarLocal = { la: new Date().toISOString(), anunturi, utilizatori };
+  });
+}
+setInterval(() => { if (esteLocala(citesteEnv().DATABASE_URL)) numaraLocal(); }, 5 * 60_000);
+setTimeout(() => { if (esteLocala(citesteEnv().DATABASE_URL)) numaraLocal(); }, 5_000);
+const ultimaCopie = (re) => { try { return readdirSync(COPII).filter((f) => re.test(f)).sort().at(-1) ?? null; } catch { return null; } };
+function bazaPublica() {
+  let s = {};
+  try { s = JSON.parse(readFileSync("/etc/cheiamea/baza-locala.json", "utf8")); } catch {}
+  const env = citesteEnv();
+  const local = esteLocala(env.DATABASE_URL);
+  const json = ultimaCopie(/^baza-\d{4}-\d{2}-\d{2}\.json\.gz$/), pg = ultimaCopie(/^pgdump-\d{4}-\d{2}-\d{2}\.dump$/);
+  const r = s.comutat?.restaurare;
+  return {
+    baza: local ? "locala" : "neon",
+    etapa: s.etapa ?? null,
+    neonRaspunde: s.neonRaspunde ?? null,
+    bazaLocalaPregatita: s.bazaLocalaPregatita ?? null,
+    copieDisponibila: { json: json?.slice(5, 15) ?? null, pgDump: pg?.slice(7, 17) ?? null },
+    comutat: s.comutat ? { la: s.comutat.la, sursa: s.comutat.sursa, copie: r?.copie ?? null, copieDin: r?.copieDin ?? null,
+      randuriRestaurate: r?.randuri ? { anunturi: r.randuri.Anunt, utilizatori: r.randuri.Utilizator } : null } : null,
+    acum: local ? numarLocal : null,
+    neonPastrat: !!env.NEON_DATABASE_URL,
+    eroare: s.eroare ?? null,
+  };
+}
+
 /** Starea publică: versiunea, când a verificat ultima dată main, ultima eroare și serviciile externe (fără chei). */
-const starePublica = () => ({
-  ...stare(),
-  verificatMain: citeste("/opt/cheiamea/verificat"),
-  ultimaEroare: citeste("/opt/cheiamea/ultima-eroare"),
-  servicii: stareServicii(),
-});
+const starePublica = () => {
+  const baza = bazaPublica();
+  return {
+    ...stare(),
+    verificatMain: citeste("/opt/cheiamea/verificat"),
+    ultimaEroare: citeste("/opt/cheiamea/ultima-eroare") ?? baza.eroare,
+    baza,
+    servicii: stareServicii(),
+  };
+};
 
 const verifica = () => verificaServiciile(citesteEnv()).catch((e) => console.error("Servicii:", e));
 setTimeout(verifica, 15_000);
