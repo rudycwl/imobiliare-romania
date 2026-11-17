@@ -10,10 +10,14 @@ export async function register() {
   void actualizeazaStariEFactura().catch((e) => console.error("Starea e-Factura:", e));
   // Anunțurile fără loc pe hartă (vechi, importate din OLX/Storia, din API sau feed) primesc unul aproximativ:
   // strada → zona → centrul localității. În fundal, la ≤ 1 cerere/secundă spre Nominatim; doar cele cu lat = null.
-  const { completeazaCoordonate } = await import("./lib/geocodare");
-  void completeazaCoordonate(Number.MAX_SAFE_INTEGER, { toate: true })
-    .then((r) => r.completate + r.esuate > 0 && console.log(`Coordonate completate: ${r.completate}, negăsite: ${r.esuate}`))
-    .catch((e) => console.error("Coordonate:", e));
+  // Apoi, o singură dată, punctele automate vechi (fără sursă) se recalculează și primesc sursa (adresă / zonă / localitate).
+  const { completeazaCoordonate, recompleteazaCoordonate } = await import("./lib/geocodare");
+  void (async () => {
+    const r = await completeazaCoordonate(Number.MAX_SAFE_INTEGER, { toate: true });
+    if (r.completate + r.esuate > 0 || r.oprit) console.log(`Coordonate completate: ${r.completate}, negăsite: ${r.esuate}${r.oprit ? " (oprit: Nominatim indisponibil)" : ""}`);
+    const v = await recompleteazaCoordonate();
+    if (v.refacute || v.oprit) console.log(`Coordonate recalculate: ${v.refacute}, mutate: ${v.mutate}${v.oprit ? " (oprit: Nominatim indisponibil)" : ""}`);
+  })().catch((e) => console.error("Coordonate:", e));
 }
 
 // Next.js apelează onRequestError pentru orice eroare din pagini, acțiuni și rute API: eroarea se păstrează pentru ERP (/api/erp/erori).

@@ -126,6 +126,9 @@ model Anunt {
   lng                 Float?
   /// true = punctul l-a pus proprietarul; false = l-am găsit noi după cartier și se recalculează la editare.
   punctProprietar     Boolean       @default(false)
+  /// De unde vine punctul pus automat (punctProprietar = false): adresa | zona | localitate (centrul localității).
+  /// null = pus înainte de 17.11.2026 (sursă necunoscută): se recalculează o dată, la pornire (recompleteazaCoordonate).
+  sursaLoc            String?
   imagine             String
   publicatLa          DateTime      @default(now())
   /// Anunțul e public cât timp expiraLa e în viitor (60 de zile, cu prelungire).

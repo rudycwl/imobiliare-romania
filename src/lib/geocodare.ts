@@ -11,6 +11,8 @@ const NOMINATIM = "https://nominatim.openstreetmap.org/search";
 const AGENT = "CheiaMea/1.0 (https://cheiamea.ro; contact@cheiamea.ro)";
 
 const cache = new Map<string, Punct | null>();
+/** Câte cereri spre Nominatim / Photon au eșuat (rețea, timeout, 429…), ca o eroare să nu fie luată drept „nu există”. */
+let eroriRetea = 0;
 let coada: Promise<unknown> = Promise.resolve();
 
 /** Cererile către Nominatim trec pe rând, la cel puțin 1,1 secunde una de alta. */
@@ -31,10 +33,11 @@ async function cauta(text: string, parametri?: Record<string, string>): Promise<
       const q = parametri ? new URLSearchParams(parametri).toString() : `q=${encodeURIComponent(text)}`;
       const url = `${NOMINATIM}?format=jsonv2&limit=1&countrycodes=ro&accept-language=ro&${q}`;
       const res = await fetch(url, { headers: { "User-Agent": AGENT }, signal: AbortSignal.timeout(6000) });
-      if (!res.ok) return undefined;
+      if (!res.ok) return (eroriRetea++, undefined);
       const [p] = (await res.json()) as { lat: string; lon: string }[];
       return p ? { lat: Number(p.lat), lng: Number(p.lon) } : null;
     } catch {
+      eroriRetea++;
       return undefined;
     }
   });
@@ -55,8 +58,14 @@ async function centruLocalitate(judet: string, oras: string): Promise<Punct | nu
   return (await cauta("", { city: o, county: j })) || (await cauta(`${o}, ${j}`));
 }
 
-/** Centrul cartierului (sau, dacă nu-l găsește în localitate, al localității) după numele din anunț. */
-export async function gasesteZona(zona: string, judet: string, oras: string): Promise<Punct | null> {
+export type SursaLoc = "adresa" | "zona" | "localitate";
+export type LocGasit = Punct & { sursa: SursaLoc };
+
+/**
+ * Centrul cartierului după numele din anunț (sursa „zona”) sau, dacă nu-l găsește în localitate sau zona lipsește,
+ * centrul localității (sursa „localitate”). null = nici localitatea (de obicei Nominatim indisponibil).
+ */
+export async function zonaSauLocalitate(zona: string, judet: string, oras: string): Promise<LocGasit | null> {
   const o = getOras(judet, oras)?.nume;
   if (!o) return null;
   const centru = await centruLocalitate(judet, oras);
@@ -66,9 +75,15 @@ export async function gasesteZona(zona: string, judet: string, oras: string): Pr
     // Tudor Vladimirescu (com. Mogoșești-Siret), abia apoi cartierul din Iași.
     const bucuresti = judet === "bucuresti";
     const p = alegeAdresa(await cautaAdrese(`${z}, ${bucuresti ? "București" : o}`), o, "", bucuresti);
-    if (p && (!centru || distantaM(p, centru) <= MAX_KM_DE_LOCALITATE * 1000)) return { lat: p.lat, lng: p.lng };
+    if (p && (!centru || distantaM(p, centru) <= MAX_KM_DE_LOCALITATE * 1000)) return { lat: p.lat, lng: p.lng, sursa: "zona" };
   }
-  return centru;
+  return centru ? { ...centru, sursa: "localitate" } : null;
+}
+
+/** Centrul cartierului (sau, dacă nu-l găsește în localitate, al localității) după numele din anunț. */
+export async function gasesteZona(zona: string, judet: string, oras: string): Promise<Punct | null> {
+  const r = await zonaSauLocalitate(zona, judet, oras);
+  return r ? { lat: r.lat, lng: r.lng } : null;
 }
 
 const slug = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
@@ -131,9 +146,10 @@ async function cautaAdrese(text: string, parametri?: Record<string, string>): Pr
       const q = parametri ? new URLSearchParams(parametri).toString() : `q=${encodeURIComponent(text)}`;
       const url = `${NOMINATIM}?format=jsonv2${parametri?.limit ? "" : "&limit=5"}&addressdetails=1&countrycodes=ro&accept-language=ro&${q}`;
       const res = await fetch(url, { headers: { "User-Agent": AGENT }, signal: AbortSignal.timeout(6000) });
-      if (!res.ok) return undefined;
+      if (!res.ok) return (eroriRetea++, undefined);
       return (await res.json()) as RezultatAdresa[];
     } catch {
+      eroriRetea++;
       return undefined;
     }
   });
@@ -175,13 +191,14 @@ export async function adresaLaPunct(lat: number, lng: number): Promise<{ strada:
     try {
       const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&accept-language=ro&lat=${lat}&lon=${lng}`;
       const res = await fetch(url, { headers: { "User-Agent": AGENT }, signal: AbortSignal.timeout(6000) });
-      if (!res.ok) return undefined;
+      if (!res.ok) return (eroriRetea++, undefined);
       const j = (await res.json()) as { address?: { road?: string; pedestrian?: string; house_number?: string; country_code?: string } };
       const a = j.address;
       if (!a || a.country_code !== "ro") return null;
       const strada = a.road ?? a.pedestrian ?? "";
       return strada ? { strada, numar: a.house_number ?? "" } : null;
     } catch {
+      eroriRetea++;
       return undefined;
     }
   });
@@ -258,7 +275,7 @@ async function cautaPhoton(text: string, box: [number, number, number, number]):
       const j = (await res.json()) as { features?: { properties?: Record<string, string | undefined> }[] };
       return (j.features ?? []).map(({ properties: p = {} }) => ({ nume: p.name ?? "", localitati: [p.city, p.town, p.village, p.municipality, p.locality] }));
     } catch {
-      return undefined;
+      return undefined; // Photon e doar pentru sugestii; o eroare aici nu oprește completarea coordonatelor
     }
   });
 }
@@ -304,12 +321,17 @@ export type LocAnunt = { strada?: string | null; numar?: string | null; zona: st
  * gasesteAdresa) → zona / cartierul → centrul localității (gasesteZona). Pe site apare mereu ca zonă (cerc),
  * pentru că punctul nu e pus de proprietar (punctProprietar = false, vezi src/lib/locatie.ts).
  */
-export async function locAproximativ(a: LocAnunt): Promise<Punct | null> {
+export async function locAproximativ(a: LocAnunt): Promise<LocGasit | "eroare" | null> {
+  const erori = eroriRetea;
   if (a.strada && a.strada.trim().length >= 3) {
     const p = await gasesteAdresa(a.strada, a.numar ?? "", a.judet, a.oras);
-    if (p) return { lat: p.lat, lng: p.lng };
+    if (p) return { lat: p.lat, lng: p.lng, sursa: "adresa" };
   }
-  return gasesteZona(a.zona, a.judet, a.oras);
+  const r = await zonaSauLocalitate(a.zona, a.judet, a.oras);
+  // O cerere eșuată pe drum (rețea, timeout, limită Nominatim) nu e „nu există”: fără ea poate s-ar fi găsit strada
+  // sau cartierul. Nu salvăm centrul localității în locul lor; se reîncearcă la rularea următoare.
+  if ((!r || r.sursa === "localitate") && eroriRetea !== erori) return "eroare";
+  return r;
 }
 
 /** Centrul localității, pentru pagina unui anunț care încă nu are loc pe hartă (cache în memorie, după prima cerere). */
@@ -317,45 +339,107 @@ export async function centruPentruPagina(judet: string, oras: string, asteptareM
   return Promise.race([centruLocalitate(judet, oras).catch(() => null), new Promise<null>((ok) => setTimeout(() => ok(null), asteptareMs))]);
 }
 
-const esuate = new Set<number>();
+/** Anunțurile pentru care nu s-a găsit nimic (nici localitatea), cu momentul: se reîncearcă după o oră. */
+const esuate = new Map<number, number>();
+const ORA_MS = 60 * 60_000;
 let ruleaza = false;
 
+const faraEsuate = () => {
+  const acum = Date.now();
+  for (const [id, la] of esuate) if (acum - la > ORA_MS) esuate.delete(id);
+  return [...esuate.keys()];
+};
+
 /**
- * Pune pe hartă anunțurile fără coordonate: locAproximativ (stradă → zonă → centrul localității), mereu aproximativ.
- * Se apelează în fundal după salvare (câteva odată) și o dată la pornirea serverului (`toate`: și cele expirate,
- * pe loturi, până nu mai rămâne niciunul). Idempotentă: atinge doar anunțurile cu lat = null și nu suprascrie un
- * punct pus între timp de proprietar. Cererile spre Nominatim trec pe rând (laRand: ≤ 1 pe secundă, cu User-Agent).
+ * Pune pe hartă anunțurile fără coordonate: locAproximativ (stradă → zonă → centrul localității), mereu aproximativ,
+ * cu sursa punctului (sursaLoc). Se apelează în fundal după salvare (câteva odată) și o dată la pornirea serverului
+ * (`toate`: și cele expirate, pe loturi). Idempotentă: atinge doar anunțurile cu lat = null și nu suprascrie un punct
+ * pus între timp de proprietar. La o eroare de rețea / limită Nominatim se oprește (nimic salvat greșit), iar
+ * anunțul rămâne pentru rularea următoare. Cererile trec pe rând (laRand: ≤ 1 pe secundă, cu User-Agent).
  */
 export async function completeazaCoordonate(maxim = 15, { toate = false, ids }: { toate?: boolean; ids?: number[] } = {}) {
-  if (ruleaza) return { completate: 0, esuate: 0 };
+  if (ruleaza) return { completate: 0, esuate: 0, oprit: false };
   ruleaza = true;
   let completate = 0;
   let gresite = 0;
+  let oprit = false;
   try {
     for (;;) {
       const lipsa = await db.anunt.findMany({
-        where: { lat: null, id: { notIn: [...esuate], ...(ids ? { in: ids } : {}) }, ...(toate ? {} : { expiraLa: { gt: new Date() } }) },
+        where: { lat: null, id: { notIn: faraEsuate(), ...(ids ? { in: ids } : {}) }, ...(toate ? {} : { expiraLa: { gt: new Date() } }) },
         select: { id: true, strada: true, numar: true, zona: true, judet: true, oras: true },
         orderBy: { id: "desc" },
         take: Math.min(maxim, 50),
       });
       for (const a of lipsa) {
         const p = await locAproximativ(a);
+        if (p === "eroare") {
+          oprit = true;
+          break;
+        }
         if (!p) {
-          esuate.add(a.id);
+          esuate.set(a.id, Date.now());
           gresite++;
           continue;
         }
         // Doar dacă între timp proprietarul n-a pus singur punctul.
-        const r = await db.anunt.updateMany({ where: { id: a.id, lat: null }, data: { lat: p.lat, lng: p.lng, punctProprietar: false } });
+        const r = await db.anunt.updateMany({ where: { id: a.id, lat: null }, data: { lat: p.lat, lng: p.lng, punctProprietar: false, sursaLoc: p.sursa } });
         completate += r.count;
       }
-      if (!toate || lipsa.length === 0 || completate + gresite >= maxim) break;
+      if (oprit || !toate || lipsa.length === 0 || completate + gresite >= maxim) break;
     }
   } catch (e) {
     console.error("geocodare", e);
   } finally {
     ruleaza = false;
   }
-  return { completate, esuate: gresite };
+  return { completate, esuate: gresite, oprit };
+}
+
+/**
+ * O singură dată pentru punctele puse automat înainte de sursaLoc (sursaLoc = null, punctProprietar = false):
+ * se recalculează cu regula de acum și se notează sursa. Corectează anunțurile puse greșit pe centrul localității
+ * deși au cartier (ex. #6 „Tudor Vladimirescu, Iași”: completarea veche lua primul rezultat Nominatim – satul
+ * Tudor Vladimirescu de lângă Pașcani –, îl respingea și cădea pe centrul Iașului). Idempotentă: după ea sursaLoc
+ * e completat; nu atinge punctele puse de proprietar. La o eroare de rețea se oprește și se reia la pornirea următoare.
+ */
+export async function recompleteazaCoordonate({ ids }: { ids?: number[] } = {}) {
+  if (ruleaza) return { refacute: 0, mutate: 0, oprit: false };
+  ruleaza = true;
+  let refacute = 0;
+  let mutate = 0;
+  let oprit = false;
+  try {
+    for (;;) {
+      const vechi = await db.anunt.findMany({
+        where: { punctProprietar: false, sursaLoc: null, lat: { not: null }, id: { notIn: faraEsuate(), ...(ids ? { in: ids } : {}) } },
+        select: { id: true, strada: true, numar: true, zona: true, judet: true, oras: true, lat: true, lng: true },
+        orderBy: { id: "desc" },
+        take: 50,
+      });
+      for (const a of vechi) {
+        const p = await locAproximativ(a);
+        if (p === "eroare") {
+          oprit = true;
+          break;
+        }
+        if (!p) {
+          esuate.set(a.id, Date.now());
+          continue;
+        }
+        const r = await db.anunt.updateMany({
+          where: { id: a.id, punctProprietar: false, sursaLoc: null },
+          data: { lat: p.lat, lng: p.lng, sursaLoc: p.sursa },
+        });
+        refacute += r.count;
+        if (r.count && distantaM(p, { lat: a.lat!, lng: a.lng! }) > 50) mutate++;
+      }
+      if (oprit || vechi.length === 0) break;
+    }
+  } catch (e) {
+    console.error("geocodare (recompletare)", e);
+  } finally {
+    ruleaza = false;
+  }
+  return { refacute, mutate, oprit };
 }
