@@ -480,7 +480,8 @@ a:hover .sageata { transform: translateX(4px); }
 /* Bara de jos pe telefon */
 .bara-mobil { display: none; }
 @media (max-width: 760px) {
-  body { padding-bottom: 72px; }
+  /* Bara de jos (~62 px) + butonul „+” care iese ~22 px deasupra ei + zona sigură a telefonului. */
+  body { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
   .bara-mobil { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: end; padding: 6px 6px calc(8px + env(safe-area-inset-bottom)); background: var(--card); border-top: 1px solid var(--border); }
   .bara-mobil a { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 48px; justify-content: center; font-size: .7rem; font-weight: 600; color: var(--muted); }
   .bara-mobil svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -691,6 +692,8 @@ a:hover .sageata { transform: translateX(4px); }
 .alegere-mare[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--card)); box-shadow: inset 0 0 0 1px var(--accent); }
 .pas-tip .continua { align-self: flex-start; min-width: 180px; padding: 12px 22px; font-weight: 600; background: var(--accent); color: var(--pe-accent); border-color: var(--accent); }
 .pas-tip .continua:disabled { opacity: .45; cursor: not-allowed; }
+/* Pe telefon „Continuă” stă lipit deasupra barei de jos, pe toată lățimea: nu e acoperit de ea și nu trebuie căutat. */
+@media (max-width: 760px) { .pas-tip .continua { position: sticky; z-index: 5; bottom: calc(92px + env(safe-area-inset-bottom)); align-self: stretch; box-shadow: 0 4px 14px rgba(11, 37, 69, .18); } }
 .formular-anunt .ales { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); }
 .formular-anunt label.pret { max-width: 260px; }
 .sectiune-caracteristici, .sectiune-locatie { margin: 0; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); min-width: 0; }
@@ -723,6 +726,14 @@ a:hover .sageata { transform: translateX(4px); }
 .obligatoriu { color: #b91c1c; font-weight: 700; }
 .eroare-camp { color: #b91c1c; font-size: .82rem; font-weight: 500; }
 .formular [aria-invalid="true"], .cu-eroare .optiune span { border-color: #dc2626 !important; box-shadow: 0 0 0 1px #dc2626; }
+/* Câmp obligatoriu lipsă: chenarul roșu rămâne vizibil și când câmpul are focus (formularul îl aduce în față). */
+.formular input[aria-invalid="true"], .formular select[aria-invalid="true"], .formular textarea[aria-invalid="true"] { background-color: #fef2f2; }
+.formular [aria-invalid="true"]:focus, .formular [aria-invalid="true"]:focus-visible { outline: 2px solid #dc2626; outline-offset: 1px; }
+@media (prefers-color-scheme: dark) { .formular input[aria-invalid="true"], .formular select[aria-invalid="true"], .formular textarea[aria-invalid="true"] { background-color: color-mix(in srgb, #dc2626 14%, var(--card)); } }
+/* Listele cu valori lungi („Centrală proprie”, „Mobilat și utilat”) ocupă tot rândul când grila are 2 coloane. */
+@container (max-width: 639px) { .grila-car > .lung { grid-column: 1 / -1; } }
+.avertizare-adresa { color: #b45309; font-weight: 600; }
+@media (prefers-color-scheme: dark) { .avertizare-adresa { color: #fbbf24; } }
 .alege-punct .adresa .strada { flex: 3 1 220px; }
 .alege-punct .adresa .numar { flex: 1 1 90px; }
 .alege-punct .adresa label { display: flex; flex-direction: column; gap: 4px; font-weight: 500; }

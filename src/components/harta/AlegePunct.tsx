@@ -22,7 +22,7 @@ export const ZOOM_ZONA = 15;
 export const ZOOM_ADRESA = 17;
 const PAUZA_TASTARE = 800;
 
-type Stare = { tip: "cauta" } | { tip: "gasit"; exact: boolean } | { tip: "negasit" } | null;
+type Stare = { tip: "cauta" } | { tip: "gasit"; exact: boolean } | { tip: "negasit"; localitate: string } | null;
 
 /**
  * Locul pe hartă, în formularul de anunț. Harta merge singură pe localitatea aleasă (zoom 13), apoi pe zonă (15),
@@ -61,6 +61,11 @@ export function AlegePunct({
     const form = el.current?.closest("form");
     const f = form ? new FormData(form) : null;
     return { judet: String(f?.get("judet") ?? ""), oras: String(f?.get("oras") ?? ""), zona: String(f?.get("zona") ?? "").trim() };
+  };
+  /** Numele localității alese, cum apare în listă (pentru mesaje). */
+  const numeLocalitate = () => {
+    const s = el.current?.closest("form")?.querySelector<HTMLSelectElement>('select[name="oras"]');
+    return s?.selectedOptions[0]?.textContent?.trim() || "localitatea aleasă";
   };
 
   useEffect(() => {
@@ -163,7 +168,17 @@ export function AlegePunct({
       setStare({ tip: "cauta" });
       const p = await geoRef.current.adresa(st, numar.trim(), judet, oras).catch(() => null);
       if (anulat) return;
-      if (!p) return setStare({ tip: "negasit" });
+      if (!p) {
+        // Adresa nu e în localitatea aleasă (sau nu există pe hartă): pinul rămâne în localitate (zona ei, dacă e scrisă),
+        // nu pe o stradă cu același nume din altă parte; omul îl mută unde e proprietatea.
+        setStare({ tip: "negasit", localitate: numeLocalitate() });
+        const { zona } = locatie();
+        const c = await geoRef.current.loc(zona, judet, oras).catch(() => null);
+        if (anulat || !c) return;
+        setPunct({ lat: c.lat, lng: c.lng });
+        harta.current?.h.setView([c.lat, c.lng], zona ? ZOOM_ZONA : ZOOM_LOCALITATE);
+        return;
+      }
       setPunct({ lat: p.lat, lng: p.lng });
       harta.current?.h.setView([p.lat, p.lng], ZOOM_ADRESA);
       setStare({ tip: "gasit", exact: p.exact });
@@ -221,7 +236,7 @@ export function AlegePunct({
         </label>
       </div>
       <span className="eticheta">Locul pe hartă</span>
-      <span className="muted small" aria-live="polite">
+      <span className={stare?.tip === "negasit" ? "avertizare-adresa small" : "muted small"} aria-live="polite">
         {stare?.tip === "cauta"
           ? "Caut adresa pe hartă…"
           : stare?.tip === "gasit"
@@ -229,7 +244,7 @@ export function AlegePunct({
               ? "Am pus pinul la adresă. Trage-l dacă trebuie mutat."
               : "Am găsit strada (fără număr). Trage pinul în dreptul clădirii."
             : stare?.tip === "negasit"
-              ? "Nu am găsit adresa pe hartă. Apasă pe hartă unde e proprietatea."
+              ? `Nu am găsit adresa în ${stare.localitate} – mută pinul pe hartă.`
               : "Scrie strada și numărul sau apasă pe hartă unde e proprietatea. Pinul se poate trage."}
       </span>
       <div ref={el} className="harta harta-mica" />

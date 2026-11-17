@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { JUDETE } from "@/modules/judete";
 
-type Props = { judetInitial?: string; orasInitial?: string };
+/** marcheazaObligatorii: steluța roșie la Județ și Localitate (formularul de anunț marchează așa câmpurile obligatorii). */
+type Props = { judetInitial?: string; orasInitial?: string; marcheazaObligatorii?: boolean };
 
 /**
  * Selectoare legate județ → oraș, pentru formulare.
@@ -13,17 +14,18 @@ type Props = { judetInitial?: string; orasInitial?: string };
  * De aceea selectoarele sunt necontrolate (defaultValue), iar când serverul întoarce alte valori inițiale
  * le recreăm (key), ca resetarea să ducă la valorile primite, nu la „Alege județul”.
  */
-export function Localitate({ judetInitial = "", orasInitial = "" }: Props) {
-  return <Selectoare key={`${judetInitial}|${orasInitial}`} judetInitial={judetInitial} orasInitial={orasInitial} />;
+export function Localitate({ judetInitial = "", orasInitial = "", marcheazaObligatorii }: Props) {
+  return <Selectoare key={`${judetInitial}|${orasInitial}`} judetInitial={judetInitial} orasInitial={orasInitial} marcheazaObligatorii={marcheazaObligatorii} />;
 }
 
-function Selectoare({ judetInitial = "", orasInitial = "" }: Props) {
+function Selectoare({ judetInitial = "", orasInitial = "", marcheazaObligatorii }: Props) {
+  const stea = marcheazaObligatorii ? <span className="obligatoriu" aria-hidden="true"> *</span> : null;
   const [judet, setJudet] = useState(judetInitial);
   const orase = JUDETE.find((j) => j.slug === judet)?.orase ?? [];
   return (
     <div className="rand">
       <label>
-        Județ
+        <span>Județ{stea}</span>
         <select
           name="judet"
           required
@@ -47,7 +49,7 @@ function Selectoare({ judetInitial = "", orasInitial = "" }: Props) {
         </select>
       </label>
       <label>
-        Localitate
+        <span>Localitate{stea}</span>
         <select name="oras" required defaultValue={judet === judetInitial ? orasInitial : ""} key={judet} disabled={!judet}>
           <option value="">Alege localitatea</option>
           {orase.map((o) => (

@@ -326,7 +326,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("incalzire") && (
-          <label className="camp-car">
+          <label className="camp-car lung">
             <Eticheta camp="incalzire" tip={tip} />
             <select name="incalzire" defaultValue={v.incalzire ?? ""} {...aria("incalzire", erori, tip, "incalzire")}>
               <option value="">Alege</option>
@@ -336,7 +336,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("mobilare") && (
-          <label className="camp-car">
+          <label className="camp-car lung">
             <Eticheta camp="mobilare" tip={tip} />
             <select name="mobilare" defaultValue={v.mobilare ?? ""} {...aria("mobilare", erori, tip, "mobilare")}>
               <option value="">Alege</option>
@@ -346,7 +346,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("aerConditionat") && (
-          <label className="camp-car">
+          <label className="camp-car lung">
             <Eticheta camp="aerConditionat" tip={tip} />
             <select name="aerConditionat" defaultValue={v.aerConditionat ?? ""} {...aria("aerConditionat", erori, tip, "aerConditionat")}>
               <option value="">Alege</option>
@@ -360,7 +360,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("clasaEnergetica") && (
-          <label className="camp-car">
+          <label className="camp-car lung">
             <Eticheta camp="clasaEnergetica" tip={tip} />
             <select name="clasaEnergetica" defaultValue={v.clasaEnergetica ?? ""} {...aria("clasaEnergetica", erori, tip, "clasaEnergetica")}>
               <option value="">Alege</option>
@@ -506,19 +506,19 @@ export function FormularCampuri({
           <p className="succes small">Am precompletat din descriere: {editare.dinDescriere.join(", ")}. Verifică și salvează.</p>
         ) : null}
         <label>
-          Titlu
+          <span>Titlu<span className="obligatoriu" aria-hidden="true"> *</span></span>
           <input name="titlu" defaultValue={v?.titlu} required minLength={10} maxLength={120} placeholder="ex. Apartament 2 camere, renovat, lângă metrou" {...aria("titlu", erori)} />
           <MesajCamp camp="titlu" erori={erori} />
         </label>
         <label className="pret">
-          Preț (€){tranzactie === "inchiriere" ? " pe lună" : ""}
+          <span>Preț (€){tranzactie === "inchiriere" ? " pe lună" : ""}<span className="obligatoriu" aria-hidden="true"> *</span></span>
           <input name="pret" defaultValue={v?.pret} type="number" inputMode="numeric" min={1} required {...aria("pret", erori)} />
           <MesajCamp camp="pret" erori={erori} />
         </label>
         {tip && <SectiuneCaracteristici key={tip} tip={tip} v={v} erori={erori} />}
         <fieldset className="sectiune-locatie">
           <legend>Localizare</legend>
-          <Localitate judetInitial={v?.judet ?? judet} orasInitial={v?.oras ?? oras} />
+          <Localitate judetInitial={v?.judet ?? judet} orasInitial={v?.oras ?? oras} marcheazaObligatorii />
           <MesajCamp camp="judet" erori={erori} />
           <MesajCamp camp="oras" erori={erori} />
           <label>
