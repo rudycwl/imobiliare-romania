@@ -15,6 +15,7 @@ Content-Type: application/json
 {
   "anunturi": [
     {
+      "cod": "AP-1024",
       "titlu": "Apartament 2 camere, Tătărași, renovat",
       "descriere": "Decomandat, etaj 2/4, centrală proprie.",
       "tip": "apartament",
@@ -31,7 +32,15 @@ Content-Type: application/json
 }`;
 
 const EXEMPLU_RASPUNS = `{
-  "publicate": [{ "pozitie": 1, "id": 1234, "link": "${adresaSite()}/anunt/1234" }],
+  "publicate": [{ "pozitie": 1, "id": 1234, "cod": "AP-1024", "link": "${adresaSite()}/anunt/1234" }],
+  "actualizate": [],
+  "cuPoze": 1,
+  "sarite": []
+}`;
+
+const EXEMPLU_ACTUALIZARE = `{
+  "publicate": [],
+  "actualizate": [{ "pozitie": 1, "id": 1234, "cod": "AP-1024", "reactivat": false, "link": "${adresaSite()}/anunt/1234" }],
   "cuPoze": 1,
   "sarite": []
 }`;
@@ -59,8 +68,9 @@ export default function ApiAgentii() {
 
       <h2>2. Publicare anunțuri</h2>
       <p>
-        <code>POST /api/v1/anunturi</code>, cu JSON. Maximum 100 de anunțuri pe cerere și 60 de cereri pe oră. Anunțurile cu același titlu și preț ca unul
-        existent nu se dublează, deci puteți retrimite toată lista fără grijă.
+        <code>POST /api/v1/anunturi</code>, cu JSON. Maximum 100 de anunțuri pe cerere și 60 de cereri pe oră. Recomandăm să trimiteți la fiecare
+        anunț câmpul <code>cod</code>: codul (numărul de referință) anunțului în programul vostru, la fel ca în feed-ul XML. Cu el, CheiaMea
+        recunoaște anunțul la fiecare retrimitere (vezi secțiunea 3).
       </p>
       <pre style={{ whiteSpace: "pre-wrap", overflowX: "auto" }}>{EXEMPLU_POST}</pre>
       <table>
@@ -68,6 +78,7 @@ export default function ApiAgentii() {
           <tr><th>Câmp</th><th>Obligatoriu</th><th>Ce conține</th></tr>
         </thead>
         <tbody>
+          <tr><td>cod</td><td>nu, dar recomandat</td><td>codul anunțului în programul agenției (text sau număr, maximum 100 de caractere), unic în contul agenției</td></tr>
           <tr><td>titlu</td><td>da</td><td>minimum 10 caractere</td></tr>
           <tr><td>tip</td><td>da</td><td>apartament, casa, teren, spatiu-comercial, birouri sau depozit</td></tr>
           <tr><td>tranzactie</td><td>da</td><td>vanzare sau inchiriere</td></tr>
@@ -77,33 +88,79 @@ export default function ApiAgentii() {
           <tr><td>zona</td><td>nu</td><td>cartierul; implicit „Centru”</td></tr>
           <tr><td>camere</td><td>nu</td><td>număr</td></tr>
           <tr><td>descriere</td><td>nu</td><td>text</td></tr>
-          <tr><td>poze</td><td>nu</td><td>listă de linkuri https către poze JPG sau WebP, maximum 10, fiecare sub 6 MB</td></tr>
+          <tr><td>poze</td><td>nu</td><td>listă de linkuri https către poze JPG sau WebP, maximum 10, fiecare sub 6 MB; prima e coperta</td></tr>
         </tbody>
       </table>
       <p>Răspunsul spune ce s-a publicat (cu numărul anunțului pe CheiaMea) și ce a fost sărit, cu motivul:</p>
       <pre style={{ whiteSpace: "pre-wrap", overflowX: "auto" }}>{EXEMPLU_RASPUNS}</pre>
       <p>
-        Coduri: 201 = s-a publicat cel puțin un anunț; 200 = niciunul (vezi <code>sarite</code>); 400 = JSON greșit; 401 = cheie greșită; 429 = prea
-        multe cereri. Dacă se atinge limita de anunțuri a abonamentului, răspunsul conține câmpul <code>oprit</code>.
+        Coduri: 201 = s-a publicat cel puțin un anunț nou; 200 = niciun anunț nou (vezi <code>actualizate</code> și <code>sarite</code>); 400 = JSON
+        greșit; 401 = cheie greșită; 429 = prea multe cereri. Dacă se atinge limita de anunțuri a abonamentului, răspunsul conține câmpul{" "}
+        <code>oprit</code>.
       </p>
       <p>Exemplu cu curl:</p>
       <pre style={{ whiteSpace: "pre-wrap", overflowX: "auto" }}>{EXEMPLU_CURL}</pre>
 
-      <h2>3. Lista anunțurilor agenției</h2>
+      <h2>3. Modificare și republicare (cu „cod”)</h2>
       <p>
-        <code>GET /api/v1/anunturi</code> întoarce anunțurile agenției (ultimele 1.000), cu <code>id</code>, titlu, preț, dacă e public acum și linkul.
+        Nu există cereri separate de modificare (<code>PUT</code> / <code>PATCH</code>): pentru orice schimbare retrimiteți anunțul întreg cu{" "}
+        <code>POST /api/v1/anunturi</code> și <strong>același</strong> <code>cod</code>.
+      </p>
+      <ul>
+        <li>
+          <strong>Cod nou</strong> pentru contul vostru: anunțul se publică (apare în <code>publicate</code>).
+        </li>
+        <li>
+          <strong>Cod deja trimis</strong> de contul vostru: anunțul existent se <strong>actualizează</strong> (preț, titlu, descriere, tip, suprafață,
+          camere, localitate, caracteristici și poze), nu se creează unul nou. Apare în <code>actualizate</code>, cu același <code>id</code> și
+          același link. Schimbarea de preț intră în istoricul prețului afișat pe site. Anunțul rămâne public încă 60 de zile de la retrimitere.
+        </li>
+        <li>
+          Dacă anunțul cu acel cod fusese <strong>retras</strong> (<code>DELETE</code>) sau <strong>expirase</strong>, retrimiterea îl{" "}
+          <strong>republică</strong> (<code>&quot;reactivat&quot;: true</code>), cu același <code>id</code>, dacă mai aveți loc în limita de anunțuri
+          active a abonamentului. Dacă nu mai aveți loc, anunțul rămâne retras, apare în <code>sarite</code>, iar răspunsul conține{" "}
+          <code>oprit</code>; anunțurile active se actualizează în continuare (actualizarea nu ocupă un loc nou).
+        </li>
+        <li>
+          Pozele: lista trimisă e lista completă. Pozele noi se adaugă, cele scoase din listă se șterg, ordinea e cea din listă. O listă goală sau
+          lipsă lasă pozele neschimbate; pozele puse de mână din cont rămân.
+        </li>
+        <li>
+          Codul e unic <strong>în contul agenției</strong>: dacă altă agenție folosește același cod, e alt anunț, al ei. Același cod de două ori în
+          aceeași cerere: al doilea e sărit.
+        </li>
+        <li>
+          Un anunț publicat mai demult fără cod, cu același titlu și preț, primește codul la prima retrimitere cu cod (se actualizează, nu se dublează).
+        </li>
+        <li>Anunțurile respinse de moderare nu se republică prin API; scrieți-ne.</li>
+      </ul>
+      <p>Răspuns la o retrimitere cu preț nou:</p>
+      <pre style={{ whiteSpace: "pre-wrap", overflowX: "auto" }}>{EXEMPLU_ACTUALIZARE}</pre>
+      <p>
+        <strong>Fără „cod”</strong> lucrurile rămân ca înainte: anunțurile cu același titlu și preț ca unul existent nu se dublează, dar un anunț cu
+        preț schimbat devine un anunț nou, iar unul retras sau expirat nu se poate republica prin API (doar din cont, cu „Reactivează”).
       </p>
 
-      <h2>4. Retragere anunț</h2>
+      <h2>4. Lista anunțurilor agenției</h2>
       <p>
-        <code>DELETE /api/v1/anunturi/&#123;id&#125;</code> retrage anunțul de pe site, de exemplu când proprietatea s-a vândut sau s-a închiriat.
+        <code>GET /api/v1/anunturi</code> întoarce anunțurile agenției (ultimele 1.000), cu <code>id</code>, <code>cod</code>, titlu, preț, dacă e
+        public acum și linkul.
+      </p>
+
+      <h2>5. Retragere anunț</h2>
+      <p>
+        <code>DELETE /api/v1/anunturi/&#123;id&#125;</code> retrage anunțul de pe site, de exemplu când proprietatea s-a vândut sau s-a închiriat.{" "}
+        <code>id</code> e numărul anunțului pe CheiaMea (din răspunsul la <code>POST</code> sau din <code>GET</code>). Anunțul retras se poate
+        republica retrimițându-l cu același <code>cod</code>.
       </p>
 
       <h2>Reguli</h2>
       <ul>
         <li>Trimiteți doar anunțuri reale, ale agenției, cu poze care vă aparțin.</li>
         <li>Anunțurile trec prin aceeași verificare automată ca cele puse de mână.</li>
-        <li>Anunțurile expiră după 60 de zile, ca toate anunțurile de pe site; le puteți reînnoi din cont.</li>
+        <li>
+          Anunțurile expiră după 60 de zile de la ultima publicare sau retrimitere; le puteți reînnoi din cont sau retrimițându-le cu același cod.
+        </li>
       </ul>
       <p>
         Întrebări tehnice: <a href="mailto:agentii@cheiamea.ro">agentii@cheiamea.ro</a>.
