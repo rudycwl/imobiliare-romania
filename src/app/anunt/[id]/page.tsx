@@ -85,7 +85,10 @@ export default async function AnuntPage({ params }: Props) {
   if (faraLoc) after(() => completeazaCoordonate());
   const hartaPagina =
     a.lat != null && a.lng != null
-      ? { lat: a.lat, lng: a.lng, raza: a.locatieAproximativa ? RAZA_APROXIMATIVA_M : undefined, localitate: false }
+      ? // Punctul pus automat pe centrul localității (cartierul nu s-a găsit): cercul mare și textul spun asta.
+        a.punctProprietar === false && a.sursaLoc === "localitate"
+        ? { lat: a.lat, lng: a.lng, raza: RAZA_LOCALITATE_M, localitate: true }
+        : { lat: a.lat, lng: a.lng, raza: a.locatieAproximativa ? RAZA_APROXIMATIVA_M : undefined, localitate: false }
       : centru
         ? { ...centru, raza: RAZA_LOCALITATE_M, localitate: true }
         : null;
@@ -212,7 +215,7 @@ export default async function AnuntPage({ params }: Props) {
           <HartaLoc lat={hartaPagina.lat} lng={hartaPagina.lng} razaAproximativa={hartaPagina.raza} />
           <p className="muted small">
             {hartaPagina.localitate
-              ? `Locație aproximativă: ${a.zona ? `zona ${a.zona}, ` : ""}${o.nume}. Pe hartă e centrul localității; adresa exactă o afli de la vânzător.`
+              ? `Anunțul e în ${a.zona && a.zona !== o.nume ? `zona ${a.zona}, ` : ""}${o.nume}. Pe hartă e centrul localității, nu locul proprietății; adresa exactă o afli de la vânzător.`
               : !a.locatieAproximativa
               ? `Locul marcat de vânzător${a.strada ? `: ${a.strada}${a.numar ? ` ${a.numar}` : ""}` : ""}.`
               : a.punctProprietar
