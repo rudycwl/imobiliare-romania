@@ -7,7 +7,7 @@ import { cautaAnunturi } from "@/lib/anunturi";
 import { getJudet, getOras } from "@/lib/geo";
 import { formatData } from "@/lib/fondatori";
 import { db } from "@/lib/db";
-import { comutaActualizareSite, prelungeste, retrage, retrimiteConfirmare } from "./actiuni";
+import { opresteActualizareSite, pornesteActualizareSite, prelungeste, retrage, retrimiteConfirmare } from "./actiuni";
 import { CadruCont } from "./CadruCont";
 import { formatPret } from "@/lib/etichete";
 import { credite } from "@/lib/abonamente";
@@ -185,9 +185,9 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
                       {!expirat && <button type="submit" formAction={retrage} className="secundar">Retrage</button>}
                       {a.sursaLink &&
                         (a.sursaActiva ? (
-                          <button type="submit" formAction={comutaActualizareSite} className="secundar">Oprește actualizarea</button>
+                          <button type="submit" formAction={opresteActualizareSite} className="secundar">Oprește actualizarea</button>
                         ) : (
-                          <button type="submit" formAction={comutaActualizareSite} name="porneste" value="da" className="secundar">Pornește actualizarea</button>
+                          <button type="submit" formAction={pornesteActualizareSite} className="secundar">Pornește actualizarea</button>
                         ))}
                     </form>
                   </li>
