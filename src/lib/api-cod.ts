@@ -1,8 +1,9 @@
 import "server-only";
 import { Prisma } from "@prisma/client";
 import { db } from "./db";
-import { anunturiActive, creeazaAnunt, limitaAnunturi, notaPret } from "./anunturi";
+import { anunturiActive, creeazaAnunt, limitaAnunturi, notaPret, type AnuntNou } from "./anunturi";
 import { randDinJson } from "./api-format";
+import { actualizareCaracteristici, SELECT_CARACTERISTICI } from "./caracteristici";
 import { cheieProprietate } from "./duplicate";
 import { citesteRand, descarcaPoza, importaRanduri } from "./import-masa";
 import { aplicaFiltru } from "./moderare";
@@ -58,15 +59,6 @@ export type RezultatApi = {
   oprit?: string;
 };
 
-/**
- * După unirea caracteristicilor dedicate (PR #137), citesteRand întoarce și `caracteristici` (din câmpurile trimise)
- * și `extrase` (din descriere). Pe main ele se citesc din descriere la afișare, deci ajunge actualizarea descrierii.
- */
-function caracteristici(citit: object, nou: boolean): object {
-  const c = citit as { caracteristici?: object; extrase?: object };
-  return nou ? { ...c.extrase, ...c.caracteristici } : { ...c.caracteristici };
-}
-
 const mesajLimita = (limita: number | null) =>
   `Ai ajuns la limita abonamentului (${limita} anunțuri active). Anunțurile noi sau retrase nu au fost publicate; cele active s-au actualizat. Alege un abonament mai mare din „Abonament”.`;
 
@@ -114,6 +106,7 @@ export async function sincronizeazaPoze(anuntId: number, urluri: string[]): Prom
 
 const campuriExistent = {
   id: true, expiraLa: true, moderare: true, titlu: true, descriere: true, pret: true, judet: true, oras: true, zona: true, punctProprietar: true,
+  ...SELECT_CARACTERISTICI,
 } satisfies Prisma.AnuntSelect;
 
 /** POST /api/v1/anunturi: anunțurile cu cod se creează sau se actualizează; cele fără cod merg ca înainte. */
@@ -171,7 +164,8 @@ export async function publicaPrinApi(utilizatorId: string, lista: unknown[]): Pr
       try {
         const a = await creeazaAnunt(
           utilizatorId,
-          { ...citit.date, ...caracteristici(citit, true), externId: cod } as typeof citit.date,
+          // Anunț nou: caracteristicile din descriere, peste ele cele trimise în câmpurile dedicate (au întâietate).
+          { ...citit.date, ...citit.extrase, ...citit.caracteristici, externId: cod } as AnuntNou,
           { lat: null, lng: null, punctProprietar: false },
         );
         id = a.id;
@@ -197,7 +191,8 @@ export async function publicaPrinApi(utilizatorId: string, lista: unknown[]): Pr
       where: { id: ex.id },
       data: {
         ...citit.date,
-        ...caracteristici(citit, false),
+        // Ca la feed: ce trimite agenția înlocuiește; ce e ghicit din descriere completează doar câmpurile goale.
+        ...actualizareCaracteristici(ex, citit.caracteristici, citit.extrase),
         externId: cod,
         cheieProprietate: cheieProprietate(citit.date),
         // Cât timp agenția îl retrimite, anunțul rămâne public încă 60 de zile (ca la feed).

@@ -45,7 +45,7 @@ export default async function AnuntNouPage({ searchParams }: { searchParams: Pro
     );
   }
   return (
-    <div className="ingust">
+    <div className="anunt-nou">
       <h1>Adaugă anunț</h1>
       <FormularAnunt judet={u.judet} oras={u.oras} poateImporta agentie={u.tip === "agentie"} linkInitial={linkInitial} />
     </div>

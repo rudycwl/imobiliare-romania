@@ -4,6 +4,8 @@ export const LUNGIME = {
   titlu: 150,
   descriere: 8000,
   zona: 80,
+  strada: 120,
+  numar: 20,
   nume: 120,
   email: 200,
   adresa: 200,

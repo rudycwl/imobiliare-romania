@@ -178,3 +178,28 @@ test("cu bază: limita abonamentului (3 gratuite) – cod nou și republicare op
     await db.utilizator.delete({ where: { id: a.id } });
   }
 });
+
+test("cu bază: caracteristicile prin cod – la creare din câmpuri și descriere; la retrimitere sursa înlocuiește, descrierea doar completează", cuBaza, async () => {
+  const { db, publicaPrinApi, agentie } = await pregatire();
+  const a = await agentie("car");
+  try {
+    let r = await publicaPrinApi(a.id, [anunt({ cod: "C-1", bai: 2 })]);
+    const id = r.publicate[0].id;
+    let x = await db.anunt.findUniqueOrThrow({ where: { id } });
+    assert.equal(x.bai, 2, "din câmpul trimis");
+    assert.equal(x.etaj, 2, "din descriere („etaj 2/4”)");
+    assert.equal(x.compartimentare, "decomandat");
+
+    // Omul corectează pe site; agenția retrimite fără „bai”, cu alt etaj în câmp și altă descriere.
+    await db.anunt.update({ where: { id }, data: { bai: 3, mobilare: "mobilat" } });
+    r = await publicaPrinApi(a.id, [anunt({ cod: "C-1", etaj: 3, descriere: "Semidecomandat, nemobilat." })]);
+    assert.equal(r.actualizate.length, 1);
+    x = await db.anunt.findUniqueOrThrow({ where: { id } });
+    assert.equal(x.etaj, 3, "câmpul trimis înlocuiește");
+    assert.equal(x.bai, 3, "ce lipsește din sursă nu șterge ce a completat omul");
+    assert.equal(x.mobilare, "mobilat", "ghicitul din descriere nu suprascrie un câmp completat");
+    assert.equal(x.compartimentare, "decomandat", "la fel");
+  } finally {
+    await db.utilizator.delete({ where: { id: a.id } });
+  }
+});

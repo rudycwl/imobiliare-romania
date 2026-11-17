@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { utilizatorCurent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { FormularCampuri } from "../../../anunt-nou/Formular";
+import { caracteristiciDinDescriere, caracteristiciSalvate, valoriCaracteristici } from "@/lib/caracteristici";
+import { etichetaCamp } from "@/lib/caracteristici-liste";
 import { SectiunePoze } from "../poze/SectiunePoze";
 
 export const metadata: Metadata = { title: "Editează anunțul", robots: { index: false } };
@@ -16,6 +18,8 @@ export default async function EditeazaPage({ params }: { params: Promise<{ id: s
   const a = await db.anunt.findFirst({ where: { id, proprietarId: u.id } });
   if (!a) notFound();
 
+  const salvate = caracteristiciSalvate(a);
+  const precompletate = caracteristiciDinDescriere(a.descriere, a.tip);
   const valori = {
     tip: a.tip,
     tranzactie: a.tranzactie,
@@ -27,9 +31,19 @@ export default async function EditeazaPage({ params }: { params: Promise<{ id: s
     judet: a.judet,
     oras: a.oras,
     zona: a.zona,
+    strada: a.strada ?? "",
+    numar: a.numar ?? "",
+    locatieExacta: a.locatieExacta ? "da" : "",
     // Punctul găsit automat după cartier nu se trimite: la schimbarea cartierului se recalculează.
     ...(a.punctProprietar && a.lat != null && a.lng != null ? { lat: String(a.lat), lng: String(a.lng) } : {}),
+    // Caracteristicile: cele salvate; la anunțurile vechi, cele goale se precompletează din descriere (omul verifică).
+    ...valoriCaracteristici(precompletate),
+    ...valoriCaracteristici(salvate),
   };
+  const dinDescriere = (Object.keys(precompletate) as (keyof typeof precompletate)[])
+    .filter((k) => !(k in salvate))
+    .map((k) => etichetaCamp(k === "balconInchis" || k === "balconMp" ? "balcon" : k, a.tip))
+    .filter((x, i, l) => l.indexOf(x) === i);
   return (
     <div className="editare-anunt">
       <p className="small"><Link href="/cont#anunturile-mele">← Anunțurile mele</Link></p>
@@ -37,7 +51,7 @@ export default async function EditeazaPage({ params }: { params: Promise<{ id: s
       <p className="muted small">Valabilitatea și promovările anunțului rămân neschimbate.</p>
       <div className="editare-coloane">
       <div>
-        <FormularCampuri judet={a.judet} oras={a.oras} editare={{ id: a.id, valori }} />
+        <FormularCampuri judet={a.judet} oras={a.oras} editare={{ id: a.id, valori, dinDescriere }} />
       </div>
       <section id="poze" className="sectiune-poze">
         <h2>Pozele anunțului</h2>

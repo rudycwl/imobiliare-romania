@@ -1,5 +1,6 @@
 import { JUDETE } from "@/modules/judete";
 import { slugify } from "@/lib/etichete";
+import { caracteristiciDinDescriere, valoriCaracteristici } from "@/lib/caracteristici";
 
 /** Site-urile de pe care proprietarul își poate importa propriul anunț. Doar acestea: nu cerem URL-uri arbitrare. */
 export const SITE_IMPORT = ["olx.ro", "storia.ro", "imobiliare.ro", "publi24.ro", "lajumate.ro"];
@@ -19,7 +20,9 @@ export type AnuntImportat = Partial<{
   sursa: string;
   /** Linkurile pozelor din galeria paginii, despărțite prin spațiu (se descarcă la publicare). */
   poze: string;
-}>;
+}> &
+  /** Caracteristicile precompletate (etaj, băi, încălzire …), ca text de formular; omul le verifică înainte de publicare. */
+  Record<string, string | undefined>;
 
 export function urlPermis(raw: string): URL | null {
   let u: URL;
@@ -181,6 +184,8 @@ export function extrageAnunt(html: string, url: URL, cursEuro: number | null = n
     [str(adresa?.addressLocality), str(adresa?.addressRegion), str(zonaServita?.name), r.titlu, url.pathname.replace(/[-/]/g, " ")].filter(Boolean).join(" "),
   );
   if (loc) Object.assign(r, loc);
+  // Caracteristicile din descriere (etaj, an, băi, încălzire …): precompletate, omul le corectează înainte de publicare.
+  Object.assign(r, valoriCaracteristici(caracteristiciDinDescriere(r.descriere ?? "", r.tip)));
 
   return Object.fromEntries(Object.entries(r).filter(([, v]) => v)) as AnuntImportat;
 }

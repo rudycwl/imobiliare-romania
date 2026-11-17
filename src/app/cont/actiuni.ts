@@ -22,17 +22,24 @@ import { completeazaCoordonate } from "@/lib/geocodare";
 import { ipClient, noteaza, permis, sterge } from "@/lib/limita";
 import { trimiteConfirmare } from "@/lib/confirmare";
 import { LUNGIME, preaLung } from "@/lib/lungimi";
+import { citesteCaracteristici } from "@/lib/caracteristici";
 
 const MIN15 = 15 * 60_000;
 const ORA = 60 * 60_000;
 
-export type Stare = { eroare?: string; valori?: Record<string, string> } | undefined;
+/** `camp`: câmpul greșit (formularul îl marchează și îl aduce în față). */
+export type Stare = { eroare?: string; camp?: string; valori?: Record<string, string> } | undefined;
 
 // React golește formularul după trimitere; returnăm valorile (fără parolă) ca să nu fie retastate.
-const esec = (eroare: string, f: FormData): Stare => ({
-  eroare,
-  valori: Object.fromEntries([...f.entries()].filter((e): e is [string, string] => typeof e[1] === "string" && e[0] !== "parola")),
-});
+// Câmpurile cu mai multe valori (bifele de dotări) se întorc despărțite prin virgulă.
+const esec = (eroare: string, f: FormData, camp?: string): Stare => {
+  const valori: Record<string, string> = {};
+  for (const [k, v] of f.entries()) {
+    if (typeof v !== "string" || k === "parola") continue;
+    valori[k] = k in valori ? `${valori[k]},${v}` : v;
+  }
+  return { eroare, ...(camp ? { camp } : {}), valori };
+};
 
 const text = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -139,7 +146,7 @@ function citestePunct(f: FormData) {
   return ok ? { lat, lng, punctProprietar: true } : { lat: null, lng: null, punctProprietar: false };
 }
 
-function citesteAnunt(f: FormData): { eroare: string } | { date: AnuntNou } {
+function citesteAnunt(f: FormData): { eroare: string; camp?: string } | { date: AnuntNou } {
   const tip = text(f, "tip");
   const tranzactie = text(f, "tranzactie");
   const titlu = text(f, "titlu");
@@ -161,8 +168,17 @@ function citesteAnunt(f: FormData): { eroare: string } | { date: AnuntNou } {
   if (pret > 100_000_000 || suprafata > 10_000_000) return { eroare: "Verifică prețul și suprafața: valoarea e prea mare." };
   if (camere != null && (!Number.isInteger(camere) || camere < 1 || camere > 100)) return { eroare: "Numărul de camere trebuie să fie între 1 și 100." };
   if (!getOras(judet, oras)) return { eroare: "Alege județul și orașul." };
+  // Secțiunea „Caracteristici” și adresa: aceeași verificare ca în browser (câmpurile obligatorii ale tipului).
+  const car = citesteCaracteristici((k) => text(f, k), (k) => f.getAll(k).map(String), tip);
+  if (car.erori.length) return { eroare: car.erori[0].mesaj, camp: car.erori[0].camp };
+  const strada = text(f, "strada").slice(0, LUNGIME.strada);
+  const numar = text(f, "numar").slice(0, LUNGIME.numar);
   return {
     date: {
+      ...car.date,
+      strada: strada || null,
+      numar: (strada && numar) || null,
+      locatieExacta: f.get("locatieExacta") === "da",
       titlu,
       descriere,
       tip: tip as keyof typeof TIPURI,
@@ -183,7 +199,7 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   // Doar conturile cu email confirmat publică: oprește anunțurile puse de pe adrese inventate.
   if (!u.emailConfirmat) return esec(MESAJ_EMAIL, f);
   const r = citesteAnunt(f);
-  if ("eroare" in r) return esec(r.eroare, f);
+  if ("eroare" in r) return esec(r.eroare, f, r.camp);
   if (!(await poatePublica(u))) return esec(MESAJ_LIMITA, f);
 
   const a = await creeazaAnunt(u.id, r.date, citestePunct(f));
@@ -208,7 +224,7 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
 export async function editeazaAnunt(_: Stare, f: FormData): Promise<Stare> {
   const { u, id } = await proprietarSiId(f);
   const r = citesteAnunt(f);
-  if ("eroare" in r) return esec(r.eroare, f);
+  if ("eroare" in r) return esec(r.eroare, f, r.camp);
   if (!(await editeaza(id, u.id, r.date, citestePunct(f)))) redirect("/cont");
   after(() => completeazaCoordonate());
   await aplicaFiltru(id, r.date.titlu, r.date.descriere);

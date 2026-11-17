@@ -10,9 +10,11 @@ import { descarcaPaginaAgentie } from "./pagina-agentie";
 import { atasazaPozeDinSite } from "./poze-agentie";
 import { MAX_POZE, stergePoza } from "./poze";
 import { ZILE_VALABILITATE } from "./tarife";
+import { actualizareCaracteristici, SELECT_CARACTERISTICI } from "./caracteristici";
 
 // Anunțurile importate din link de pe site-ul agenției se recitesc la 3 ore (odată cu feed-urile, /api/feeduri).
-// Se actualizează prețul, titlul, descrierea, suprafața, camerele, zona și (doar dacă s-au schimbat) pozele.
+// Se actualizează prețul, titlul, descrierea, suprafața, camerele, zona, caracteristicile pe care le are pagina
+// (cele lipsă rămân cum le-a completat agenția) și (doar dacă s-au schimbat) pozele.
 // Pagina dispărută de 2 ori la rând → anunțul se retrage (nu se șterge). Site căzut → nu atingem nimic.
 
 /** Cele mai vechi verificări întâi; restul intră la rularea următoare (rotație). */
@@ -33,7 +35,11 @@ export async function actualizeazaDinSite(max = MAX_PE_RULARE): Promise<RaportSi
     },
     orderBy: { sursaVerificatLa: { sort: "asc", nulls: "first" } },
     take: max,
-    select: { id: true, proprietarId: true, sursaLink: true, sursaDisparut: true, sursaPoze: true, pret: true, titlu: true, descriere: true, proprietar: { select: { judet: true, oras: true } } },
+    select: {
+      id: true, proprietarId: true, sursaLink: true, sursaDisparut: true, sursaPoze: true, pret: true, titlu: true, descriere: true,
+      ...SELECT_CARACTERISTICI,
+      proprietar: { select: { judet: true, oras: true } },
+    },
   });
   if (!lista.length) return rap;
 
@@ -89,6 +95,8 @@ export async function actualizeazaDinSite(max = MAX_PE_RULARE): Promise<RaportSi
         where: { id: a.id },
         data: {
           ...date,
+          // Caracteristicile: ce are pagina agenției înlocuiește; ce lipsește nu șterge ce s-a completat de mână.
+          ...actualizareCaracteristici(a, r.caracteristici, r.extrase),
           cheieProprietate: cheieProprietate({ ...vechi, camere: date.camere, zona: date.zona }),
           // Cât timp anunțul e pe site-ul agenției, rămâne public (ca la feed).
           expiraLa: new Date(Date.now() + ZILE_VALABILITATE * 864e5),

@@ -17,7 +17,9 @@ import { ButonTelefon, Vizualizare } from "./Statistica";
 import { Favorit } from "@/components/Favorit";
 import { HartaLoc } from "@/components/harta/HartaLoc";
 import { Galerie } from "@/components/Galerie";
-import { extrageCaracteristici, localizare, randuriCaracteristici, textLocalizare } from "@/lib/anunt-format";
+import { localizare, randuriCaracteristici, textLocalizare } from "@/lib/anunt-format";
+import { caracteristiciAfisate } from "@/lib/caracteristici";
+import { RAZA_APROXIMATIVA_M } from "@/lib/locatie";
 import { Caracteristici, Descriere, TextLocalizare } from "./Detalii";
 
 type Props = { params: Promise<{ id: string }> };
@@ -68,7 +70,8 @@ export default async function AnuntPage({ params }: Props) {
   const [poze, curs, istoric, altele] = await Promise.all([pozeAnunt(a.id), cursEuro(), istoricPret(a.id), aceeasiProprietate(a)]);
   const ev = evolutiePret(istoric, a.pret, a.publicatLa);
   const loc = localizare(a.zona, o.nume, j.nume, j.slug);
-  const caracteristici = randuriCaracteristici(a, extrageCaracteristici(a.descriere), {
+  // Întâi câmpurile completate în formular; din descriere doar ce lipsește (anunțuri vechi).
+  const caracteristici = randuriCaracteristici(a, caracteristiciAfisate(a), {
     tranzactie: TRANZACTII[a.tranzactie],
     tip: TIPURI[a.tip],
   });
@@ -184,9 +187,14 @@ export default async function AnuntPage({ params }: Props) {
               Alte anunțuri din zonă pe hartă →
             </Link>
           </div>
-          <HartaLoc lat={a.lat} lng={a.lng} />
+          {/* Fără bifa „locația exactă”: punctul e deja mutat pe server (src/lib/locatie.ts); aici doar cercul zonei. */}
+          <HartaLoc lat={a.lat} lng={a.lng} razaAproximativa={a.locatieAproximativa ? RAZA_APROXIMATIVA_M : undefined} />
           <p className="muted small">
-            {a.punctProprietar ? "Locul marcat de vânzător." : `Locație aproximativă: zona ${a.zona}, ${o.nume}.`}
+            {!a.locatieAproximativa
+              ? `Locul marcat de vânzător${a.strada ? `: ${a.strada}${a.numar ? ` ${a.numar}` : ""}` : ""}.`
+              : a.punctProprietar
+                ? `Zonă aproximativă (cerc de ~${RAZA_APROXIMATIVA_M} m): adresa exactă o afli de la vânzător.`
+                : `Locație aproximativă: zona ${a.zona}, ${o.nume}.`}
           </p>
         </section>
       )}
