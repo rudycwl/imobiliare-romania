@@ -60,7 +60,7 @@ export function FormularInregistrare({ tipInitial, tipuri, cod }: { tipInitial: 
         Telefon
         <input name="telefon" defaultValue={v?.telefon} type="tel" required autoComplete="tel" pattern="0[0-9]{9}" placeholder="07xxxxxxxx" />
       </label>
-      <Localitate orasInitial={v?.oras} />
+      <Localitate judetInitial={v?.judet} orasInitial={v?.oras} />
       <label>
         Parolă (minim 8 caractere)
         <input name="parola" type="password" required minLength={8} autoComplete="new-password" />

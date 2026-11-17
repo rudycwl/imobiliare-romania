@@ -49,20 +49,19 @@ export default async function ImportPage() {
               <span className="small muted">(completăm formularul cu datele și pozele, tu verifici și publici; apoi poți șterge feed-ul de aici)</span>
             </p>
           )}
-          <form action={actiuneFeed} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <input type="hidden" name="id" value={f.id} />
-            <button type="submit" name="actiune" value={f.activ ? "acum" : "porneste"}>
-              {f.activ ? "Citește acum" : "Pornește din nou"}
-            </button>
-            {f.activ && (
-              <button type="submit" name="actiune" value="opreste" className="secundar">
-                Oprește
-              </button>
-            )}
-            <button type="submit" name="actiune" value="sterge" className="secundar">
-              Șterge feed-ul
-            </button>
-          </form>
+          {/* Câte un formular pe buton, cu acțiunea în câmp ascuns: la formularele cu acțiune de server, React nu trimite
+              numele și valoarea butonului apăsat, iar toate butoanele ar fi ajuns pe server fără „actiune” (nu făceau nimic). */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {(f.activ ? (["acum", "opreste", "sterge"] as const) : (["porneste", "sterge"] as const)).map((ce) => (
+              <form key={ce} action={actiuneFeed}>
+                <input type="hidden" name="id" value={f.id} />
+                <input type="hidden" name="actiune" value={ce} />
+                <button type="submit" className={ce === "acum" || ce === "porneste" ? undefined : "secundar"}>
+                  {{ acum: "Citește acum", porneste: "Pornește din nou", opreste: "Oprește", sterge: "Șterge feed-ul" }[ce]}
+                </button>
+              </form>
+            ))}
+          </div>
         </div>
       ))}
       <FormularFeed />

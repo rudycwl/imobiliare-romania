@@ -255,10 +255,18 @@ export async function prelungeste(f: FormData) {
 }
 
 /** „Oprește / pornește actualizarea automată” la un anunț importat din link de pe site-ul agenției. */
-export async function comutaActualizareSite(f: FormData) {
+async function comutaActualizareSite(f: FormData, porneste: boolean) {
   const { u, id } = await proprietarSiId(f);
-  const porneste = f.get("porneste") === "da";
   await db.anunt.updateMany({ where: { id, proprietarId: u.id, sursaLink: { not: null } }, data: porneste ? { sursaActiva: true, sursaDisparut: 0 } : { sursaActiva: false } });
   revalidatePath("/cont");
   redirect("/cont#anunturile-mele");
+}
+
+// Două acțiuni separate: un buton cu formAction nu trimite și name/value (React le omite), deci „porneste=da” nu ajungea pe server.
+export async function opresteActualizareSite(f: FormData) {
+  await comutaActualizareSite(f, false);
+}
+
+export async function pornesteActualizareSite(f: FormData) {
+  await comutaActualizareSite(f, true);
 }
