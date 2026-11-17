@@ -337,7 +337,9 @@ export function AlegePunct({
           : stare?.tip === "gasit"
             ? stare.exact
               ? "Am pus pinul la adresă. Trage-l dacă trebuie mutat."
-              : "Am găsit strada (fără număr). Trage pinul în dreptul clădirii."
+              : numar.trim()
+                ? "Numărul nu e pe hartă – trage pinul la clădire (pe „Satelit” se vede clădirea)."
+                : "Am găsit strada. Trage pinul în dreptul clădirii."
             : stare?.tip === "negasit"
               ? `Nu am găsit adresa în ${stare.localitate} – mută pinul pe hartă.`
               : "Scrie strada și numărul sau apasă pe hartă unde e proprietatea. Pinul se poate trage."}
