@@ -89,17 +89,19 @@ export default async function AnuntPage({ params }: Props) {
       <ActiuniProprietar id={a.id} activ={a.expiraLa > new Date()} />
       <Vizualizare id={a.id} />
       <div className="anunt">
-        {poze.length ? (
-          <Galerie
-            eticheta="Pozele anunțului"
-            poze={poze.map((p, i) => ({ src: urlPublic(p.cheie), alt: `${a.titlu}, poza ${i + 1} din ${poze.length}` }))}
-          />
-        ) : (
-          <div className="anunt-img" style={{ background: a.imagine }}>
-            <span>{TIPURI[a.tip]}</span>
-          </div>
-        )}
-        <div>
+        <div className="anunt-media">
+          {poze.length ? (
+            <Galerie
+              eticheta="Pozele anunțului"
+              poze={poze.map((p, i) => ({ src: urlPublic(p.cheie), alt: `${a.titlu}, poza ${i + 1} din ${poze.length}` }))}
+            />
+          ) : (
+            <div className="anunt-img" style={{ background: a.imagine }}>
+              <span>{TIPURI[a.tip]}</span>
+            </div>
+          )}
+        </div>
+        <div className="anunt-info">
           <h1>{a.titlu}</h1>
           <div className="pret mare">{formatPret(a)}</div>
           {curs && <div className="pret-lei" title={`La cursul de ${curs.toFixed(4)} lei pentru 1 €. Prețul de referință e cel în euro.`}>{formatLei(a, curs)}</div>}
@@ -128,7 +130,6 @@ export default async function AnuntPage({ params }: Props) {
               )}
             </tbody>
           </table>
-          <Descriere text={a.descriere} />
           <Vanzator u={u} />
           <div className="actiuni-anunt">
             <ButonTelefon id={a.id} />
@@ -152,6 +153,11 @@ export default async function AnuntPage({ params }: Props) {
           <Distribuie url={`${SITE}/anunt/${a.id}`} text={`${a.titlu} – ${formatPret(a)} pe CheiaMea`} />
           <Raporteaza id={a.id} />
         </div>
+        {/* Descrierea stă sub galerie, pe toată lățimea coloanei principale; pe mobil vine după preț și contact. */}
+        <section className="anunt-descriere" aria-labelledby="titlu-descriere">
+          <h2 id="titlu-descriere">Descriere</h2>
+          <Descriere text={a.descriere} />
+        </section>
       </div>
       {a.expiraLa > new Date() && (
         <script
