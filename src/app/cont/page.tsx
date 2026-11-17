@@ -12,6 +12,7 @@ import { CadruCont } from "./CadruCont";
 import { formatPret } from "@/lib/etichete";
 import { credite } from "@/lib/abonamente";
 import { ANUNTURI_GRATUITE, ZILE_VALABILITATE } from "@/lib/tarife";
+import { numeRetea, postariPentru } from "@/lib/postari-sociale";
 
 /** Butonul „Prelungește” apare cu atâtea zile înainte de expirare. */
 const ZILE_AVERTIZARE = 10;
@@ -74,6 +75,8 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
   // Fără fila cerută în link: prima filă care are anunțuri (de obicei „Active”).
   const fila: Fila = FILE.some((f) => f.cod === filaCeruta) ? (filaCeruta as Fila) : (FILE.find((f) => numar[f.cod])?.cod ?? "active");
   const lista = anunturi.filter((a) => filaAnunt(a, acum) === fila);
+  // Postările CheiaMea pe rețele (Instagram, Facebook …): fiecare client vede unde i-am promovat anunțul.
+  const postari = await postariPentru(lista.map((a) => a.id));
   const active = numar.active + numar.verificare;
   const curand = anunturi.filter((a) => a.expiraLa > acum && a.expiraLa.getTime() - acum.getTime() <= ZILE_AVERTIZARE * 864e5).length;
   const deActive = anunturi.filter((a) => a.expiraLa > acum);
@@ -169,6 +172,18 @@ export default async function ContPage({ searchParams }: { searchParams: Promise
                             {a.sursaActiva && a.sursaStare === "disparut" && " · pagina lipsește (se retrage dacă lipsește și la verificarea următoare)"}
                             {a.sursaStare === "retras" && " · retras: pagina nu mai există pe site-ul agenției"}
                             {a.sursaActiva && a.sursaStare === "eroare" && " · site-ul nu a răspuns la ultima verificare"}
+                          </div>
+                        )}
+                        {!!postari.get(a.id)?.length && (
+                          <div className="small postari-sociale">
+                            Promovat pe:{" "}
+                            {postari.get(a.id)!.map((p, i) => (
+                              <span key={p.url}>
+                                {i > 0 && ", "}
+                                <a href={p.url} target="_blank" rel="noopener noreferrer">{numeRetea(p.retea)}</a>
+                                <span className="muted"> ({formatData(p.creatLa)})</span>
+                              </span>
+                            ))}
                           </div>
                         )}
                         <div className="small statistici-anunt">👁 {cate(a.vizualizari, "vizualizare", "vizualizări")} · 📞 {cate(a.afisariTelefon, "apăsare", "apăsări")} pe „Sună”</div>
