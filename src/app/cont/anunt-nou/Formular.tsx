@@ -9,6 +9,7 @@ import { citesteCaracteristici } from "@/lib/caracteristici";
 import {
   AN_NECUNOSCUT,
   areCamp,
+  latimiMobil,
   CLASA_IN_CURS,
   CLASE_ENERGETICE,
   COMPARTIMENTARE,
@@ -238,37 +239,40 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
   const casa = tip === "casa";
   const dotari = dotariTip(tip);
   const bifate = new Set((v.dotari ?? "").split(",").filter(Boolean));
+  const lat = latimiMobil(tip);
+  const cls = (c: CampCar) => (lat.has(c) ? "camp-car lung" : "camp-car");
   return (
     <fieldset className="sectiune-caracteristici">
       <legend>Caracteristici</legend>
       <p className="muted small">Câmpurile cu * sunt obligatorii pentru {TIPURI[tip as keyof typeof TIPURI]?.toLowerCase() ?? "acest tip"}. Apar pe pagina anunțului, nu trebuie scrise și în descriere.</p>
       <div className="grila-car">
-        <label className="camp-car">
+        <label className={cls("suprafata")}>
           <Eticheta camp="suprafata" tip={tip} />
           <input name="suprafata" defaultValue={v.suprafata} type="number" inputMode="numeric" min={1} placeholder="m²" {...aria("suprafata", erori, tip, "suprafata")} />
           <MesajCamp camp="suprafata" erori={erori} />
         </label>
         {are("suprafataTotala") && (
-          <label className="camp-car">
+          <label className={cls("suprafataTotala")}>
             <Eticheta camp="suprafataTotala" tip={tip} />
             <input name="suprafataTotala" defaultValue={v.suprafataTotala} type="number" inputMode="numeric" min={1} placeholder="m²" {...aria("suprafataTotala", erori, tip, "suprafataTotala")} />
             <MesajCamp camp="suprafataTotala" erori={erori} />
           </label>
         )}
         {are("camere") && (
-          <label className="camp-car">
+          <label className={cls("camere")}>
             <Eticheta camp="camere" tip={tip} />
             <select name="camere" defaultValue={v.camere ?? ""} {...aria("camere", erori, tip, "camere")}>
               <option value="">Alege</option>
               {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>{n === 1 && tip === "apartament" ? "1 (garsonieră)" : n}</option>
+                // „Garsonieră” (valoarea rămâne 1): „1 (garsonieră)” nu încăpea pe jumătate de rând la 360 px.
+                <option key={n} value={n}>{n === 1 && tip === "apartament" ? "Garsonieră" : n}</option>
               ))}
             </select>
             <MesajCamp camp="camere" erori={erori} />
           </label>
         )}
         {are("etaj") && (
-          <label className="camp-car">
+          <label className={cls("etaj")}>
             <Eticheta camp="etaj" tip={tip} />
             <select name="etaj" defaultValue={v.etaj ?? ""} {...aria("etaj", erori, tip, "etaj")}>
               <option value="">Alege</option>
@@ -282,7 +286,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("etajeTotal") && (
-          <label className="camp-car">
+          <label className={cls("etajeTotal")}>
             <Eticheta camp="etajeTotal" tip={tip} />
             <select name="etajeTotal" defaultValue={v.etajeTotal ?? ""} {...aria("etajeTotal", erori, tip, "etajeTotal")}>
               <option value="">Alege</option>
@@ -298,7 +302,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("anConstructie") && (
-          <div className="camp-car">
+          <div className={cls("anConstructie")}>
             <label htmlFor="camp-an">
               <Eticheta camp="anConstructie" tip={tip} />
             </label>
@@ -314,7 +318,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </div>
         )}
         {are("bai") && (
-          <label className="camp-car">
+          <label className={cls("bai")}>
             <Eticheta camp="bai" tip={tip} />
             <select name="bai" defaultValue={v.bai ?? ""} {...aria("bai", erori, tip, "bai")}>
               <option value="">Alege</option>
@@ -326,7 +330,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("incalzire") && (
-          <label className="camp-car lung">
+          <label className={cls("incalzire")}>
             <Eticheta camp="incalzire" tip={tip} />
             <select name="incalzire" defaultValue={v.incalzire ?? ""} {...aria("incalzire", erori, tip, "incalzire")}>
               <option value="">Alege</option>
@@ -336,7 +340,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("mobilare") && (
-          <label className="camp-car lung">
+          <label className={cls("mobilare")}>
             <Eticheta camp="mobilare" tip={tip} />
             <select name="mobilare" defaultValue={v.mobilare ?? ""} {...aria("mobilare", erori, tip, "mobilare")}>
               <option value="">Alege</option>
@@ -346,7 +350,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("aerConditionat") && (
-          <label className="camp-car lung">
+          <label className={cls("aerConditionat")}>
             <Eticheta camp="aerConditionat" tip={tip} />
             <select name="aerConditionat" defaultValue={v.aerConditionat ?? ""} {...aria("aerConditionat", erori, tip, "aerConditionat")}>
               <option value="">Alege</option>
@@ -360,7 +364,7 @@ function SectiuneCaracteristici({ tip, v, erori }: { tip: string; v: Record<stri
           </label>
         )}
         {are("clasaEnergetica") && (
-          <label className="camp-car lung">
+          <label className={cls("clasaEnergetica")}>
             <Eticheta camp="clasaEnergetica" tip={tip} />
             <select name="clasaEnergetica" defaultValue={v.clasaEnergetica ?? ""} {...aria("clasaEnergetica", erori, tip, "clasaEnergetica")}>
               <option value="">Alege</option>
