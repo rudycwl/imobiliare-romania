@@ -24,3 +24,18 @@ Apoi:
    (și `www`, `cheiamea.com`, `www.cheiamea.com`).
 
 Starea publică (fără secrete): `/configurare/stare`.
+
+## Baza de date locală (din 17.11.2026)
+
+Neon (planul gratuit) a rămas fără cotă, așa că baza s-a mutat pe acest server: PostgreSQL din Ubuntu, doar pe 127.0.0.1.
+Mutarea o face singur `baza-locala.sh`, apelat de `actualizeaza.sh` până reușește (apoi `/etc/cheiamea/baza-locala.gata`):
+- dacă Neon răspunde: oprește site-ul, copiază tot din Neon (doar citire), comută, pornește site-ul (zero pierderi);
+- altfel: restaurează cea mai nouă copie JSON de noapte din `/var/lib/cheiamea-copii` (sau din R2) și comută.
+`DATABASE_URL` arată spre baza locală; vechea adresă rămâne ca `NEON_DATABASE_URL`. Parola bazei locale: `/etc/cheiamea/baza-locala.parola` (0600).
+Jurnal: `/var/log/cheiamea-baza-locala.log`; stare publică: `/configurare/stare` → `baza`.
+
+Copii de rezervă: JSON (aplicația) + `pg_dump -Fc` (`copie-pgdump.mjs`), în fiecare noapte, pe disc (14 zile) și în R2 `copie/baza/`.
+
+Când Neon revine (după resetarea lunară), ce s-a scris acolo după copie se recuperează cu:
+`cd /opt/cheiamea/baza-locala-lucru && sudo -u cheiamea env COPII_DIR=/var/lib/cheiamea-copii node scripts/recupereaza-diferente.mjs`
+(întâi fără `--aplica`, ca să vezi ce ar face; apoi cu `--aplica`).

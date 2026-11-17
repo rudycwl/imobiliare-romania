@@ -12,7 +12,7 @@ if [ ! -s /etc/cheiamea/cheie-alerte ]; then
   chown root:cheiamea /etc/cheiamea/cheie-alerte
 fi
 install -m 755 "$SRC/actualizeaza.sh" /opt/cheiamea/bin/actualizeaza.sh
-install -m 644 "$SRC/configurare.mjs" "$SRC/servicii.mjs" "$SRC/cu-env.mjs" /opt/cheiamea/bin/
+install -m 644 "$SRC/configurare.mjs" "$SRC/servicii.mjs" "$SRC/cu-env.mjs" "$SRC/copie-pgdump.mjs" /opt/cheiamea/bin/
 # Pagina de configurare rulează mereu: o repornim când s-au schimbat fișierele pe care le-a încărcat.
 h=$(cat /opt/cheiamea/bin/configurare.mjs /opt/cheiamea/bin/servicii.mjs | sha256sum | cut -d' ' -f1)
 if [ "$(cat /run/cheiamea-configurare.sha 2>/dev/null)" != "$h" ]; then
