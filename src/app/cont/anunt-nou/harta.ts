@@ -1,7 +1,7 @@
 "use server";
 
 import { utilizatorCurent } from "@/lib/auth";
-import { adresaLaPunct, gasesteAdresa, gasesteZona } from "@/lib/geocodare";
+import { adresaLaPunct, gasesteAdresa, gasesteZona, sugestiiStrazi } from "@/lib/geocodare";
 import { noteaza, permis } from "@/lib/limita";
 
 // Geocodarea din formularul de anunț trece prin serverul nostru (cache + cel mult o cerere pe secundă la
@@ -35,4 +35,10 @@ export async function stradaLaPunct(lat: number, lng: number) {
   if (!(await permisCont())) return null;
   if (!(lat > 43.5 && lat < 48.4 && lng > 20.2 && lng < 29.8)) return null;
   return adresaLaPunct(Math.round(lat * 1e5) / 1e5, Math.round(lng * 1e5) / 1e5);
+}
+
+/** Străzile din localitatea aleasă care încep / conțin ce s-a scris (lista de sub câmpul „Stradă”). */
+export async function sugestiiStrada(text: string, judet: string, oras: string) {
+  if (!(await permisCont())) return [];
+  return sugestiiStrazi(String(text).slice(0, 80), String(judet), String(oras));
 }

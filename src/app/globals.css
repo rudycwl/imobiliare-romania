@@ -126,6 +126,9 @@ button.secundar, .buton.secundar { background: transparent; color: var(--accent)
 /* La derulare, titlurile și listele apar treptat (în browserele care știu asta; celelalte le arată direct). */
 @supports (animation-timeline: view()) {
   main h2, .judete { animation: apare-sus linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+  /* „Pe hartă” din pagina anunțului e ultimul titlu, sub hartă vine subsolul: cât nu s-a derulat până la el (capturi
+     de pagină întreagă, previzualizări) rămânea transparent – pe desktop lipsea deasupra hărții. Îl arătăm direct. */
+  .loc-anunt h2 { animation: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -739,9 +742,23 @@ a:hover .sageata { transform: translateX(4px); }
 .avertizare-adresa { color: #b45309; font-weight: 600; }
 @media (prefers-color-scheme: dark) { .avertizare-adresa { color: #fbbf24; } }
 .alege-punct .adresa .strada { flex: 3 1 220px; }
+/* Lista de străzi sugerate sub câmpul „Stradă” (combobox): peste hartă, cu atingere ușoară pe telefon. */
+.alege-punct .adresa .strada { position: relative; }
+.sugestii-strada { position: absolute; z-index: 1100; top: 100%; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 28px rgba(11, 37, 69, .18); max-height: 320px; overflow-y: auto; font-weight: 400; }
+.sugestii-strada li { padding: 11px 12px; border-radius: 7px; cursor: pointer; line-height: 1.3; }
+.sugestii-strada li[aria-selected="true"], .sugestii-strada li:hover { background: color-mix(in srgb, var(--accent) 10%, var(--card)); }
 .alege-punct .adresa .numar { flex: 1 1 90px; }
 .alege-punct .adresa label { display: flex; flex-direction: column; gap: 4px; font-weight: 500; }
 .caracteristici dl > div.lat { grid-column: 1 / -1; }
 .etichete-dotari { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
 .etichete-dotari li { padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 10%, var(--card)); border: 1px solid var(--border); font-size: .85rem; font-weight: 600; }
 @media (prefers-color-scheme: dark) { .obligatoriu, .eroare-camp { color: #fca5a5; } }
+/* Comutatorul „Satelit / Hartă” din colțul hărților (și pe mobil, ușor de atins). */
+.comutator-fundal button { display: block; min-width: 76px; min-height: 36px; padding: 6px 12px; border: 0; border-radius: 4px; background: #fff; color: #0b2545; font: 700 .85rem/1.2 inherit; font-family: inherit; cursor: pointer; }
+.comutator-fundal button:hover { background: #f1f5f9; }
+.comutator-fundal.activ button { background: #0b2545; color: #fff; }
+.comutator-fundal button:focus-visible { outline: 3px solid #f97316; outline-offset: 1px; }
+
+/* Atribuirea hărții (mai ales cea lungă, Esri) să nu acopere harta pe telefon. */
+.leaflet-container .leaflet-control-attribution { font-size: 10px; line-height: 1.3; }
+@media (max-width: 600px) { .leaflet-container .leaflet-control-attribution { font-size: 9px; max-width: 70%; } }

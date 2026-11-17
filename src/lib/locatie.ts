@@ -17,9 +17,9 @@ function stabil(id: number, sare: number): number {
 
 export function punctPublic(a: { id: number; lat: number | null; lng: number | null; punctProprietar: boolean; locatieExacta: boolean }): PunctPublic {
   if (a.lat == null || a.lng == null) return null;
-  // Centrul cartierului (găsit de noi) e deja aproximativ; îl arătăm ca zonă, nu ca pin.
-  if (!a.punctProprietar) return { lat: a.lat, lng: a.lng, aproximativ: true };
-  if (a.locatieExacta) return { lat: a.lat, lng: a.lng, aproximativ: false };
+  if (a.punctProprietar && a.locatieExacta) return { lat: a.lat, lng: a.lng, aproximativ: false };
+  // Altfel doar zona. Și punctul găsit de noi (centrul cartierului sau adresa găsită după stradă, când formularul s-a
+  // salvat fără pin) se mută ca cel al proprietarului: altfel centrul cercului ar fi chiar adresa.
   const distanta = 80 + stabil(a.id, 1) * 120; // m
   const unghi = stabil(a.id, 2) * 2 * Math.PI;
   const dLat = (distanta * Math.cos(unghi)) / 111_320;

@@ -3,7 +3,7 @@
 import "leaflet/dist/leaflet.css";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
-import { gasesteLoc, gasesteLocAdresa, stradaLaPunct } from "@/app/cont/anunt-nou/harta";
+import { gasesteLoc, gasesteLocAdresa, stradaLaPunct, sugestiiStrada } from "@/app/cont/anunt-nou/harta";
 import { cerintaLocatie } from "@/lib/caracteristici-liste";
 import { hartaNoua, incarcaLeaflet, pinSimplu, ROMANIA } from "./leaflet";
 
@@ -14,13 +14,17 @@ export type Geocodor = {
   loc: (zona: string, judet: string, oras: string) => Promise<Punct | null>;
   adresa: (strada: string, numar: string, judet: string, oras: string) => Promise<(Punct & { exact: boolean }) | null>;
   invers: (lat: number, lng: number) => Promise<{ strada: string; numar: string } | null>;
+  /** Străzile din localitate care se potrivesc cu textul scris (lista de sub câmpul „Stradă”). */
+  strazi: (text: string, judet: string, oras: string) => Promise<string[]>;
 };
-export const GeocodareContext = createContext<Geocodor>({ loc: gasesteLoc, adresa: gasesteLocAdresa, invers: stradaLaPunct });
+export const GeocodareContext = createContext<Geocodor>({ loc: gasesteLoc, adresa: gasesteLocAdresa, invers: stradaLaPunct, strazi: sugestiiStrada });
 
 export const ZOOM_LOCALITATE = 13;
 export const ZOOM_ZONA = 15;
 export const ZOOM_ADRESA = 17;
 const PAUZA_TASTARE = 800;
+/** Lista de străzi se cere la 400 ms după ultima tastă, de la 3 litere. */
+const PAUZA_SUGESTII = 400;
 
 type Stare = { tip: "cauta" } | { tip: "gasit"; exact: boolean } | { tip: "negasit"; localitate: string } | null;
 
@@ -47,6 +51,12 @@ export function AlegePunct({
   const [numar, setNumar] = useState(adresa?.numar ?? "");
   const [exacta, setExacta] = useState(!!adresa?.locatieExacta);
   const [stare, setStare] = useState<Stare>(null);
+  // Lista de străzi sugerate (combobox): deschisă cât omul scrie, închisă după alegere / Escape / ieșirea din câmp.
+  const [sugestii, setSugestii] = useState<string[]>([]);
+  const [deschis, setDeschis] = useState(false);
+  const [activ, setActiv] = useState(-1);
+  /** Textul pentru care nu mai cerem sugestii (strada aleasă din listă sau venită de pe hartă). */
+  const faraSugestii = useRef(adresa?.strada ?? "");
   const harta = useRef<{ L: typeof Leaflet; h: Leaflet.Map; pin?: Leaflet.Marker } | null>(null);
   const punctRef = useRef(punct);
   punctRef.current = punct;
@@ -89,6 +99,7 @@ export function AlegePunct({
           geoRef.current.invers(p.lat, p.lng).then((a) => {
             if (!a || input.value.trim()) return;
             dinHarta.current = true;
+            faraSugestii.current = a.strada;
             setStrada(a.strada);
             setNumar(a.numar);
           });
@@ -209,6 +220,59 @@ export function AlegePunct({
     }
   }, [punct]);
 
+  // Sugestiile de străzi: la 400 ms după ultima tastă, de la 3 litere, doar din localitatea aleasă (server: ≤ 1 cerere/s).
+  useEffect(() => {
+    const t = strada.trim();
+    if (t === faraSugestii.current.trim() || t.replace(/[^\p{L}\p{N}]/gu, "").length < 3) {
+      setSugestii([]);
+      return;
+    }
+    let anulat = false;
+    const ceas = setTimeout(async () => {
+      const { judet, oras } = locatie();
+      if (!judet || !oras) return;
+      const lista = await geoRef.current.strazi(t, judet, oras).catch(() => []);
+      if (anulat) return;
+      setSugestii(lista);
+      setActiv(-1);
+      setDeschis(true);
+    }, PAUZA_SUGESTII);
+    return () => {
+      anulat = true;
+      clearTimeout(ceas);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [strada]);
+
+  /** Strada aleasă din listă: numele complet în câmp; căutarea adresei (efectul de mai sus) pune pinul pe ea. */
+  const alege = (nume: string) => {
+    faraSugestii.current = nume;
+    setStrada(nume);
+    setSugestii([]);
+    setDeschis(false);
+    setActiv(-1);
+  };
+  const listaVizibila = deschis && sugestii.length > 0;
+  const laTasta = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!listaVizibila) {
+      if (e.key === "ArrowDown" && sugestii.length) setDeschis(true);
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiv((i) => (i + 1) % sugestii.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiv((i) => (i <= 0 ? sugestii.length - 1 : i - 1));
+    } else if (e.key === "Enter" && activ >= 0) {
+      e.preventDefault(); // nu trimite formularul
+      alege(sugestii[activ]);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setDeschis(false);
+    }
+  };
+
   const cerinta = cerintaLocatie(tip);
   return (
     <div className="alege-punct">
@@ -221,13 +285,44 @@ export function AlegePunct({
           <input
             name="strada"
             value={strada}
-            onChange={(e) => setStrada(e.target.value)}
+            onChange={(e) => {
+              setStrada(e.target.value);
+              setDeschis(true);
+            }}
+            onKeyDown={laTasta}
+            onBlur={() => setDeschis(false)}
+            onFocus={() => setDeschis(true)}
             maxLength={120}
-            autoComplete="address-line1"
+            autoComplete="off"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={listaVizibila}
+            aria-controls="sugestii-strada"
+            aria-activedescendant={listaVizibila && activ >= 0 ? `sugestie-strada-${activ}` : undefined}
             placeholder="ex. Strada Palat"
             aria-invalid={eroareStrada ? true : undefined}
             aria-describedby={eroareStrada ? "eroare-strada" : undefined}
           />
+          {listaVizibila && (
+            <ul className="sugestii-strada" id="sugestii-strada" role="listbox" aria-label="Străzi din localitate">
+              {sugestii.map((n, i) => (
+                <li
+                  key={n}
+                  id={`sugestie-strada-${i}`}
+                  role="option"
+                  aria-selected={i === activ}
+                  // mousedown (nu click): alegerea are loc înainte ca ieșirea din câmp să închidă lista; merge și la atingere.
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    alege(n);
+                  }}
+                  onMouseEnter={() => setActiv(i)}
+                >
+                  {n}
+                </li>
+              ))}
+            </ul>
+          )}
           {eroareStrada && <span className="eroare-camp" id="eroare-strada">{eroareStrada}</span>}
         </label>
         <label className="numar">

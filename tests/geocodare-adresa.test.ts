@@ -57,3 +57,24 @@ test("adresa: strada găsită trebuie să fie cea cerută (textul liber poate î
   assert.equal(alegeAdresa(valeni, "Iași", "", false, "Strada Balciu"), null);
   assert.ok(alegeAdresa(carol, "Iași", "11", false, "Bulevardul Carol I"));
 });
+
+test("gasesteZona: cartierul din localitatea aleasă, nu satul cu același nume („Tudor Vladimirescu, Iași”)", async () => {
+  const { gasesteZona } = await import("@/lib/geocodare");
+  const orig = globalThis.fetch;
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const u = new URL(String(input));
+    const r = (x: unknown) => new Response(JSON.stringify(x), { status: 200, headers: { "content-type": "application/json" } });
+    if (u.searchParams.get("q") === "Tudor Vladimirescu, Iași")
+      return r([
+        { lat: "47.1322851", lon: "26.7780097", address: { village: "Tudor Vladimirescu", municipality: "Mogoșești-Siret", county: "Iași" } },
+        { lat: "47.1560029", lon: "27.6016607", address: { suburb: "Tudor Vladimirescu", city: "Iași", county: "Iași" } },
+      ]);
+    if (u.searchParams.get("city") === "Iași") return r([{ lat: "47.1615598", lon: "27.5837814", address: { city: "Iași" } }]);
+    return r([]);
+  }) as typeof fetch;
+  try {
+    assert.deepEqual(await gasesteZona("Tudor Vladimirescu", "iasi", "iasi"), { lat: 47.1560029, lng: 27.6016607 });
+  } finally {
+    globalThis.fetch = orig;
+  }
+});
