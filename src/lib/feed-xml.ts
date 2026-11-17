@@ -33,7 +33,22 @@ const SINONIME: Record<string, string[]> = {
   zona: ["zona", "cartier", "neighborhood", "neighbourhood", "district", "zone", "quarter", "subzona"],
   lat: ["lat", "latitude", "latitudine"],
   lng: ["lng", "lon", "long", "longitude", "longitudine"],
+  // Caracteristici (opționale): lipsa lor nu oprește publicarea; vezi caracteristiciDinRand.
+  etaj: ["etaj", "etajul", "floor", "floornumber", "nivel"],
+  etajeTotal: ["etajetotal", "nretaje", "numaretaje", "totalfloors", "floorscount", "regiminaltime", "regimdeinaltime", "nrniveluri", "niveluri", "levels"],
+  anConstructie: ["anconstructie", "anulconstructiei", "anconstruire", "yearbuilt", "constructionyear", "buildyear"],
+  clasaEnergetica: ["clasaenergetica", "certificatenergetic", "energyclass", "energyrating", "energycertificate"],
+  bai: ["bai", "nrbai", "numarbai", "bathrooms", "nrbathrooms", "bathroomsnumber", "grupurisanitare"],
+  balcon: ["balcon", "balcoane", "nrbalcoane", "balcony", "balconies"],
+  balconMp: ["suprafatabalcon", "balconysize", "balconyarea"],
+  incalzire: ["incalzire", "tipincalzire", "sistemincalzire", "heating", "heatingtype"],
+  mobilare: ["mobilare", "mobilat", "stadiumobilare", "furnished", "furnishing"],
+  aerConditionat: ["aerconditionat", "aercond", "airconditioning", "nraparateac"],
+  suprafataTotala: ["suprafatatotala", "totalarea", "grossarea"],
+  compartimentare: ["compartimentare", "partitioning", "layout"],
+  stare: ["stare", "stareimobil", "condition"],
 };
+const CARACTERISTICI_FEED = ["etaj", "etajeTotal", "anConstructie", "clasaEnergetica", "bai", "balcon", "balconMp", "incalzire", "mobilare", "aerConditionat", "suprafataTotala", "compartimentare", "stare"];
 const CONTAINERE_LOC = ["location", "locatie", "localizare", "address", "adresa", "geo", "pozitie", "position"];
 const CHEI_POZE = ["poze", "photos", "pictures", "images", "imagini", "gallery", "galerie", "media", "foto", "fotografii", "poza", "photo", "picture", "image", "imagine"];
 
@@ -185,6 +200,10 @@ export function randDinNod(n: Nod, cursEuro: number | null): RandFeed | { eroare
     // Prețul în lei se transformă în euro la cursul zilei; la actualizare îl ignorăm dacă diferă doar prin curs.
     moneda: pret && /RON|LEI/.test(moneda) ? "RON" : "EUR",
   };
+  for (const k of CARACTERISTICI_FEED) {
+    const v = text(c.get(k));
+    if (v) rand[k] = v;
+  }
   return { externId, rand };
 }
 

@@ -1,16 +1,26 @@
 import Link from "next/link";
-import { blocuriDescriere, type Localizare } from "@/lib/anunt-format";
+import { blocuriDescriere, type Localizare, type RandCaracteristici } from "@/lib/anunt-format";
 
 /** Blocul „Caracteristici”: grilă cu etichetă deasupra valorii (2 coloane pe mobil). */
-export function Caracteristici({ randuri }: { randuri: { eticheta: string; valoare: string }[] }) {
+export function Caracteristici({ randuri }: { randuri: RandCaracteristici[] }) {
   return (
     <section className="caracteristici" aria-labelledby="titlu-caracteristici">
       <h2 id="titlu-caracteristici">Caracteristici</h2>
       <dl>
         {randuri.map((r) => (
-          <div key={r.eticheta}>
+          <div key={r.eticheta} className={r.lista ? "lat" : undefined}>
             <dt>{r.eticheta}</dt>
-            <dd>{r.valoare}</dd>
+            {r.lista ? (
+              <dd>
+                <ul className="etichete-dotari">
+                  {r.lista.map((x) => (
+                    <li key={x}>{x}</li>
+                  ))}
+                </ul>
+              </dd>
+            ) : (
+              <dd>{r.valoare}</dd>
+            )}
           </div>
         ))}
       </dl>

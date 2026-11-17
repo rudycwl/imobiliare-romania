@@ -85,6 +85,39 @@ model Anunt {
   pret                Int
   suprafata           Int
   camere              Int?
+  // Caracteristici completate în formular (toate opționale; null = necompletat, pagina folosește atunci textul descrierii).
+  /// Etajul: -1 = demisol, 0 = parter. Nu se folosește la casă și teren.
+  etaj                Int?
+  /// Apartament / spațiu: ultimul etaj al clădirii („etajul 2 din 4” → 4). Casă: numărul de niveluri (P+1 → 2).
+  etajeTotal          Int?
+  /// 0 = proprietarul nu știe anul.
+  anConstructie       Int?
+  /// in-curs (în curs de obținere) | A++ | A+ | A | B | C | D | E | F | G
+  clasaEnergetica     String?
+  bai                 Int?
+  balcon              Boolean?
+  balconMp            Int?
+  /// centralizata | centrala-proprie | gaz | pardoseala | electrica | alta (src/lib/caracteristici.ts)
+  incalzire           String?
+  /// nemobilat | semimobilat | mobilat | mobilat-utilat
+  mobilare            String?
+  /// Numărul de aparate de aer condiționat; 0 = nu are.
+  aerConditionat      Int?
+  /// Suprafața totală (construită); `suprafata` rămâne suprafața utilă.
+  suprafataTotala     Int?
+  /// Balcon închis (doar când balcon = true).
+  balconInchis        Boolean?
+  /// decomandat | semidecomandat | nedecomandat | circular | open-space (apartament, casă)
+  compartimentare     String?
+  /// nou | renovat | bun | necesita-renovare
+  stare               String?
+  /// Codurile dotărilor bifate (DOTARI din src/lib/caracteristici-liste.ts); la teren, utilitățile.
+  dotari              String[]      @default([])
+  /// Adresa, vizibilă doar proprietarului și administratorului; pe site apare doar dacă locatieExacta.
+  strada              String?
+  numar               String?
+  /// false (implicit): pe pagina publică și pe hartă apare doar zona aproximativă (cerc ~300 m), fără număr.
+  locatieExacta       Boolean       @default(false)
   judet               String
   oras                String
   zona                String

@@ -9,6 +9,8 @@ import { limitaPentru } from "./abonamente";
 import { ruleazaReactualizari } from "./promovari";
 import { getOras } from "./geo";
 import { cheieProprietate, suprafataApropiata } from "./duplicate";
+import { punctPublic } from "./locatie";
+import type { CampuriCaracteristici } from "./caracteristici";
 
 export type Filtre = {
   q?: string;
@@ -42,8 +44,19 @@ const cuProprietar = { proprietar: true } satisfies Prisma.AnuntInclude;
 type AnuntDb = Prisma.AnuntGetPayload<{ include: typeof cuProprietar }>;
 
 function laAnunt(a: AnuntDb, acum = new Date()) {
+  // Strada și numărul ies din server doar cu bifa „Arată pe site locația exactă”; punctul e cel public (src/lib/locatie.ts).
+  const { strada, numar, ...rest } = a;
+  const p = punctPublic(a);
+  const loc = {
+    lat: p?.lat ?? null,
+    lng: p?.lng ?? null,
+    locatieAproximativa: p?.aproximativ ?? true,
+    strada: a.locatieExacta ? strada : null,
+    numar: a.locatieExacta ? numar : null,
+  };
   return {
-    ...a,
+    ...rest,
+    ...loc,
     evidentiat: !!a.evidentiatPanaLa && a.evidentiatPanaLa > acum,
     /** Afișat în zona „Promovate” (Top în oraș sau prima pagină a județului). */
     promovat: false as boolean,
@@ -181,7 +194,8 @@ export async function anunturiFavorite(utilizatorId: string) {
   return f.map((x) => laAnunt(x.anunt, acum));
 }
 
-export type AnuntNou = Omit<Anunt, "id" | "publicatLa" | "expiraLa" | "imagine" | "proprietarId">;
+export type AnuntNou = Omit<Anunt, "id" | "publicatLa" | "expiraLa" | "imagine" | "proprietarId"> &
+  Partial<CampuriCaracteristici> & { strada?: string | null; numar?: string | null; locatieExacta?: boolean };
 
 const peste = (zile: number) => new Date(Date.now() + zile * 864e5);
 
@@ -284,7 +298,7 @@ export async function statisticiZona(judet: string, oras?: string) {
 
 const campuriHarta = {
   id: true, titlu: true, pret: true, tranzactie: true, tip: true, suprafata: true, camere: true,
-  zona: true, judet: true, oras: true, lat: true, lng: true, imagine: true,
+  zona: true, judet: true, oras: true, lat: true, lng: true, imagine: true, punctProprietar: true, locatieExacta: true,
 } satisfies Prisma.AnuntSelect;
 
 /** Anunțurile care se potrivesc filtrelor și au loc pe hartă (doar câmpurile pentru hartă), plus totalul. */
@@ -295,7 +309,14 @@ export async function puncteHarta(f: Filtre, limita = 3000) {
     db.anunt.findMany({ where: { AND: [where, { lat: { not: null }, lng: { not: null } }] }, orderBy: [{ ordine: "desc" }, { id: "desc" }], take: limita, select: campuriHarta }),
     db.anunt.count({ where }),
   ]);
-  return { puncte: puncte.map((p) => ({ ...p, lat: p.lat!, lng: p.lng! })), total };
+  // Fără bifa „locația exactă”, pe hartă apare punctul aproximativ (vezi src/lib/locatie.ts).
+  return {
+    puncte: puncte.map(({ punctProprietar: _p, locatieExacta: _e, ...p }) => {
+      const pp = punctPublic({ ...p, punctProprietar: _p, locatieExacta: _e })!;
+      return { ...p, lat: pp.lat, lng: pp.lng };
+    }),
+    total,
+  };
 }
 
 export type PunctHarta = Awaited<ReturnType<typeof puncteHarta>>["puncte"][number];

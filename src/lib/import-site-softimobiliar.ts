@@ -1,6 +1,7 @@
 import { JUDETE } from "@/modules/judete";
 import { slugify } from "./etichete";
 import { numarFeed, potrivire, TIP, TRANZ, type RandFeed } from "./feed-xml";
+import { caracteristiciDinDescriere, caracteristiciDinRand, valoriCaracteristici } from "./caracteristici";
 
 // PROBĂ: importul anunțurilor direct de pe site-ul public al unei agenții făcut de Soft Imobiliar
 // (același șablon la multe agenții: /apartamente-de-vanzare/iasi-8449/1, anunțuri …-35590.html).
@@ -235,6 +236,22 @@ export function anuntDinPagina(html: string, url: string, opt: OptiuniPagina = {
       zona,
       poze: poze.join(" "),
       moneda: pret && /RON|LEI/.test(moneda) ? "RON" : "EUR",
+      // Caracteristicile din lista de detalii (când pagina le are); se citesc liber în caracteristiciDinRand.
+      ...Object.fromEntries(
+        Object.entries({
+          etaj: eticheta(html, "Etaj"),
+          etajeTotal: eticheta(html, "Regim (?:de )?(?:î|i)n(?:ă|a)l(?:ț|t)ime", "Nr\\.? etaje", "Nr\\.? niveluri"),
+          anConstructie: eticheta(html, "An(?:ul)? construc(?:ț|t)i(?:e|ei)", "An construc(?:ț|t)ie"),
+          clasaEnergetica: eticheta(html, "Clas(?:a|ă) energetic(?:a|ă)", "Certificat energetic"),
+          bai: eticheta(html, "B(?:ă|a)i", "Nr\\.? b(?:ă|a)i", "Grupuri sanitare"),
+          balcon: eticheta(html, "Balcon", "Balcoane", "Nr\\.? balcoane"),
+          incalzire: eticheta(html, "(?:Î|I)nc(?:ă|a)lzire", "Sistem (?:de )?(?:î|i)nc(?:ă|a)lzire"),
+          mobilare: eticheta(html, "Mobilare", "Mobilat"),
+          aerConditionat: eticheta(html, "Aer condi(?:ț|t)ionat"),
+          suprafataTotala: eticheta(html, "Suprafa(?:ț|t)(?:ă|a) total(?:ă|a)", "Suprafa(?:ț|t)(?:ă|a) construit(?:ă|a)").replace(/m\s*p|m2|m²/gi, ""),
+          compartimentare: eticheta(html, "Compartimentare"),
+        }).filter(([, v]) => v),
+      ),
     },
   };
 }
@@ -303,6 +320,8 @@ export function valoriFormular(rand: Record<string, string>): Record<string, str
     judet: j?.slug ?? "",
     oras: o ? o.slug : "",
     zona: (rand.zona ?? "").slice(0, 80),
+    // Caracteristicile: din detaliile paginii, iar ce lipsește din descriere; agenția le verifică înainte de publicare.
+    ...valoriCaracteristici({ ...caracteristiciDinDescriere(rand.descriere ?? "", rand.tip ?? ""), ...caracteristiciDinRand(rand, rand.tip ?? "") }),
   };
   return Object.fromEntries(Object.entries(v).filter(([, x]) => x));
 }

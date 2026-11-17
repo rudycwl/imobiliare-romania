@@ -34,6 +34,9 @@ test("caracteristici din anunțul 6", () => {
     balcon: "Da, 6 m²",
     incalzire: "Centralizată",
     mobilare: "Mobilat și utilat",
+    aerConditionat: "Da, 2 aparate",
+    compartimentare: "Decomandat",
+    dotari: ["lift", "acces-securizat", "video"],
     suprafataUtila: 74,
     suprafataTotala: 80,
   });
@@ -83,13 +86,16 @@ test("rânduri caracteristici: câmpurile rămân, extragerea se adaugă", () =>
       "Suprafață utilă: 74 m²",
       "Suprafață totală: 80 m²",
       "Camere: 3",
+      "Compartimentare: Decomandat",
       "Băi: 2",
       "Etaj: 2/11",
       "An construcție: 2019",
       "Balcon: Da, 6 m²",
       "Încălzire: Centralizată",
       "Mobilare: Mobilat și utilat",
+      "Aer condiționat: Da, 2 aparate",
       "Clasă energetică: A",
+      "Dotări: Lift, Acces securizat, Supraveghere video",
     ],
   );
 });

@@ -1,7 +1,12 @@
 // Anunțurile trimise prin API au aceleași câmpuri ca fișierul model de import (public/model-import-cheiamea.csv).
 // Aici doar le aducem la forma unui rând din fișier; verificarea câmpurilor e aceeași ca la import.
 
-export const CAMPURI_API = ["titlu", "descriere", "tip", "tranzactie", "pret", "suprafata", "camere", "judet", "oras", "zona", "poze"] as const;
+export const CAMPURI_API = [
+  "titlu", "descriere", "tip", "tranzactie", "pret", "suprafata", "camere", "judet", "oras", "zona", "poze",
+  // Caracteristici opționale (aceleași valori ca în feed: „Parter”, „P+4”, „centrala proprie”, true/false …).
+  "etaj", "etajeTotal", "anConstructie", "clasaEnergetica", "bai", "balcon", "balconMp", "incalzire", "mobilare",
+  "aerConditionat", "suprafataTotala", "compartimentare", "stare",
+] as const;
 
 /** Un anunț din JSON → rând de import. Câmpurile necunoscute se ignoră; „poze” poate fi listă sau text. */
 export function randDinJson(a: unknown): Record<string, string> {
@@ -14,6 +19,7 @@ export function randDinJson(a: unknown): Record<string, string> {
     // Numerele le rotunjim aici: la import, punctul e citit ca separator de mii (85.000), nu de zecimale.
     else if (typeof v === "number" && Number.isFinite(v)) rand[c] = String(Math.round(v));
     else if (typeof v === "string") rand[c] = v;
+    else if (typeof v === "boolean") rand[c] = v ? "da" : "nu";
   }
   return rand;
 }

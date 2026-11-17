@@ -10,6 +10,7 @@ import { citesteFeed } from "./feed-xml";
 import { completeazaCoordonate } from "./geocodare";
 import { salveazaIndiceLunar } from "./indice";
 import { citesteRand, importaRanduri, ipPrivat } from "./import-masa";
+import { actualizareCaracteristici, SELECT_CARACTERISTICI } from "./caracteristici";
 import { aplicaFiltru } from "./moderare";
 import { actualizeazaDinSite } from "./actualizare-site";
 import { ZILE_VALABILITATE } from "./tarife";
@@ -103,7 +104,7 @@ export async function ruleazaFeed(feedId: number): Promise<RaportFeed> {
       (
         await db.anunt.findMany({
           where: { proprietarId: u.id, externId: { not: null } },
-          select: { id: true, externId: true, pret: true, expiraLa: true, moderare: true, feedId: true, titlu: true, descriere: true },
+          select: { id: true, externId: true, pret: true, expiraLa: true, moderare: true, feedId: true, titlu: true, descriere: true, ...SELECT_CARACTERISTICI },
         })
       ).map((a) => [a.externId!, a]),
     );
@@ -137,7 +138,14 @@ export async function ruleazaFeed(feedId: number): Promise<RaportFeed> {
       await db.anunt.update({
         where: { id: vechi.id },
         // Cât timp anunțul e în feed, rămâne public (prelungit la fiecare rulare).
-        data: { ...r.date, feedId: feed.id, cheieProprietate: cheieProprietate(r.date), expiraLa: peste(ZILE_VALABILITATE) },
+        // Caracteristicile: ce lipsește din feed nu șterge ce a completat agenția de mână pe site.
+        data: {
+          ...r.date,
+          ...actualizareCaracteristici(vechi, r.caracteristici, r.extrase),
+          feedId: feed.id,
+          cheieProprietate: cheieProprietate(r.date),
+          expiraLa: peste(ZILE_VALABILITATE),
+        },
       });
       if (vechi.pret !== r.date.pret) await notaPret(vechi.id, r.date.pret);
       if (textSchimbat) await aplicaFiltru(vechi.id, r.date.titlu, r.date.descriere);

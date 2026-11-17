@@ -8,6 +8,7 @@ import { JUDETE } from "@/modules/judete";
 import { anunturiActive, creeazaAnunt, limitaAnunturi, type AnuntNou } from "./anunturi";
 import { aplicaFiltru } from "./moderare";
 import { LUNGIME } from "./lungimi";
+import { caracteristiciDinDescriere, caracteristiciDinRand, type CampuriCaracteristici } from "./caracteristici";
 import { adaugaPoza, cheieNoua, MAX_POZE } from "./poze";
 import { salveazaLocal, stocareLocala } from "./stocare";
 
@@ -79,7 +80,15 @@ function gasesteLoc(judetText: string, orasText: string) {
 
 const numar = (v: string) => Number(v.replace(/[\s.€]/g, "").replace(",", "."));
 
-export function citesteRand(r: Record<string, string>): { eroare: string } | { date: AnuntNou; poze: string[] } {
+/**
+ * Un rând de import → anunț. `caracteristici`: ce scrie sursa în coloanele dedicate (etaj, băi …);
+ * `extrase`: ce am găsit în descriere. La un anunț nou le punem pe amândouă (sursa are întâietate);
+ * la actualizare, cele din descriere completează doar câmpurile goale (vezi actualizareCaracteristici).
+ * Câmpurile obligatorii din formular nu se cer aici: sursa poate să nu le aibă.
+ */
+export function citesteRand(
+  r: Record<string, string>,
+): { eroare: string } | { date: AnuntNou; poze: string[]; caracteristici: Partial<CampuriCaracteristici>; extrase: Partial<CampuriCaracteristici> } {
   const tip = gasesteCheie(TIPURI, r.tip ?? "");
   const tranzactie = gasesteCheie(TRANZACTII, r.tranzactie ?? "");
   const titlu = (r.titlu ?? "").trim().slice(0, LUNGIME.titlu);
@@ -105,6 +114,8 @@ export function citesteRand(r: Record<string, string>): { eroare: string } | { d
       zona: (r.zona ?? "").trim().slice(0, LUNGIME.zona) || "Centru",
     },
     poze: (r.poze ?? "").split(/[\s|]+/).filter((u) => /^https:\/\//i.test(u)).slice(0, MAX_POZE),
+    caracteristici: caracteristiciDinRand(r, tip),
+    extrase: caracteristiciDinDescriere(r.descriere ?? "", tip),
   };
 }
 
@@ -165,7 +176,7 @@ export async function importaRanduri(utilizatorId: string, randuri: Record<strin
       rez.oprit = `Ai ajuns la limita abonamentului (${limita} anunțuri active). Restul rândurilor nu au fost importate; alege un abonament mai mare din „Abonament”.`;
       break;
     }
-    const a = await creeazaAnunt(utilizatorId, citit.date, { lat: null, lng: null, punctProprietar: false });
+    const a = await creeazaAnunt(utilizatorId, { ...citit.date, ...citit.extrase, ...citit.caracteristici }, { lat: null, lng: null, punctProprietar: false });
     await aplicaFiltru(a.id, citit.date.titlu, citit.date.descriere);
     existente.add(`${citit.date.titlu}|${citit.date.pret}`);
     locuri--;
