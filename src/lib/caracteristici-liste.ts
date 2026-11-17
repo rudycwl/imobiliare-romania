@@ -203,3 +203,29 @@ export const DOTARI_TIP: Record<TipProprietate, Dotare[]> = {
 };
 
 export const dotariTip = (tip: string): Dotare[] => DOTARI_TIP[tip as TipProprietate] ?? DOTARI_TIP.apartament;
+
+/** Câmpurile din grilă, în ordinea afișării; cele din LUNGI au valori care nu încap pe jumătate de rând pe telefon. */
+const GRILA: CampCar[] = ["suprafata", "suprafataTotala", "camere", "etaj", "etajeTotal", "anConstructie", "bai", "incalzire", "mobilare", "aerConditionat", "clasaEnergetica"];
+const LUNGI = new Set<CampCar>(["etajeTotal", "incalzire", "mobilare", "aerConditionat", "clasaEnergetica"]);
+
+/**
+ * Pe telefon (grila cu 2 coloane) câmpurile care ocupă tot rândul: cele cu valori lungi („Doar parter (P)”,
+ * „Centrală proprie”) și câmpul rămas singur într-un șir impar de câmpuri scurte (ex. „Camere” la casă, înainte de
+ * „Regim de înălțime”), ca să nu stea pe jumătate de rând cu un gol lângă el. Ordinea rămâne cea din pagină.
+ */
+export function latimiMobil(tip: string): Set<CampCar> {
+  const lat = new Set<CampCar>();
+  let sir: CampCar[] = [];
+  const inchide = () => {
+    if (sir.length % 2) lat.add(sir[sir.length - 1]);
+    sir = [];
+  };
+  for (const c of GRILA.filter((k) => areCamp(tip, k))) {
+    if (LUNGI.has(c)) {
+      inchide();
+      lat.add(c);
+    } else sir.push(c);
+  }
+  inchide();
+  return lat;
+}
