@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -20,11 +21,15 @@ import { Galerie } from "@/components/Galerie";
 import { localizare, randuriCaracteristici, textLocalizare } from "@/lib/anunt-format";
 import { caracteristiciAfisate } from "@/lib/caracteristici";
 import { RAZA_APROXIMATIVA_M } from "@/lib/locatie";
+import { centruPentruPagina, completeazaCoordonate } from "@/lib/geocodare";
 import { Caracteristici, Descriere, TextLocalizare } from "./Detalii";
 
 type Props = { params: Promise<{ id: string }> };
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cheiamea.ro";
+
+/** Cercul pe centrul localității, când anunțul nu are încă loc pe hartă (m). */
+const RAZA_LOCALITATE_M = 1500;
 
 // Anunțurile se generează la prima vizită și se reîmprospătează la cel mult 5 minute.
 export const revalidate = 300;
@@ -67,7 +72,23 @@ export default async function AnuntPage({ params }: Props) {
         </p>
       </div>
     );
-  const [poze, curs, istoric, altele] = await Promise.all([pozeAnunt(a.id), cursEuro(), istoricPret(a.id), aceeasiProprietate(a)]);
+  // Fără loc pe hartă încă (anunț vechi, importat, geocodare nereușită): harta localității, cu un cerc mare,
+  // iar în fundal anunțul primește locul aproximativ (stradă → zonă → centrul localității) pentru vizitele următoare.
+  const faraLoc = a.lat == null || a.lng == null;
+  const [poze, curs, istoric, altele, centru] = await Promise.all([
+    pozeAnunt(a.id),
+    cursEuro(),
+    istoricPret(a.id),
+    aceeasiProprietate(a),
+    faraLoc ? centruPentruPagina(j.slug, o.slug) : Promise.resolve(null),
+  ]);
+  if (faraLoc) after(() => completeazaCoordonate());
+  const hartaPagina =
+    a.lat != null && a.lng != null
+      ? { lat: a.lat, lng: a.lng, raza: a.locatieAproximativa ? RAZA_APROXIMATIVA_M : undefined, localitate: false }
+      : centru
+        ? { ...centru, raza: RAZA_LOCALITATE_M, localitate: true }
+        : null;
   const ev = evolutiePret(istoric, a.pret, a.publicatLa);
   const loc = localizare(a.zona, o.nume, j.nume, j.slug);
   // Întâi câmpurile completate în formular; din descriere doar ce lipsește (anunțuri vechi).
@@ -179,7 +200,7 @@ export default async function AnuntPage({ params }: Props) {
           }}
         />
       )}
-      {a.lat != null && a.lng != null && (
+      {hartaPagina && (
         <section className="loc-anunt">
           <div className="titlu-cu-actiune">
             <h2>Pe hartă</h2>
@@ -188,9 +209,11 @@ export default async function AnuntPage({ params }: Props) {
             </Link>
           </div>
           {/* Fără bifa „locația exactă”: punctul e deja mutat pe server (src/lib/locatie.ts); aici doar cercul zonei. */}
-          <HartaLoc lat={a.lat} lng={a.lng} razaAproximativa={a.locatieAproximativa ? RAZA_APROXIMATIVA_M : undefined} />
+          <HartaLoc lat={hartaPagina.lat} lng={hartaPagina.lng} razaAproximativa={hartaPagina.raza} />
           <p className="muted small">
-            {!a.locatieAproximativa
+            {hartaPagina.localitate
+              ? `Locație aproximativă: ${a.zona ? `zona ${a.zona}, ` : ""}${o.nume}. Pe hartă e centrul localității; adresa exactă o afli de la vânzător.`
+              : !a.locatieAproximativa
               ? `Locul marcat de vânzător${a.strada ? `: ${a.strada}${a.numar ? ` ${a.numar}` : ""}` : ""}.`
               : a.punctProprietar
                 ? `Zonă aproximativă (cerc de ~${RAZA_APROXIMATIVA_M} m): adresa exactă o afli de la vânzător.`

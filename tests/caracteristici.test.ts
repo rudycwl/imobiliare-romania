@@ -306,5 +306,11 @@ test("locația pe site: exactă doar cu bifă; altfel un punct stabil, la 80–2
     assert.deepEqual(punctPublic({ id, ...loc, punctProprietar: true, locatieExacta: false }), p); // același la fiecare afișare
   }
   assert.equal(punctPublic({ id: 1, lat: null, lng: null, punctProprietar: false, locatieExacta: false }), null);
-  assert.deepEqual(punctPublic({ id: 1, ...loc, punctProprietar: false, locatieExacta: false }), { ...loc, aproximativ: true });
+  // Punctul găsit de noi (centrul zonei sau adresa după stradă) e tot zonă, mutat ca al proprietarului; bifa nu-l face exact.
+  for (const locatieExacta of [false, true]) {
+    const p = punctPublic({ id: 1, ...loc, punctProprietar: false, locatieExacta })!;
+    assert.equal(p.aproximativ, true);
+    const d = distantaM(loc, p);
+    assert.ok(d > 60 && d < RAZA_APROXIMATIVA_M - 50, `${d} m`);
+  }
 });

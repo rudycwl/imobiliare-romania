@@ -62,8 +62,11 @@ export async function gasesteZona(zona: string, judet: string, oras: string): Pr
   const centru = await centruLocalitate(judet, oras);
   const z = zona.trim();
   if (z && slug(z) !== slug(o)) {
-    const p = await cauta(`${z}, ${judet === "bucuresti" ? "București" : o}`);
-    if (p && (!centru || distantaM(p, centru) <= MAX_KM_DE_LOCALITATE * 1000)) return p;
+    // Până la 5 rezultate, primul din localitatea aleasă: „Tudor Vladimirescu, Iași” întoarce întâi satul
+    // Tudor Vladimirescu (com. Mogoșești-Siret), abia apoi cartierul din Iași.
+    const bucuresti = judet === "bucuresti";
+    const p = alegeAdresa(await cautaAdrese(`${z}, ${bucuresti ? "București" : o}`), o, "", bucuresti);
+    if (p && (!centru || distantaM(p, centru) <= MAX_KM_DE_LOCALITATE * 1000)) return { lat: p.lat, lng: p.lng };
   }
   return centru;
 }
@@ -186,32 +189,66 @@ export async function adresaLaPunct(lat: number, lng: number): Promise<{ strada:
   return r ?? null;
 }
 
+/** Anunțul, cât trebuie pentru locul lui aproximativ. */
+export type LocAnunt = { strada?: string | null; numar?: string | null; zona: string; judet: string; oras: string };
+
+/**
+ * Locul aproximativ al unui anunț fără punct pe hartă: adresa (stradă + număr, doar în localitatea aleasă, vezi
+ * gasesteAdresa) → zona / cartierul → centrul localității (gasesteZona). Pe site apare mereu ca zonă (cerc),
+ * pentru că punctul nu e pus de proprietar (punctProprietar = false, vezi src/lib/locatie.ts).
+ */
+export async function locAproximativ(a: LocAnunt): Promise<Punct | null> {
+  if (a.strada && a.strada.trim().length >= 3) {
+    const p = await gasesteAdresa(a.strada, a.numar ?? "", a.judet, a.oras);
+    if (p) return { lat: p.lat, lng: p.lng };
+  }
+  return gasesteZona(a.zona, a.judet, a.oras);
+}
+
+/** Centrul localității, pentru pagina unui anunț care încă nu are loc pe hartă (cache în memorie, după prima cerere). */
+export async function centruPentruPagina(judet: string, oras: string, asteptareMs = 3000): Promise<Punct | null> {
+  return Promise.race([centruLocalitate(judet, oras).catch(() => null), new Promise<null>((ok) => setTimeout(() => ok(null), asteptareMs))]);
+}
+
 const esuate = new Set<number>();
 let ruleaza = false;
 
-/** Pune pe hartă anunțurile fără coordonate (câteva odată). Se apelează în fundal, după răspuns. */
-export async function completeazaCoordonate(maxim = 15) {
-  if (ruleaza) return;
+/**
+ * Pune pe hartă anunțurile fără coordonate: locAproximativ (stradă → zonă → centrul localității), mereu aproximativ.
+ * Se apelează în fundal după salvare (câteva odată) și o dată la pornirea serverului (`toate`: și cele expirate,
+ * pe loturi, până nu mai rămâne niciunul). Idempotentă: atinge doar anunțurile cu lat = null și nu suprascrie un
+ * punct pus între timp de proprietar. Cererile spre Nominatim trec pe rând (laRand: ≤ 1 pe secundă, cu User-Agent).
+ */
+export async function completeazaCoordonate(maxim = 15, { toate = false, ids }: { toate?: boolean; ids?: number[] } = {}) {
+  if (ruleaza) return { completate: 0, esuate: 0 };
   ruleaza = true;
+  let completate = 0;
+  let gresite = 0;
   try {
-    const lipsa = await db.anunt.findMany({
-      where: { lat: null, expiraLa: { gt: new Date() }, id: { notIn: [...esuate] } },
-      select: { id: true, zona: true, judet: true, oras: true },
-      orderBy: { id: "desc" },
-      take: maxim,
-    });
-    for (const a of lipsa) {
-      const p = await gasesteZona(a.zona, a.judet, a.oras);
-      if (!p) {
-        esuate.add(a.id);
-        continue;
+    for (;;) {
+      const lipsa = await db.anunt.findMany({
+        where: { lat: null, id: { notIn: [...esuate], ...(ids ? { in: ids } : {}) }, ...(toate ? {} : { expiraLa: { gt: new Date() } }) },
+        select: { id: true, strada: true, numar: true, zona: true, judet: true, oras: true },
+        orderBy: { id: "desc" },
+        take: Math.min(maxim, 50),
+      });
+      for (const a of lipsa) {
+        const p = await locAproximativ(a);
+        if (!p) {
+          esuate.add(a.id);
+          gresite++;
+          continue;
+        }
+        // Doar dacă între timp proprietarul n-a pus singur punctul.
+        const r = await db.anunt.updateMany({ where: { id: a.id, lat: null }, data: { lat: p.lat, lng: p.lng, punctProprietar: false } });
+        completate += r.count;
       }
-      // Doar dacă între timp proprietarul n-a pus singur punctul.
-      await db.anunt.updateMany({ where: { id: a.id, lat: null }, data: p });
+      if (!toate || lipsa.length === 0 || completate + gresite >= maxim) break;
     }
   } catch (e) {
     console.error("geocodare", e);
   } finally {
     ruleaza = false;
   }
+  return { completate, esuate: gresite };
 }
