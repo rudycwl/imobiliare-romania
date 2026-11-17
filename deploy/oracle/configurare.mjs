@@ -42,6 +42,8 @@ const CAMPURI = [
   { k: "BREVO_API_KEY", secret: true, ajutor: "Brevo → numele tău (sus, dreapta) → SMTP & API → API Keys → Generate a new API key. Fără ea, „Am uitat parola” și alertele pe email nu merg." },
   { k: "EMAIL_EXPEDITOR", implicit: "noreply@cheiamea.ro", ajutor: "Lasă așa. Domeniul cheiamea.ro trebuie verificat în Brevo (Senders, Domains & Dedicated IPs → Domains)." },
   { k: "NETLIFY_TOKEN", secret: true, ajutor: "Opțional: app.netlify.com/user/applications → Personal access tokens → New access token. Cu el, site-ul își pune singur rândurile DNS (Brevo, cheiamea.com)." },
+  { grup: "Hartă satelit (ArcGIS)" },
+  { k: "NEXT_PUBLIC_ARCGIS_KEY", secret: true, ajutor: "Opțional. location.arcgis.com → Developer credentials → API key nou, cu dreptul „Basemaps” (Static basemap tiles) și cu referrer doar https://cheiamea.ro. Fără ea, butonul „Satelit” nu apare." },
   { grup: "ERP Hugetech" },
   { k: "ERP_KEY", secret: true, ajutor: "Render → hugetech-erp → Environment → valoarea CHEIAMEA_ERP_KEY." },
 ];
