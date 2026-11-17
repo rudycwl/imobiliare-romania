@@ -748,3 +748,8 @@ a:hover .sageata { transform: translateX(4px); }
 .etichete-dotari { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
 .etichete-dotari li { padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 10%, var(--card)); border: 1px solid var(--border); font-size: .85rem; font-weight: 600; }
 @media (prefers-color-scheme: dark) { .obligatoriu, .eroare-camp { color: #fca5a5; } }
+/* Comutatorul „Satelit / Hartă” din colțul hărților (și pe mobil, ușor de atins). */
+.comutator-fundal button { display: block; min-width: 76px; min-height: 36px; padding: 6px 12px; border: 0; border-radius: 4px; background: #fff; color: #0b2545; font: 700 .85rem/1.2 inherit; font-family: inherit; cursor: pointer; }
+.comutator-fundal button:hover { background: #f1f5f9; }
+.comutator-fundal.activ button { background: #0b2545; color: #fff; }
+.comutator-fundal button:focus-visible { outline: 3px solid #f97316; outline-offset: 1px; }

@@ -17,6 +17,15 @@ npm run dev             # http://localhost:3000
 
 În producție: `npm run db:deploy` (aplică migrările), apoi `npm run build && npm start`. Build-ul are nevoie de baza de date, pentru că pagina principală și lista de agenții se pre-generează.
 
+## Harta satelit (opțională)
+
+Hărțile (pagina anunțului, formularul de anunț/editare, `/harta`) au implicit fundalul OpenStreetMap. Butonul „Satelit / Hartă” din colțul hărții apare doar dacă e setată variabila `NEXT_PUBLIC_ARCGIS_KEY` (în `.env` local și în variabilele de mediu Netlify/Vercel; fiind `NEXT_PUBLIC_`, e citită la build, deci după setare e nevoie de un build nou).
+
+- Cheia se creează într-un cont [ArcGIS Location Platform](https://location.arcgis.com/) (developers.arcgis.com → API keys), cu acces la basemap-uri (World Imagery prin `ibasemaps-api.arcgis.com`) și la Static Basemap Tiles (etichetele `arcgis/imagery/labels`). Restricționează cheia la domeniul `cheiamea.ro` (referrer).
+- Cheia se trimite ca parametru `?token=` la fiecare placă (cum descrie documentația ArcGIS); e vizibilă în browser, de aceea restricția pe domeniu e importantă.
+- Fără cont/cheie, serviciile publice Esri nu sunt permise pentru uz comercial, deci comutatorul nu apare.
+- Atribuirea afișată pe hartă: „Tiles © Esri — Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community”.
+
 ## Structură
 
 | Rută | Descriere |
