@@ -1,7 +1,8 @@
 import { JUDETE } from "@/modules/judete";
 import { slugify } from "./etichete";
 import { numarFeed, potrivire, TIP, TRANZ, type RandFeed } from "./feed-xml";
-import { caracteristiciDinDescriere, caracteristiciDinRand, valoriCaracteristici } from "./caracteristici";
+import { caracteristiciDinDescriere, caracteristiciDinRand, stareDedusa, valoriCaracteristici } from "./caracteristici";
+import { areCamp } from "./caracteristici-liste";
 
 // PROBĂ: importul anunțurilor direct de pe site-ul public al unei agenții făcut de Soft Imobiliar
 // (același șablon la multe agenții: /apartamente-de-vanzare/iasi-8449/1, anunțuri …-35590.html).
@@ -304,7 +305,12 @@ export function paginaDisparuta(cerut: URL, final: URL, status: number): boolean
 }
 
 /** Rândul citit din pagină → valorile formularului „Adaugă anunț” (județul și orașul ca în lista site-ului, adică slug). */
-export function valoriFormular(rand: Record<string, string>): Record<string, string> {
+export function valoriFormular(rand: Record<string, string>, acum = new Date()): Record<string, string> {
+  const tipRand = rand.tip ?? "";
+  const car = { ...caracteristiciDinDescriere(rand.descriere ?? "", tipRand, acum), ...caracteristiciDinRand(rand, tipRand, acum) };
+  // Starea lipsă: o precompletăm doar când reiese sigur din date (clădire nouă după an); altfel rămâne goală.
+  const stare = stareDedusa(car, acum);
+  if (!car.stare && stare && areCamp(tipRand, "stare")) car.stare = stare;
   const sj = slugify(rand.judet ?? "").replace(/^judetul-/, "");
   const j = JUDETE.find((x) => x.slug === sj || slugify(x.nume) === sj);
   const so = slugify(rand.oras ?? "").replace(/^(municipiul|orasul|oras)-/, "");
@@ -321,7 +327,7 @@ export function valoriFormular(rand: Record<string, string>): Record<string, str
     oras: o ? o.slug : "",
     zona: (rand.zona ?? "").slice(0, 80),
     // Caracteristicile: din detaliile paginii, iar ce lipsește din descriere; agenția le verifică înainte de publicare.
-    ...valoriCaracteristici({ ...caracteristiciDinDescriere(rand.descriere ?? "", rand.tip ?? ""), ...caracteristiciDinRand(rand, rand.tip ?? "") }),
+    ...valoriCaracteristici(car),
   };
   return Object.fromEntries(Object.entries(v).filter(([, x]) => x));
 }

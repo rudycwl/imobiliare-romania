@@ -161,13 +161,36 @@ export function citesteCaracteristici(
     d.dotari = [...new Set(getAll("dotari").flatMap((x) => x.split(",")).map((x) => x.trim()).filter((x) => permise.has(x)))];
   }
 
-  // Adresa: la apartament și casă strada; la teren strada sau zona.
+  // Adresa: la apartament, casă și teren strada sau zona.
   if (cuObligatorii) {
     const c = cerintaLocatie(tip);
-    if (c === "strada" && !get("strada").trim()) lipsa("strada", "Stradă");
     if (c === "strada-sau-zona" && !get("strada").trim() && !get("zona").trim()) lipsa("strada", "Stradă sau zonă");
   }
   return { date: d, erori };
+}
+
+/** Câmpurile opționale pe care formularul le cere totuși la „Publică”, într-o fereastră. */
+export type CampFereastra = "strada" | "stare" | "clasaEnergetica";
+
+/**
+ * Câmpurile goale dintre strada, starea și clasa energetică (doar cele care apar în formular pentru tip).
+ * Formularul le arată într-o fereastră înainte de publicare; se poate publica și fără ele.
+ */
+export function campuriLipsaPublicare(get: (k: string) => string, tip: string): CampFereastra[] {
+  const r: CampFereastra[] = [];
+  if (!get("strada").trim()) r.push("strada");
+  for (const c of ["stare", "clasaEnergetica"] as const) if (areCamp(tip, c) && !get(c).trim()) r.push(c);
+  return r;
+}
+
+/**
+ * Starea dedusă sigur din date, pentru precompletare la import: clădire terminată anul acesta sau anul trecut
+ * (ori care urmează să fie gata) → „Nou”. Altfel nimic (omul alege).
+ */
+export function stareDedusa(c: Partial<CampuriCaracteristici>, acum = new Date()): string | undefined {
+  const an = c.anConstructie;
+  if (an && an !== AN_NECUNOSCUT && an >= acum.getFullYear() - 1) return "nou";
+  return undefined;
 }
 
 // ---------- Din importuri ----------

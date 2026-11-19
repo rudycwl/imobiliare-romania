@@ -280,7 +280,6 @@ export function AlegePunct({
         <label className="strada">
           <span>
             {cerinta === "strada-sau-zona" ? "Stradă (sau completează zona)" : "Stradă"}
-            {cerinta === "strada" && <span className="obligatoriu" aria-hidden="true"> *</span>}
           </span>
           <input
             name="strada"

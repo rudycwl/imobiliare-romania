@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { esteLinkAnuntAgentie } from "@/lib/import-site-softimobiliar";
 import { utilizatorCurent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { MAX_FEEDURI_PE_AGENTIE, ruleazaFeed, verificaAdresa, type RaportFeed } from "@/lib/feeduri";
@@ -20,6 +22,9 @@ export async function adaugaFeed(_: StareFeed, f: FormData): Promise<StareFeed> 
   const a = await agentie();
   if ("eroare" in a) return { eroare: a.eroare };
   const url = String(f.get("url") ?? "").trim().slice(0, 1000);
+  // Linkul unui singur anunț de pe site-ul agenției nu e feed: îl importăm direct în formularul de anunț nou
+  // (agenția verifică și publică), în loc să-l salvăm ca feed care dă eroare la fiecare citire.
+  if (esteLinkAnuntAgentie(url)) redirect(`/cont/anunt-nou?link=${encodeURIComponent(url)}`);
   if (f.get("acord") !== "da") return { eroare: "Bifează acordul pentru feed (pozele și datele din anunțuri sunt ale agenției și au acordul clienților)." };
   const gresit = await verificaAdresa(url);
   if (gresit) return { eroare: gresit };

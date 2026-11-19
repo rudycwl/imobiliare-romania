@@ -5,7 +5,7 @@ import { Localitate } from "@/components/Localitate";
 import { AlegePunct } from "@/components/harta/AlegePunct";
 import { TIPURI, TRANZACTII } from "@/lib/etichete";
 import type { AnuntImportat } from "@/lib/import-anunt";
-import { citesteCaracteristici } from "@/lib/caracteristici";
+import { campuriLipsaPublicare, citesteCaracteristici, type CampFereastra } from "@/lib/caracteristici";
 import {
   AN_NECUNOSCUT,
   areCamp,
@@ -24,6 +24,7 @@ import {
 } from "@/lib/caracteristici-liste";
 import { editeazaAnunt, publicaAnunt } from "../actiuni";
 import { importaAnunt } from "./import";
+import { FereastraLipsuri } from "./FereastraLipsuri";
 
 function ImportAnunt({ laImport, agentie, linkInitial }: { laImport: (v: AnuntImportat) => void; agentie: boolean; linkInitial?: string }) {
   const [link, setLink] = useState(linkInitial ?? "");
@@ -434,6 +435,9 @@ export function FormularCampuri({
   const [pas, setPas] = useState(editare || (importat?.tip && importat?.tranzactie) ? 2 : 1);
   const [pozeSursa, setPozeSursa] = useState<string[]>(importat?.poze ? importat.poze.split(" ") : []);
   const [erori, setErori] = useState<Erori>({});
+  // Fereastra de la „Publică” (strada, starea sau clasa energetică goale); `confirmat`: omul a ales deja în fereastră.
+  const [lipsa, setLipsa] = useState<CampFereastra[]>([]);
+  const confirmat = useRef(false);
   const form = useRef<HTMLFormElement>(null);
   const v: Record<string, string | undefined> = { ...editare?.valori, ...importat, ...stare?.valori };
 
@@ -471,7 +475,48 @@ export function FormularCampuri({
       e.preventDefault();
       const ordine = [...e.currentTarget.elements].map((x) => (x as HTMLInputElement).name).filter(Boolean);
       focusCamp(Object.keys(map).sort((a, b) => (ordine.indexOf(a) + 1 || 1e6) - (ordine.indexOf(b) + 1 || 1e6))[0]);
+      return;
     }
+    // La publicare: dacă lipsesc strada, starea sau clasa energetică, întâi fereastra (o singură dată pe trimitere).
+    if (!editare && !confirmat.current) {
+      const l = campuriLipsaPublicare(get, tip);
+      if (l.length) {
+        e.preventDefault();
+        setLipsa(l);
+        return;
+      }
+    }
+    confirmat.current = false;
+  };
+
+  /** Copiază în formular valorile scrise în fereastră și trimite formularul. */
+  const publicaDinFereastra = (valori: Partial<Record<CampFereastra, string>>) => {
+    const f = form.current;
+    if (!f) return;
+    if (valori.strada?.trim()) {
+      const input = f.querySelector<HTMLInputElement>('input[name="strada"]');
+      if (input) {
+        // Strada e câmp controlat (AlegePunct): valoarea se pune prin setter-ul nativ + evenimentul „input”, ca React s-o vadă.
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(input, valori.strada.trim());
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+    if (valori.stare) {
+      const radio = f.querySelector<HTMLInputElement>(`input[name="stare"][value="${CSS.escape(valori.stare)}"]`);
+      if (radio) radio.checked = true;
+    }
+    if (valori.clasaEnergetica) {
+      const sel = f.querySelector<HTMLSelectElement>('select[name="clasaEnergetica"]');
+      if (sel) sel.value = valori.clasaEnergetica;
+    }
+    trimiteConfirmat();
+  };
+
+  const trimiteConfirmat = () => {
+    setLipsa([]);
+    confirmat.current = true;
+    // După ce React a preluat strada nouă.
+    requestAnimationFrame(() => form.current?.requestSubmit());
   };
 
   // O eroare dispare când omul schimbă câmpul.
@@ -481,6 +526,7 @@ export function FormularCampuri({
   };
 
   return (
+    <>
     <form ref={form} className="formular formular-anunt" action={actiune} onSubmit={verifica} onChange={sterge} noValidate>
       {pas === 1 && (
         <AlegeTip tranzactie={tranzactie} tip={tip} setTranzactie={setTranzactie} setTip={setTip} continua={() => setPas(2)} />
@@ -559,5 +605,7 @@ export function FormularCampuri({
         </button>
       </div>
     </form>
+    <FereastraLipsuri lipsa={lipsa} laCompletare={publicaDinFereastra} laFaraEle={trimiteConfirmat} laInchidere={() => setLipsa([])} />
+    </>
   );
 }
