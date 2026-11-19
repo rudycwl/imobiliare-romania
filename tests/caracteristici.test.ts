@@ -127,7 +127,9 @@ test("lista câmpurilor pe tip: un singur loc, teren fără etaj și băi, casă
   const casa = campuriTip("casa").map((c) => c.camp);
   assert.ok(!casa.includes("etaj") && casa.includes("etajeTotal"));
   assert.ok(campuriTip("apartament").find((c) => c.camp === "compartimentare")?.obligatoriu);
-  assert.ok(campuriTip("apartament").find((c) => c.camp === "stare")?.obligatoriu);
+  // Starea și clasa energetică sunt opționale (le cere fereastra de la „Publică”).
+  assert.equal(campuriTip("apartament").find((c) => c.camp === "stare")?.obligatoriu, false);
+  assert.equal(campuriTip("casa").find((c) => c.camp === "clasaEnergetica")?.obligatoriu, false);
   assert.equal(campuriTip("apartament").find((c) => c.camp === "dotari")?.obligatoriu, false);
 });
 
@@ -164,7 +166,7 @@ test("validare: câmpurile obligatorii lipsă, în ordinea din formular", () => 
   const r = citesteCaracteristici(f.get, f.getAll, "apartament", { acum: ACUM });
   assert.deepEqual(
     r.erori.map((e) => e.camp),
-    ["camere", "suprafataTotala", "compartimentare", "etaj", "etajeTotal", "anConstructie", "stare", "bai", "balcon", "incalzire", "mobilare", "aerConditionat", "clasaEnergetica", "strada"],
+    ["camere", "suprafataTotala", "compartimentare", "etaj", "etajeTotal", "anConstructie", "bai", "balcon", "incalzire", "mobilare", "aerConditionat", "strada"],
   );
   assert.equal(r.erori.find((e) => e.camp === "etaj")?.mesaj, "Completează „Etaj”.");
   // Feed / CSV: nu se cer.

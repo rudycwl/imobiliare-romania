@@ -762,3 +762,17 @@ a:hover .sageata { transform: translateX(4px); }
 /* Atribuirea hărții (mai ales cea lungă, Esri) să nu acopere harta pe telefon. */
 .leaflet-container .leaflet-control-attribution { font-size: 10px; line-height: 1.3; }
 @media (max-width: 600px) { .leaflet-container .leaflet-control-attribution { font-size: 9px; max-width: 70%; } }
+
+/* Fereastra de la „Publică” când lipsesc strada, starea sau clasa energetică (FereastraLipsuri). */
+.fereastra-lipsuri { width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); color: var(--fg); box-shadow: 0 20px 50px rgb(0 0 0 / .25); box-sizing: border-box; }
+.fereastra-lipsuri::backdrop { background: rgb(15 23 42 / .55); }
+.fereastra-lipsuri h2 { margin: 0; font-size: 1.15rem; }
+.fereastra-lipsuri .fereastra-cap { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.fereastra-lipsuri .inchide { background: transparent; color: var(--muted); border: 0; font-size: 1.5rem; line-height: 1; padding: 2px 8px; }
+.fereastra-lipsuri > p { margin: 8px 0 14px; }
+.fereastra-lipsuri .fereastra-campuri { display: flex; flex-direction: column; gap: 12px; }
+.fereastra-lipsuri label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
+.fereastra-lipsuri label .muted { font-weight: 400; }
+.fereastra-lipsuri input, .fereastra-lipsuri select { padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--fg); font: inherit; font-weight: 400; }
+.fereastra-lipsuri .fereastra-butoane { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.fereastra-lipsuri .fereastra-butoane button { flex: 1 1 auto; padding: 11px 14px; white-space: nowrap; }

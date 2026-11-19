@@ -48,16 +48,18 @@ const O = false; // opțional
  * Câmpurile fiecărui tip: true = obligatoriu în formular, false = opțional; lipsă = nu se aplică (nu apare).
  * Feed-urile XML, CSV-ul și actualizarea automată nu cer câmpurile obligatorii (sursa poate să nu le aibă);
  * la editarea manuală ulterioară devin obligatorii.
+ * Starea și clasa energetică sunt opționale (des lipsesc din anunțurile importate); la „Publică” formularul
+ * le cere, împreună cu strada, într-o fereastră din care se poate publica și fără ele.
  */
 export const CAMPURI_TIP: Record<TipProprietate, Partial<Record<CampCar, boolean>>> = {
   apartament: {
-    suprafata: T, suprafataTotala: T, camere: T, compartimentare: T, etaj: T, etajeTotal: T, anConstructie: T, stare: T,
-    bai: T, balcon: T, incalzire: T, mobilare: T, aerConditionat: T, clasaEnergetica: T, dotari: O,
+    suprafata: T, suprafataTotala: T, camere: T, compartimentare: T, etaj: T, etajeTotal: T, anConstructie: T, stare: O,
+    bai: T, balcon: T, incalzire: T, mobilare: T, aerConditionat: T, clasaEnergetica: O, dotari: O,
   },
   // La casă nu are sens etajul; „etajeTotal” e numărul de niveluri.
   casa: {
-    suprafata: T, suprafataTotala: T, camere: T, compartimentare: T, etajeTotal: T, anConstructie: T, stare: T,
-    bai: T, balcon: T, incalzire: T, mobilare: T, aerConditionat: T, clasaEnergetica: T, dotari: O,
+    suprafata: T, suprafataTotala: T, camere: T, compartimentare: T, etajeTotal: T, anConstructie: T, stare: O,
+    bai: T, balcon: T, incalzire: T, mobilare: T, aerConditionat: T, clasaEnergetica: O, dotari: O,
   },
   // Dotările terenului sunt utilitățile.
   teren: { suprafata: T, dotari: O },
@@ -82,22 +84,10 @@ export const areCamp = (tip: string, camp: CampCar) => camp in (CAMPURI_TIP[tip 
 export const obligatoriu = (tip: string, camp: CampCar) => !!CAMPURI_TIP[tip as TipProprietate]?.[camp];
 
 /**
- * La conturile de agenție, starea și clasa energetică nu sunt obligatorii (paginile agențiilor des nu le au);
- * la „Publică” formularul le cere într-o fereastră, cu opțiunea de a publica fără ele.
+ * Locația: la apartament, casă și teren strada sau zona (fără stradă, anunțul apare pe hartă după zonă / localitate).
  */
-export const OPTIONALE_AGENTIE: readonly CampCar[] = ["stare", "clasaEnergetica"];
-
-/** Obligativitatea câmpului pentru tip, ținând cont de tipul contului. */
-export const obligatoriuPentru = (tip: string, camp: CampCar, agentie = false) =>
-  obligatoriu(tip, camp) && !(agentie && OPTIONALE_AGENTIE.includes(camp));
-
-/**
- * Locația: la apartament și casă strada e obligatorie (numărul nu); la teren strada sau zona.
- * La agenții strada nu e obligatorie: ajunge zona (anunțul apare pe hartă după zonă / localitate).
- */
-export function cerintaLocatie(tip: string, agentie = false): "strada" | "strada-sau-zona" | null {
-  if (tip === "apartament" || tip === "casa") return agentie ? "strada-sau-zona" : "strada";
-  if (tip === "teren") return "strada-sau-zona";
+export function cerintaLocatie(tip: string): "strada-sau-zona" | null {
+  if (tip === "apartament" || tip === "casa" || tip === "teren") return "strada-sau-zona";
   return null;
 }
 
