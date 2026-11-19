@@ -38,11 +38,14 @@ export function AlegePunct({
   tip,
   adresa,
   eroareStrada,
+  agentie = false,
 }: {
   initial?: Punct | null;
   tip: string;
   adresa?: { strada?: string; numar?: string; locatieExacta?: boolean };
   eroareStrada?: string;
+  /** Cont de agenție: strada nu e obligatorie (ajunge zona). */
+  agentie?: boolean;
 }) {
   const geo = useContext(GeocodareContext);
   const el = useRef<HTMLDivElement>(null);
@@ -273,7 +276,7 @@ export function AlegePunct({
     }
   };
 
-  const cerinta = cerintaLocatie(tip);
+  const cerinta = cerintaLocatie(tip, agentie);
   return (
     <div className="alege-punct">
       <div className="rand adresa">

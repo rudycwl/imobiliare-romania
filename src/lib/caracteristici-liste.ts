@@ -81,9 +81,22 @@ export function campuriTip(tip: string): { camp: CampCar; obligatoriu: boolean }
 export const areCamp = (tip: string, camp: CampCar) => camp in (CAMPURI_TIP[tip as TipProprietate] ?? {});
 export const obligatoriu = (tip: string, camp: CampCar) => !!CAMPURI_TIP[tip as TipProprietate]?.[camp];
 
-/** Locația: la apartament și casă strada e obligatorie (numărul nu); la teren strada sau zona. */
-export function cerintaLocatie(tip: string): "strada" | "strada-sau-zona" | null {
-  if (tip === "apartament" || tip === "casa") return "strada";
+/**
+ * La conturile de agenție, starea și clasa energetică nu sunt obligatorii (paginile agențiilor des nu le au);
+ * la „Publică” formularul le cere într-o fereastră, cu opțiunea de a publica fără ele.
+ */
+export const OPTIONALE_AGENTIE: readonly CampCar[] = ["stare", "clasaEnergetica"];
+
+/** Obligativitatea câmpului pentru tip, ținând cont de tipul contului. */
+export const obligatoriuPentru = (tip: string, camp: CampCar, agentie = false) =>
+  obligatoriu(tip, camp) && !(agentie && OPTIONALE_AGENTIE.includes(camp));
+
+/**
+ * Locația: la apartament și casă strada e obligatorie (numărul nu); la teren strada sau zona.
+ * La agenții strada nu e obligatorie: ajunge zona (anunțul apare pe hartă după zonă / localitate).
+ */
+export function cerintaLocatie(tip: string, agentie = false): "strada" | "strada-sau-zona" | null {
+  if (tip === "apartament" || tip === "casa") return agentie ? "strada-sau-zona" : "strada";
   if (tip === "teren") return "strada-sau-zona";
   return null;
 }

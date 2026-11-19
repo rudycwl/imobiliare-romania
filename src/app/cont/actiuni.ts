@@ -146,7 +146,8 @@ function citestePunct(f: FormData) {
   return ok ? { lat, lng, punctProprietar: true } : { lat: null, lng: null, punctProprietar: false };
 }
 
-function citesteAnunt(f: FormData): { eroare: string; camp?: string } | { date: AnuntNou } {
+/** `agentie`: contul e de agenție (strada, starea și clasa energetică pot lipsi; vezi citesteCaracteristici). */
+function citesteAnunt(f: FormData, agentie = false): { eroare: string; camp?: string } | { date: AnuntNou } {
   const tip = text(f, "tip");
   const tranzactie = text(f, "tranzactie");
   const titlu = text(f, "titlu");
@@ -169,7 +170,7 @@ function citesteAnunt(f: FormData): { eroare: string; camp?: string } | { date: 
   if (camere != null && (!Number.isInteger(camere) || camere < 1 || camere > 100)) return { eroare: "Numărul de camere trebuie să fie între 1 și 100." };
   if (!getOras(judet, oras)) return { eroare: "Alege județul și orașul." };
   // Secțiunea „Caracteristici” și adresa: aceeași verificare ca în browser (câmpurile obligatorii ale tipului).
-  const car = citesteCaracteristici((k) => text(f, k), (k) => f.getAll(k).map(String), tip);
+  const car = citesteCaracteristici((k) => text(f, k), (k) => f.getAll(k).map(String), tip, { agentie });
   if (car.erori.length) return { eroare: car.erori[0].mesaj, camp: car.erori[0].camp };
   const strada = text(f, "strada").slice(0, LUNGIME.strada);
   const numar = text(f, "numar").slice(0, LUNGIME.numar);
@@ -198,7 +199,7 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
   if (!u) redirect("/cont/autentificare");
   // Doar conturile cu email confirmat publică: oprește anunțurile puse de pe adrese inventate.
   if (!u.emailConfirmat) return esec(MESAJ_EMAIL, f);
-  const r = citesteAnunt(f);
+  const r = citesteAnunt(f, u.tip === "agentie");
   if ("eroare" in r) return esec(r.eroare, f, r.camp);
   if (!(await poatePublica(u))) return esec(MESAJ_LIMITA, f);
 
@@ -223,7 +224,7 @@ export async function publicaAnunt(_: Stare, f: FormData): Promise<Stare> {
 /** Salvează modificările unui anunț propriu; valabilitatea și promovările rămân neschimbate. */
 export async function editeazaAnunt(_: Stare, f: FormData): Promise<Stare> {
   const { u, id } = await proprietarSiId(f);
-  const r = citesteAnunt(f);
+  const r = citesteAnunt(f, u.tip === "agentie");
   if ("eroare" in r) return esec(r.eroare, f, r.camp);
   if (!(await editeaza(id, u.id, r.date, citestePunct(f)))) redirect("/cont");
   after(() => completeazaCoordonate());

@@ -15,7 +15,8 @@ import {
   eticheteClasa,
   INCALZIRE,
   MOBILARE,
-  obligatoriu,
+  obligatoriuPentru,
+  OPTIONALE_AGENTIE,
   STARE,
   type CampCar,
   type Dotare,
@@ -73,12 +74,13 @@ function intreg(v: string): number | null {
  * Citește și verifică secțiunea „Caracteristici” (și adresa) din formular. Aceeași funcție rulează în browser
  * (marcaj lângă câmp, focus pe primul lipsă) și pe server (publicaAnunt / editeazaAnunt).
  * Câmpurile care nu se aplică tipului se golesc. `cuObligatorii: false` sare doar peste câmpurile lipsă.
+ * `agentie: true` (cont de agenție): strada, starea și clasa energetică nu se cer (rămâne „Stradă sau zonă”).
  */
 export function citesteCaracteristici(
   get: (k: string) => string,
   getAll: (k: string) => string[],
   tip: string,
-  { cuObligatorii = true, acum = new Date() }: { cuObligatorii?: boolean; acum?: Date } = {},
+  { cuObligatorii = true, acum = new Date(), agentie = false }: { cuObligatorii?: boolean; acum?: Date; agentie?: boolean } = {},
 ): { date: CampuriCaracteristici; erori: EroareCamp[] } {
   const erori: EroareCamp[] = [];
   const d: CampuriCaracteristici = { ...GOL, dotari: [] };
@@ -86,7 +88,7 @@ export function citesteCaracteristici(
     erori.push({ camp, mesaj: `Completează „${eticheta}”.` });
   const gresit = (camp: string, mesaj: string) => erori.push({ camp, mesaj });
   const cere = (camp: CampCar, v: unknown) => {
-    if ((v === null || v === "") && cuObligatorii && obligatoriu(tip, camp)) lipsa(camp);
+    if ((v === null || v === "") && cuObligatorii && obligatoriuPentru(tip, camp, agentie)) lipsa(camp);
   };
   const numar = (camp: CampCar, min: number, max: number, mesaj: string) => {
     if (!areCamp(tip, camp)) return null;
@@ -112,7 +114,7 @@ export function citesteCaracteristici(
   // Suprafața utilă și camerele sunt câmpurile vechi ale anunțului (le salvează citesteAnunt); aici doar le cerem.
   const suprafata = intreg(get("suprafata"));
   if (suprafata === null && cuObligatorii) lipsa("suprafata");
-  if (areCamp(tip, "camere") && cuObligatorii && obligatoriu(tip, "camere") && intreg(get("camere")) === null) lipsa("camere");
+  if (areCamp(tip, "camere") && cuObligatorii && obligatoriuPentru(tip, "camere", agentie) && intreg(get("camere")) === null) lipsa("camere");
 
   d.suprafataTotala = numar("suprafataTotala", 1, 10_000_000, "Suprafața totală trebuie să fie un număr întreg de m².");
   if (d.suprafataTotala && suprafata && suprafata > 0 && d.suprafataTotala < suprafata)
@@ -163,11 +165,32 @@ export function citesteCaracteristici(
 
   // Adresa: la apartament și casă strada; la teren strada sau zona.
   if (cuObligatorii) {
-    const c = cerintaLocatie(tip);
+    const c = cerintaLocatie(tip, agentie);
     if (c === "strada" && !get("strada").trim()) lipsa("strada", "Stradă");
     if (c === "strada-sau-zona" && !get("strada").trim() && !get("zona").trim()) lipsa("strada", "Stradă sau zonă");
   }
   return { date: d, erori };
+}
+
+/**
+ * Câmpurile pe care agenția le poate lăsa goale, dar pe care formularul le cere la „Publică” într-o fereastră:
+ * strada (la apartament și casă), starea și clasa energetică (unde sunt obligatorii pentru persoane fizice).
+ */
+export function campuriLipsaAgentie(get: (k: string) => string, tip: string): ("strada" | CampCar)[] {
+  const r: ("strada" | CampCar)[] = [];
+  if (cerintaLocatie(tip) === "strada" && !get("strada").trim()) r.push("strada");
+  for (const c of OPTIONALE_AGENTIE) if (areCamp(tip, c) && obligatoriuPentru(tip, c) && !get(c).trim()) r.push(c);
+  return r;
+}
+
+/**
+ * Starea dedusă sigur din date, pentru precompletare la import: clădire terminată anul acesta sau anul trecut
+ * (ori care urmează să fie gata) → „Nou”. Altfel nimic (agenția alege).
+ */
+export function stareDedusa(c: Partial<CampuriCaracteristici>, acum = new Date()): string | undefined {
+  const an = c.anConstructie;
+  if (an && an !== AN_NECUNOSCUT && an >= acum.getFullYear() - 1) return "nou";
+  return undefined;
 }
 
 // ---------- Din importuri ----------
