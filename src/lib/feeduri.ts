@@ -1,3 +1,4 @@
+import { esteLinkAnuntAgentie } from "./import-site-softimobiliar";
 import "server-only";
 import { lookup } from "dns/promises";
 import { revalidatePath } from "next/cache";
@@ -227,9 +228,13 @@ export async function ruleazaFeed(feedId: number): Promise<RaportFeed> {
 /** Toate feed-urile active (le pornește timerul de pe server). */
 export async function ruleazaFeeduri() {
   await completeazaChei();
-  const feeduri = await db.feedAgentie.findMany({ where: { activ: true }, select: { id: true }, orderBy: { ultimaRulare: { sort: "asc", nulls: "first" } } });
+  const feeduri = await db.feedAgentie.findMany({ where: { activ: true }, select: { id: true, url: true }, orderBy: { ultimaRulare: { sort: "asc", nulls: "first" } } });
   const rezultate: { id: number; raport: RaportFeed }[] = [];
-  for (const f of feeduri) rezultate.push({ id: f.id, raport: await ruleazaFeed(f.id) });
+  for (const f of feeduri) {
+    // Linkul unui singur anunț salvat din greșeală ca feed: îl oprim (nu mai dă eroare la 3 ore); pe pagina de import rămâne butonul „Importă acest anunț”.
+    if (esteLinkAnuntAgentie(f.url)) { await db.feedAgentie.update({ where: { id: f.id }, data: { activ: false } }); continue; }
+    rezultate.push({ id: f.id, raport: await ruleazaFeed(f.id) });
+  }
   // Anunțurile importate din link de pe site-ul agenției (Adaugă anunț → import din link).
   const site = await actualizeazaDinSite().catch((e) => ({ eroare: String(e) }));
   if (!("eroare" in site) && (site.actualizate || site.retrase)) reimprospateaza("/", "/cont");
