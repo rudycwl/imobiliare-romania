@@ -176,6 +176,8 @@ export default async function Home() {
             <ul className="bife">
               <li><Icon d={BIFA} marime={20} />Până la {ANUNTURI_GRATUITE} anunțuri active, {ZILE_VALABILITATE} de zile</li>
               <li><Icon d={BIFA} marime={20} />Până la {MAX_POZE} poze pe anunț</li>
+              <li><Icon d={BIFA} marime={20} />Anunțul apare și pe harta României</li>
+              <li><Icon d={BIFA} marime={20} />Îl editezi oricând din contul tău</li>
               <li><Icon d={BIFA} marime={20} />Vezi în cont câte vizualizări are anunțul</li>
             </ul>
             <Link href={ADAUGA} className="buton-plin">Adaugă anunțul tău</Link>
